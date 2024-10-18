@@ -1,0 +1,9 @@
+Win32
+GeminiTest.dfm
+GeminiTest.pas
+Main.dpr
+Main.dproj
+Main.dproj.local
+Main.res
+source\__history
+source\__recovery
