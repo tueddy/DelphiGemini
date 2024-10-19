@@ -301,15 +301,6 @@ implementation
 uses
   REST.Json;
 
-//function ModelCheck(const Value: string; LowerCase: Boolean = False): string;
-//begin
-//  if LowerCase then
-//    Result := Value.ToLower else
-//    Result := Value;
-//  if not AnsiLowerCase(Result).StartsWith('models/') then
-//    Result := 'models/' + Result;
-//end;
-
 constructor TGeminiAPI.Create;
 begin
   inherited Create;

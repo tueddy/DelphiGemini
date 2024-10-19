@@ -11,9 +11,21 @@ interface
 
 uses
   System.Classes, System.JSON, System.SysUtils, System.Types, System.RTTI,
-  REST.JsonReflect, REST.Json.Interceptors, System.Generics.Collections;
+  REST.JsonReflect, REST.Json.Interceptors, System.Generics.Collections,
+  System.Threading;
 
 type
+  /// <summary>
+  /// Represents a reference to a procedure that takes a single argument of type T and returns no value.
+  /// </summary>
+  /// <param name="T">
+  /// The type of the argument that the referenced procedure will accept.
+  /// </param>
+  /// <remarks>
+  /// This type is useful for defining callbacks or procedures that operate on a variable of type T, allowing for more flexible and reusable code.
+  /// </remarks>
+  TProcRef<T> = reference to procedure(var Arg: T);
+
   TJSONInterceptorStringToString = class(TJSONInterceptor)
     constructor Create; reintroduce;
   protected
@@ -46,6 +58,7 @@ type
     procedure Delete(const Key: string); virtual;
     procedure Clear; virtual;
     property Count: Integer read GetCount;
+    function Detach: TJSONObject;
     property JSON: TJSONObject read FJSON write SetJSON;
     function ToJsonString(FreeObject: Boolean = False): string; virtual;
     function ToFormat(FreeObject: Boolean = False): string;
@@ -246,6 +259,24 @@ end;
 function TJSONParam.GetOrCreateObject(const Name: string): TJSONObject;
 begin
   Result := GetOrCreate<TJSONObject>(Name);
+end;
+
+function TJSONParam.Detach: TJSONObject;
+begin
+  Result := JSON;
+  JSON := nil;
+  var Task: ITask := TTask.Create(
+    procedure()
+    begin
+      Sleep(30);
+      TThread.Queue(nil,
+      procedure
+      begin
+        Self.Free;
+      end);
+    end
+  );
+  Task.Start;
 end;
 
 procedure TJSONParam.SetJSON(const Value: TJSONObject);

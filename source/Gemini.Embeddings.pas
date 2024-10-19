@@ -70,17 +70,6 @@ type
   end;
 
   /// <summary>
-  /// Represents a reference to a procedure that takes a single argument of type T and returns no value.
-  /// </summary>
-  /// <param name="T">
-  /// The type of the argument that the referenced procedure will accept.
-  /// </param>
-  /// <remarks>
-  /// This type is useful for defining callbacks or procedures that operate on a variable of type T, allowing for more flexible and reusable code.
-  /// </remarks>
-  TProcRef<T> = reference to procedure(var Arg: T);
-
-  /// <summary>
   /// Represents the parameters required to create an embedding request.
   /// </summary>
   /// <remarks>
@@ -135,7 +124,7 @@ type
     /// <returns>
     /// A <c>TJSONObject</c> representing the embedding request parameters.
     /// </returns>
-    function ToJSON: TJSONObject;
+    function ToJson: TJSONObject;
     /// <summary>
     /// Creates a new instance of <c>TEmbeddingRequestParams</c> with specified settings.
     /// </summary>
@@ -702,7 +691,7 @@ begin
   var RequestsJSON := TJSONArray.Create;
   for var Item in Value do
     begin
-      RequestsJSON.Add(Item.ToJSON);
+      RequestsJSON.Add(Item.ToJson);
     end;
   Result := TEmbeddingBatchParams(Add('requests', RequestsJSON));
 end;
@@ -747,7 +736,7 @@ begin
   Result := Self;
 end;
 
-function TEmbeddingRequestParams.ToJSON: TJSONObject;
+function TEmbeddingRequestParams.ToJson: TJSONObject;
 begin
   var PartsJSON := TJSONArray.Create;
   for var Item in FContent do
