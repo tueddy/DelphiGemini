@@ -227,7 +227,7 @@ type
   private
     FSender: TObject;
     FOnStart: TProc<TObject>;
-    FOnSuccess: TProc<TObject, T>;
+    FOnSuccess: TProc<TObject>;
     FOnProgress: TProc<TObject, T>;
     FOnError: TProc<TObject, string>;
     FOnCancellation: TProc<TObject>;
@@ -283,7 +283,7 @@ type
     ///    end;
     /// </code>
     /// </remarks>
-    property OnSuccess: TProc<TObject, T> read FOnSuccess write FOnSuccess;
+    property OnSuccess: TProc<TObject> read FOnSuccess write FOnSuccess;
     /// <summary>
     /// Event triggered to handle progress during the streaming chat request.
     /// </summary>

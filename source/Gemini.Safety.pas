@@ -88,7 +88,6 @@ type
     /// Works only with a PaLM-type model.
     /// </remarks>
     HARM_CATEGORY_DANGEROUS,
-
     /// <summary>
     /// Harassment content.
     /// </summary>

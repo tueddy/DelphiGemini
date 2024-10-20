@@ -12,15 +12,23 @@ interface
 uses
   System.SysUtils, System.Classes, REST.JsonReflect, System.JSON, System.Threading,
   REST.Json.Types, Gemini.API.Params, Gemini.API, Gemini.Safety, Gemini.Schema,
-  Gemini.Tools,
-
-  Vcl.Dialogs;
+  Gemini.Tools, Gemini.Async.Support;
 
 type
   TMessageRole = (
     user,
     model
   );
+
+  TMessageRoleHelper = record helper for TMessageRole
+    function ToString: string;
+    class function Create(const Value: string): TMessageRole; static;
+  end;
+
+  TMessageRoleInterceptor = class(TJSONInterceptorStringToString)
+    function StringConverter(Data: TObject; Field: string): string; override;
+    procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
+  end;
 
   TFinishReason = (
     /// <summary>
@@ -79,10 +87,6 @@ type
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
-  TMessageRoleHelper = record helper for TMessageRole
-    function ToString: string;
-  end;
-
   TContentPayload = record
   private
     FRole: TMessageRole;
@@ -135,8 +139,11 @@ type
   TChatContent = class
   private
     FParts: TArray<TChatPart>;
+    [JsonReflectAttribute(ctString, rtString, TMessageRoleInterceptor)]
+    FRole: TMessageRole;
   public
     property Parts: TArray<TChatPart> read FParts write FParts;
+    property Role: TMessageRole read FRole write FRole;
     destructor Destroy; override;
   end;
 
@@ -261,17 +268,156 @@ type
     destructor Destroy; override;
   end;
 
+  TChatEvent = reference to procedure(var Chat: TChat; IsDone: Boolean; var Cancel: Boolean);
+
+  TAsynChat = TAsynCallBack<TChat>;
+
+  TAsynChatStream = TAsynStreamCallBack<TChat>;
+
   TChatRoute = class(TGeminiAPIRoute)
   public
+    procedure AsynCreate(const ModelName: string; ParamProc: TProc<TChatParams>;
+      CallBacks: TFunc<TAsynChat>);
+    procedure AsynCreateStream(const ModelName: string; ParamProc: TProc<TChatParams>;
+      CallBacks: TFunc<TAsynChatStream>);
+
     function Create(const ModelName: string; ParamProc: TProc<TChatParams>): TChat;
+    function CreateStream(const ModelName: string; ParamProc: TProc<TChatParams>; Event: TChatEvent): Boolean;
   end;
 
 implementation
 
 uses
-  System.StrUtils, System.Math, System.Rtti, Rest.Json;
+  System.StrUtils, System.Math, System.Rtti, Rest.Json, Gemini.Async.Params;
 
 { TChatRoute }
+
+procedure TChatRoute.AsynCreate(const ModelName: string;
+  ParamProc: TProc<TChatParams>; CallBacks: TFunc<TAsynChat>);
+begin
+  with TAsynCallBackExec<TAsynChat, TChat>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TChat
+      begin
+        Result := Self.Create(ModelName, ParamProc);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TChatRoute.AsynCreateStream(const ModelName: string;
+  ParamProc: TProc<TChatParams>; CallBacks: TFunc<TAsynChatStream>);
+begin
+  var CallBackParams := TUseParamsFactory<TAsynChatStream>.CreateInstance(CallBacks);
+
+  var Sender := CallBackParams.Param.Sender;
+  var OnStart := CallBackParams.Param.OnStart;
+  var OnSuccess := CallBackParams.Param.OnSuccess;
+  var OnProgress := CallBackParams.Param.OnProgress;
+  var OnError := CallBackParams.Param.OnError;
+  var OnCancellation := CallBackParams.Param.OnCancellation;
+  var OnDoCancel := CallBackParams.Param.OnDoCancel;
+
+  var Task: ITask := TTask.Create(
+          procedure()
+          begin
+            {--- Pass the instance of the current class in case no value was specified. }
+            if not Assigned(Sender) then
+              Sender := Self;
+
+            {--- Trigger OnStart callback }
+            if Assigned(OnStart) then
+              TThread.Queue(nil,
+                procedure
+                begin
+                  OnStart(Sender);
+                end);
+            try
+              var Stop := False;
+
+              {--- Processing }
+              CreateStream(ModelName, ParamProc,
+                procedure (var Chat: TChat; IsDone: Boolean; var Cancel: Boolean)
+                begin
+                  {--- Check that the process has not been canceled }
+                  if Assigned(OnDoCancel) then
+                    TThread.Queue(nil,
+                        procedure
+                        begin
+                          Stop := OnDoCancel();
+                        end);
+                  if Stop then
+                    begin
+                      {--- Trigger when processus was stopped }
+                      if Assigned(OnCancellation) then
+                        TThread.Queue(nil,
+                        procedure
+                        begin
+                          OnCancellation(Sender)
+                        end);
+                      Cancel := True;
+                      Exit;
+                    end;
+                  if not IsDone and Assigned(Chat) then
+                    begin
+                      var LocalChat := Chat;
+                      Chat := nil;
+
+                      {--- Triggered when processus is progressing }
+                      if Assigned(OnProgress) then
+                        TThread.Synchronize(TThread.Current,
+                        procedure
+                        begin
+                          try
+                            OnProgress(Sender, LocalChat);
+                          finally
+                            {--- Makes sure to release the instance containing the data obtained
+                                 following processing}
+                            LocalChat.Free;
+                          end;
+                        end);
+                    end
+                  else
+                  if IsDone then
+                    begin
+                      {--- Trigger OnEnd callback when the process is done }
+                      if Assigned(OnSuccess) then
+                        TThread.Queue(nil,
+                        procedure
+                        begin
+                          OnSuccess(Sender);
+                        end);
+                    end;
+                end);
+            except
+              on E: Exception do
+                begin
+                  var Error := AcquireExceptionObject;
+                  try
+                    var ErrorMsg := (Error as Exception).Message;
+
+                    {--- Trigger OnError callback if the process has failed }
+                    if Assigned(OnError) then
+                      TThread.Queue(nil,
+                      procedure
+                      begin
+                        OnError(Sender, ErrorMsg);
+                      end);
+                  finally
+                    {--- Ensures that the instance of the caught exception is released}
+                    Error.Free;
+                  end;
+                end;
+            end;
+          end);
+  Task.Start;
+end;
 
 function TChatRoute.Create(const ModelName: string; ParamProc: TProc<TChatParams>): TChat;
 begin
@@ -280,6 +426,72 @@ begin
     Result := API.Post<TChat, TChatParams>(SetModel(ModelName, ':generateContent'), ParamProc);
   finally
     GeminiLock.Release;
+  end;
+end;
+
+function TChatRoute.CreateStream(const ModelName: string; ParamProc: TProc<TChatParams>;
+  Event: TChatEvent): Boolean;
+var
+  Response: TStringStream;
+  RetPos: Integer;
+  PrevRet: Integer;
+  PrevRetPos: Integer;
+begin
+  Response := TStringStream.Create('', TEncoding.UTF8);
+  try
+    RetPos := 0;
+    PrevRet := 0;
+    PrevRetPos := 0;
+    Result := API.Post<TChatParams>(SetModel(ModelName, ':streamGenerateContent'), ParamProc, Response,
+      procedure(const Sender: TObject; AContentLength: Int64; AReadCount: Int64; var AAbort: Boolean)
+      var
+        IsDone: Boolean;
+        Data: string;
+        Chat: TChat;
+        TextBuffer: string;
+        Line: string;
+        Ret: Integer;
+      begin
+        try
+          TextBuffer := Response.DataString;
+        except
+          on E: EEncodingError do
+            Exit;
+        end;
+
+        if not TextBuffer.IsEmpty then
+          begin
+            Ret := TextBuffer.Length - 1;
+            Line := TextBuffer.Substring(RetPos, Ret - RetPos);
+            RetPos := Ret + 1;
+
+            Chat := nil;
+            Data := Line.Trim([' ', #13, #10]);
+            Data := Copy(Data, 2, Data.Length-1);
+
+            IsDone := Data.IsEmpty;
+
+            if not IsDone then
+            try
+              Chat := TJson.JsonToObject<TChat>(Data);
+              PrevRet := Ret;
+              PrevRetPos := RetPos;
+            except
+               Chat := nil;
+               Ret := PrevRet;
+               RetPos := PrevRetPos;
+            end;
+
+            try
+              Event(Chat, IsDone, AAbort);
+            finally
+              Chat.Free;
+            end;
+          end;
+
+      end);
+  finally
+    Response.Free;
   end;
 end;
 
@@ -357,6 +569,14 @@ begin
 end;
 
 { TMessageRoleHelper }
+
+class function TMessageRoleHelper.Create(const Value: string): TMessageRole;
+begin
+  var index := IndexStr(AnsiLowerCase(Value), ['user', 'model']);
+  if index = -1 then
+    raise Exception.Create('String role value not correct');
+  Result := TMessageRole(index);
+end;
 
 function TMessageRoleHelper.ToString: string;
 begin
@@ -614,6 +834,20 @@ end;
 function TGenerationConfig.TopP(const Value: Double): TGenerationConfig;
 begin
   Result := TGenerationConfig(Add('topP', Value));
+end;
+
+{ TMessageRoleInterceptor }
+
+function TMessageRoleInterceptor.StringConverter(Data: TObject;
+  Field: string): string;
+begin
+  Result := RTTI.GetType(Data.ClassType).GetField(Field).GetValue(Data).AsType<TMessageRole>.ToString;
+end;
+
+procedure TMessageRoleInterceptor.StringReverter(Data: TObject; Field,
+  Arg: string);
+begin
+  RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, TValue.From(TMessageRole.Create(Arg)));
 end;
 
 end.

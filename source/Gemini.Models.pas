@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Threading, REST.Json.Types,
-  Gemini.API.Params, Gemini.API, Gemini.Async.Params, Gemini.Async.Support;
+  Gemini.API.Params, Gemini.API, Gemini.Async.Support;
 
 type
   /// <summary>
