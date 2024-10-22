@@ -40,55 +40,6 @@ type
 
   THarmCategory = (
     /// <summary>
-    /// Category is unspecified.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_UNSPECIFIED,
-    /// <summary>
-    /// Negative or harmful comments targeting identity and/or protected attribute.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_DEROGATORY,
-    /// <summary>
-    /// Content that is rude, disrespectful, or profane.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_TOXICITY,
-    /// <summary>
-    /// Describes scenarios depicting violence against an individual or group, or general descriptions of gore.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_VIOLENCE,
-    /// <summary>
-    /// Contains references to sexual acts or other lewd content.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_SEXUAL,
-    /// <summary>
-    /// Promotes unchecked medical advice.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_MEDICAL,
-    /// <summary>
-    /// Dangerous content that promotes, facilitates, or encourages harmful acts.
-    /// </summary>
-    /// <remarks>
-    /// Works only with a PaLM-type model.
-    /// </remarks>
-    HARM_CATEGORY_DANGEROUS,
-    /// <summary>
     /// Harassment content.
     /// </summary>
     /// <remarks>
@@ -201,21 +152,27 @@ type
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
-  TSafetyParams = record
+  TSafety = record
   private
     FCategory: THarmCategory;
     FThreshold: THarmBlockThreshold;
   public
-    function Category(Value: THarmCategory): TSafetyParams;
-    function Threshold(Value: THarmBlockThreshold): TSafetyParams;
+    function Category(Value: THarmCategory): TSafety;
+    function Threshold(Value: THarmBlockThreshold): TSafety;
     function ToJson: TJSONObject;
-    class function New(Category: THarmCategory; Threshold: THarmBlockThreshold): TSafetyParams; static;
+    class function New(Category: THarmCategory; Threshold: THarmBlockThreshold): TSafety; static;
+    class function DontBlock: TArray<TSafety>; static;
+    class function SexuallyExplicit(const Value: THarmBlockThreshold): TSafety; static;
+    class function HateSpeech(const Value: THarmBlockThreshold): TSafety; static;
+    class function Harassment(const Value: THarmBlockThreshold): TSafety; static;
+    class function DangerousContent(const Value: THarmBlockThreshold): TSafety; static;
+    class function CivicIntegrity(const Value: THarmBlockThreshold): TSafety; static;
   end;
 
 implementation
 
 uses
-  System.StrUtils, System.Math, System.Rtti, Rest.Json;
+  System.StrUtils, System.Rtti, Rest.Json;
 
 { THarmBlockThresholdHelper }
 
@@ -242,9 +199,7 @@ end;
 class function THarmCategoryHelper.Create(const Value: string): THarmCategory;
 begin
   var Index := IndexStr(AnsiUpperCase(Value), [
-        'HARM_CATEGORY_UNSPECIFIED', 'HARM_CATEGORY_DEROGATORY', 'HARM_CATEGORY_TOXICITY',
-        'HARM_CATEGORY_VIOLENCE', 'HARM_CATEGORY_SEXUAL', 'HARM_CATEGORY_MEDICAL',
-        'HARM_CATEGORY_DANGEROUS', 'HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH',
+        'HARM_CATEGORY_HARASSMENT', 'HARM_CATEGORY_HATE_SPEECH',
         'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT',
         'HARM_CATEGORY_CIVIC_INTEGRITY' ]);
   if Index = -1 then
@@ -255,20 +210,6 @@ end;
 function THarmCategoryHelper.ToString: string;
 begin
   case Self of
-    HARM_CATEGORY_UNSPECIFIED:
-      Exit('HARM_CATEGORY_UNSPECIFIED');
-    HARM_CATEGORY_DEROGATORY:
-      Exit('HARM_CATEGORY_DEROGATORY');
-    HARM_CATEGORY_TOXICITY:
-      Exit('HARM_CATEGORY_TOXICITY');
-    HARM_CATEGORY_VIOLENCE:
-      Exit('HARM_CATEGORY_VIOLENCE');
-    HARM_CATEGORY_SEXUAL:
-      Exit('HARM_CATEGORY_SEXUAL');
-    HARM_CATEGORY_MEDICAL:
-      Exit('HARM_CATEGORY_MEDICAL');
-    HARM_CATEGORY_DANGEROUS:
-      Exit('HARM_CATEGORY_DANGEROUS');
     HARM_CATEGORY_HARASSMENT:
       Exit('HARM_CATEGORY_HARASSMENT');
     HARM_CATEGORY_HATE_SPEECH:
@@ -379,27 +320,67 @@ begin
   RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, TValue.From(THarmProbability.Create(Arg)));
 end;
 
-{ TSafetyParams }
+{ TSafety }
 
-function TSafetyParams.Category(Value: THarmCategory): TSafetyParams;
+function TSafety.Category(Value: THarmCategory): TSafety;
 begin
   FCategory := Value;
   Result := Self;
 end;
 
-class function TSafetyParams.New(Category: THarmCategory;
-  Threshold: THarmBlockThreshold): TSafetyParams;
+class function TSafety.CivicIntegrity(
+  const Value: THarmBlockThreshold): TSafety;
+begin
+  Result := TSafety.New(HARM_CATEGORY_CIVIC_INTEGRITY, Value);
+end;
+
+class function TSafety.DangerousContent(
+  const Value: THarmBlockThreshold): TSafety;
+begin
+  Result := TSafety.New(HARM_CATEGORY_DANGEROUS_CONTENT, Value);
+end;
+
+class function TSafety.DontBlock: TArray<TSafety>;
+begin
+  Result := [
+    SexuallyExplicit(BLOCK_NONE),
+    HateSpeech(BLOCK_NONE),
+    Harassment(BLOCK_NONE),
+    DangerousContent(BLOCK_NONE),
+    CivicIntegrity(BLOCK_NONE)];
+end;
+
+class function TSafety.Harassment(
+  const Value: THarmBlockThreshold): TSafety;
+begin
+  Result := TSafety.New(HARM_CATEGORY_HARASSMENT, Value);
+end;
+
+class function TSafety.HateSpeech(
+  const Value: THarmBlockThreshold): TSafety;
+begin
+  Result := TSafety.New(HARM_CATEGORY_HATE_SPEECH, Value);
+end;
+
+class function TSafety.New(Category: THarmCategory;
+  Threshold: THarmBlockThreshold): TSafety;
 begin
   Result := Result.Category(Category).Threshold(Threshold);
 end;
 
-function TSafetyParams.Threshold(Value: THarmBlockThreshold): TSafetyParams;
+class function TSafety.SexuallyExplicit(
+  const Value: THarmBlockThreshold): TSafety;
+begin
+  Result := TSafety.New(HARM_CATEGORY_SEXUALLY_EXPLICIT, Value);
+end;
+
+function TSafety.Threshold(Value: THarmBlockThreshold): TSafety;
 begin
   FThreshold := Value;
   Result := Self;
 end;
 
-function TSafetyParams.ToJson: TJSONObject;
+function TSafety.ToJson: TJSONObject;
 begin
   Result := TJSONObject.Create;
   Result.

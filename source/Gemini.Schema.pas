@@ -42,6 +42,13 @@ type
     function ToString: string;
   end;
 
+  TSchemaParams = class;
+
+  TPropertyItem = record
+  public
+    class function Add(Key: string; Value: TSchemaType): TJSONPair; static;
+  end;
+
   TSchemaParams = class(TJSONParam)
   public
     function &Type(const Value: TSchemaType): TSchemaParams;
@@ -53,6 +60,7 @@ type
     function MinItems(const Value: string): TSchemaParams;
     function Properties(const Key: string; const Value: TSchemaParams): TSchemaParams; overload;
     function Properties(const Key: string; const ParamProc: TProcRef<TSchemaParams>): TSchemaParams; overload;
+    function Properties(const Value: TArray<TJSONPair>): TSchemaParams; overload;
     function Required(const Value: TArray<string>): TSchemaParams;
     function Items(const Value: TSchemaParams): TSchemaParams; overload;
     function Items(const ParamProc: TProcRef<TSchemaParams>): TSchemaParams; overload;
@@ -71,19 +79,19 @@ function TSchemaTypeHelper.ToString: string;
 begin
   case Self of
     TYPE_UNSPECIFIED:
-      Exit('TYPE_UNSPECIFIED');
+      Exit('type_unspecified');
     stSTRING:
-      Exit('STRING');
+      Exit('string');
     stNUMBER:
-      Exit('NUMBER');
+      Exit('number');
     stINTEGER:
-      Exit('INTEGER');
+      Exit('integer');
     stBOOLEAN:
-      Exit('BOOLEAN');
+      Exit('boolean');
     stARRAY:
-      Exit('ARRAY');
+      Exit('array');
     stOBJECT:
-      Exit('OBJECT');
+      Exit('object');
   end;
 end;
 
@@ -151,6 +159,17 @@ begin
   Result := TSchemaParams(Add('nullable', Value.ToString));
 end;
 
+function TSchemaParams.Properties(
+  const Value: TArray<TJSONPair>): TSchemaParams;
+begin
+  var JSONValue := TJSONObject.Create;
+  for var Item in Value do
+    begin
+      JSONValue.AddPair(Item);
+    end;
+  Result := TSchemaParams(Add('properties', JSONValue));
+end;
+
 function TSchemaParams.Properties(const Key: string;
   const ParamProc: TProcRef<TSchemaParams>): TSchemaParams;
 begin
@@ -166,8 +185,7 @@ end;
 function TSchemaParams.Properties(const Key: string;
   const Value: TSchemaParams): TSchemaParams;
 begin
-  var JSONProperties := TJSONObject.Create.AddPair(Key, Value.Detach);
-  Result := TSchemaParams(Add('properties', JSONProperties));
+  Result := TSchemaParams(Add(Key, Value.Detach));
 end;
 
 function TSchemaParams.Required(const Value: TArray<string>): TSchemaParams;
@@ -178,6 +196,13 @@ end;
 function TSchemaParams.&Type(const Value: TSchemaType): TSchemaParams;
 begin
   Result := TSchemaParams(Add('type', Value.ToString));
+end;
+
+{ TPropertyItem }
+
+class function TPropertyItem.Add(Key: string; Value: TSchemaType): TJSONPair;
+begin
+  Result := TJSONPair.Create(Key, Value.ToString);
 end;
 
 end.

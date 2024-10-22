@@ -108,6 +108,11 @@ type
     procedure ParseError(const Code: Int64; const ResponseText: string);
     procedure SetCustomHeaders(const Value: TNetHeaders);
 
+  private
+    function ToStringValueFor(const Value: string): string; overload;
+    function ToStringValueFor(const Value: string; const Field: string): string; overload;
+    function ToStringValueFor(const Value: string; const Field: TArray<string>): string; overload;
+
   protected
     function GetHeaders: TNetHeaders;
     function GetRequestURL(const Path: string): string; overload;
@@ -301,6 +306,9 @@ implementation
 uses
   REST.Json;
 
+const
+  FieldsToString : TArray<string> = ['"args": {'];
+
 constructor TGeminiAPI.Create;
 begin
   inherited Create;
@@ -384,7 +392,7 @@ begin
     if Assigned(ParamProc) then
       ParamProc(Params);
     Code := Post(Path, Params.JSON, Response);
-    Result := ParseResponse<TResult>(Code, Response.DataString);
+    Result := ParseResponse<TResult>(Code, ToStringValueFor(Response.DataString));
   finally
     Params.Free;
     Response.Free;
@@ -400,7 +408,7 @@ begin
   Response := TStringStream.Create('', TEncoding.UTF8);
   try
     Code := Post(Path, ParamJSON, Response);
-    Result := ParseResponse<TResult>(Code, Response.DataString);
+    Result := ParseResponse<TResult>(Code, ToStringValueFor(Response.DataString));
   finally
     Response.Free;
   end;
@@ -649,6 +657,51 @@ end;
 procedure TGeminiAPI.SetToken(const Value: string);
 begin
   FToken := Value;
+end;
+
+function TGeminiAPI.ToStringValueFor(const Value: string): string;
+begin
+  Result := ToStringValueFor(Value, FieldsToString);
+end;
+
+function TGeminiAPI.ToStringValueFor(const Value, Field: string): string;
+begin
+  Result := Value;
+  var i := Pos(Field, Result);
+  while (i > 0) and (i < Result.Length) do
+    begin
+      i := i + Field.Length - 1;
+      Result[i] := '"';
+      Inc(i);
+      var j := 0;
+      while (j > 0) or ((j = 0) and not (Result[i] = '}')) do
+        begin
+          case Result[i] of
+            '{':
+              Inc(j);
+            '}':
+              j := j - 1;
+            '"':
+              Result[i] := '`';
+          end;
+          Inc(i);
+          if i > Result.Length then
+            raise Exception.Create('Invalid JSON string');
+        end;
+      Result[i] := '"';
+      i := Pos(Field, Result);
+    end;
+end;
+
+function TGeminiAPI.ToStringValueFor(const Value: string;
+  const Field: TArray<string>): string;
+begin
+  Result := Value;
+  if Length(Field) > 0 then
+    begin
+      for var Item in Field do
+        Result := ToStringValueFor(Result, Item);
+    end;
 end;
 
 { GeminiException }

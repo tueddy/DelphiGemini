@@ -17,7 +17,8 @@ uses
 type
   TMessageRole = (
     user,
-    model
+    model,
+    &function
   );
 
   TMessageRoleHelper = record helper for TMessageRole
@@ -113,27 +114,44 @@ type
     function FrequencyPenalty(const Value: Double): TGenerationConfig;
     function ResponseLogprobs(const Value: Boolean): TGenerationConfig;
     function Logprobs(const Value: Integer): TGenerationConfig;
-    class function New: TGenerationConfig; overload;
     class function New(const ParamProc: TProcRef<TGenerationConfig>): TGenerationConfig; overload;
   end;
 
   TChatParams = class(TJSONParam)
     function Contents(const Value: TArray<TContentPayload>): TChatParams;
-    function Tools(const Value: TArray<TToolParams>): TChatParams;
-    function ToolConfig(const Value: TToolConfig): TChatParams;
-    function SafetySettings(const Value: TArray<TSafetyParams>): TChatParams;
+    function Tools(const Value: TArray<TToolPluginParams>): TChatParams;
+    function ToolConfig(const Value: TToolMode; AllowedFunctionNames: TArray<string> = []): TChatParams;
+    function SafetySettings(const Value: TArray<TSafety>): TChatParams;
     function SystemInstruction(const Value: string): TChatParams;
     function GenerationConfig(const ParamProc: TProcRef<TGenerationConfig>): TChatParams;
     function CachedContent(const Value: string): TChatParams;
-    class function New: TChatParams; overload;
     class function New(const ParamProc: TProcRef<TChatParams>): TChatParams; overload;
+  end;
+
+  TArgsFixInterceptor = class(TJSONInterceptorStringToString)
+  public
+    procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
+  end;
+
+  TFunctionCall = class
+  private
+    FName: string;
+    [JsonReflectAttribute(ctString, rtString, TArgsFixInterceptor)]
+    FArgs: string;
+  public
+    property Name: string read FName write FName;
+    property Args: string read FArgs write FArgs;
+    destructor Destroy; override;
   end;
 
   TChatPart = class
   private
     FText: string;
+    FFunctionCall: TFunctionCall;
   public
     property Text: string read FText write FText;
+    property FunctionCall: TFunctionCall read FFunctionCall write FFunctionCall;
+    destructor Destroy; override;
   end;
 
   TChatContent = class
@@ -434,14 +452,12 @@ function TChatRoute.CreateStream(const ModelName: string; ParamProc: TProc<TChat
 var
   Response: TStringStream;
   RetPos: Integer;
-  PrevRet: Integer;
-  PrevRetPos: Integer;
+  Prev: Integer;
 begin
   Response := TStringStream.Create('', TEncoding.UTF8);
   try
     RetPos := 0;
-    PrevRet := 0;
-    PrevRetPos := 0;
+    Prev := 0;
     Result := API.Post<TChatParams>(SetModel(ModelName, ':streamGenerateContent'), ParamProc, Response,
       procedure(const Sender: TObject; AContentLength: Int64; AReadCount: Int64; var AAbort: Boolean)
       var
@@ -459,35 +475,30 @@ begin
             Exit;
         end;
 
-        if not TextBuffer.IsEmpty then
-          begin
-            Ret := TextBuffer.Length - 1;
-            Line := TextBuffer.Substring(RetPos, Ret - RetPos);
-            RetPos := Ret + 1;
+        Ret := TextBuffer.Length - 1;
+        Line := TextBuffer.Substring(RetPos, Ret - RetPos);
+        RetPos := Ret + 1;
 
+        Chat := nil;
+        Data := Line.Trim([' ', #13, #10]);
+        Data := Copy(Data, 2, Data.Length-1);
+
+        IsDone := Data.IsEmpty;
+
+        if not IsDone then
+          try
+            Chat := TJson.JsonToObject<TChat>(Data);
+            Prev := RetPos;
+          except
             Chat := nil;
-            Data := Line.Trim([' ', #13, #10]);
-            Data := Copy(Data, 2, Data.Length-1);
-
-            IsDone := Data.IsEmpty;
-
-            if not IsDone then
-            try
-              Chat := TJson.JsonToObject<TChat>(Data);
-              PrevRet := Ret;
-              PrevRetPos := RetPos;
-            except
-               Chat := nil;
-               Ret := PrevRet;
-               RetPos := PrevRetPos;
-            end;
-
-            try
-              Event(Chat, IsDone, AAbort);
-            finally
-              Chat.Free;
-            end;
+            RetPos := Prev;
           end;
+
+        try
+          Event(Chat, IsDone, AAbort);
+        finally
+          Chat.Free;
+        end;
 
       end);
   finally
@@ -533,13 +544,8 @@ begin
     end;
 end;
 
-class function TChatParams.New: TChatParams;
-begin
-  Result := TChatParams.Create;
-end;
-
 function TChatParams.SafetySettings(
-  const Value: TArray<TSafetyParams>): TChatParams;
+  const Value: TArray<TSafety>): TChatParams;
 begin
   var JSONSafetySettings := TJSONArray.Create;
   for var Item in Value do
@@ -553,26 +559,52 @@ begin
   Result := TChatParams(Add('system_instruction', PartsJSON));
 end;
 
-function TChatParams.ToolConfig(const Value: TToolConfig): TChatParams;
+function TChatParams.ToolConfig(const Value: TToolMode; AllowedFunctionNames: TArray<string>): TChatParams;
 begin
-  Result := TChatParams(Add('toolConfig', Value.Detach));
+  var Temp := TJSONObject.Create.AddPair('mode', Value.ToString);
+  if Length(AllowedFunctionNames) > 0 then
+    begin
+      var JSONArray := TJSONArray.Create;
+      for var Item in AllowedFunctionNames do
+        begin
+          JSONArray.Add(Item);
+        end;
+      Temp.AddPair('allowedFunctionNames', JSONArray);
+    end;
+
+  Result := TChatParams(Add('toolConfig',
+              TJSONObject.Create.AddPair('function_calling_config', Temp)));
 end;
 
-function TChatParams.Tools(const Value: TArray<TToolParams>): TChatParams;
+function TChatParams.Tools(const Value: TArray<TToolPluginParams>): TChatParams;
 begin
-  var JSONTools := TJSONArray.Create;
-  for var Item in Value do
+  var JSONFuncs := TJSONArray.Create;
+  for var Item in value do
     begin
-      JSONTools.Add(Item.Detach);
+      JSONFuncs.Add(Item.ToJson);
     end;
-  Result := TChatParams(Add('tools', JSONTools));
+  var JSONDeclaration := TJSONObject.Create.AddPair('function_declarations', JSONFuncs);
+
+  var JSONTool := TJSONArray.Create.Add(JSONDeclaration);
+
+  Result := TChatParams(Add('tools', JSONTool));
 end;
+
+//function TChatParams.Tools(const Value: TArray<TToolParams>): TChatParams;
+//begin
+//  var JSONTools := TJSONArray.Create;
+//  for var Item in Value do
+//    begin
+//      JSONTools.Add(Item.Detach);
+//    end;
+//  Result := TChatParams(Add('tools', JSONTools));
+//end;
 
 { TMessageRoleHelper }
 
 class function TMessageRoleHelper.Create(const Value: string): TMessageRole;
 begin
-  var index := IndexStr(AnsiLowerCase(Value), ['user', 'model']);
+  var index := IndexStr(AnsiLowerCase(Value), ['user', 'model', 'function']);
   if index = -1 then
     raise Exception.Create('String role value not correct');
   Result := TMessageRole(index);
@@ -585,6 +617,8 @@ begin
       Exit('user');
     model:
       Exit('model');
+    &function:
+      Exit('function');
   end;
 end;
 
@@ -778,11 +812,6 @@ begin
   Result := TGenerationConfig(Add('presencePenalty', Value));
 end;
 
-class function TGenerationConfig.New: TGenerationConfig;
-begin
-  Result := TGenerationConfig.Create;
-end;
-
 function TGenerationConfig.ResponseLogprobs(
   const Value: Boolean): TGenerationConfig;
 begin
@@ -848,6 +877,34 @@ procedure TMessageRoleInterceptor.StringReverter(Data: TObject; Field,
   Arg: string);
 begin
   RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, TValue.From(TMessageRole.Create(Arg)));
+end;
+
+{ TFunctionCall }
+
+destructor TFunctionCall.Destroy;
+begin
+//  if Assigned(FArgs) then
+//    FArgs.Free;
+  inherited;
+end;
+
+{ TChatPart }
+
+destructor TChatPart.Destroy;
+begin
+  if Assigned(FFunctionCall) then
+    FFunctionCall.Free;
+  inherited;
+end;
+
+{ TArgsFixInterceptor }
+
+procedure TArgsFixInterceptor.StringReverter(Data: TObject; Field, Arg: string);
+begin
+  Arg := Format('{%s}', [Trim(Arg.Replace('`', '"').Replace(#10, ''))]);
+  while Arg.Contains(', ') do Arg := Arg.Replace(', ', ',');
+  Arg := Arg.Replace(',', ', ');
+  RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, Arg);
 end;
 
 end.
