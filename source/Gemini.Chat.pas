@@ -141,7 +141,6 @@ type
   public
     property Name: string read FName write FName;
     property Args: string read FArgs write FArgs;
-    destructor Destroy; override;
   end;
 
   TChatPart = class
@@ -877,15 +876,6 @@ procedure TMessageRoleInterceptor.StringReverter(Data: TObject; Field,
   Arg: string);
 begin
   RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, TValue.From(TMessageRole.Create(Arg)));
-end;
-
-{ TFunctionCall }
-
-destructor TFunctionCall.Destroy;
-begin
-//  if Assigned(FArgs) then
-//    FArgs.Free;
-  inherited;
 end;
 
 { TChatPart }

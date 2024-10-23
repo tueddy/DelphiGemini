@@ -94,7 +94,7 @@ type
   TGeminiAPI = class
   public
     const
-      URL_BASE = 'https://generativelanguage.googleapis.com/v1beta';
+      URL_BASE = 'https://generativelanguage.googleapis.com';
   private
     FHTTPClient: THTTPClient;
     FToken: string;
@@ -115,17 +115,21 @@ type
 
   protected
     function GetHeaders: TNetHeaders;
+    function GetFilesURL(const Path: string): string;
     function GetRequestURL(const Path: string): string; overload;
     function GetRequestURL(const Path, Params: string): string; overload;
+    function GetRequestFilesURL(const Path: string): string;
     function Get(const Path, Params: string; Response: TStringStream): Integer; overload;
     function Delete(const Path: string; Response: TStringStream): Integer; overload;
     function Post(const Path: string; Response: TStringStream): Integer; overload;
     function Post(const Path: string; Body: TJSONObject; Response: TStringStream; OnReceiveData: TReceiveDataCallback = nil): Integer; overload;
     function Post(const Path: string; Body: TMultipartFormData; Response: TStringStream): Integer; overload;
+    function Post(const Path: string; Body: TJSONObject; var ResponseHeader: TNetHeaders): Integer; overload;
     function ParseResponse<T: class, constructor>(const Code: Int64; const ResponseText: string): T;
     procedure CheckAPI;
 
   public
+    function Find<TParams: TJSONParam>(const Path: string; KeyName: string; ParamProc: TProc<TParams>): string;
     function Get<TResult: class, constructor>(const Path: string; const Params: string = ''): TResult; overload;
     function Get(const Path: string; const Params: string = ''): string; overload;
     procedure GetFile(const Path: string; Response: TStream); overload;
@@ -135,6 +139,7 @@ type
     function Post<TResult: class, constructor>(const Path: string; ParamJSON: TJSONObject): TResult; overload;
     function Post<TResult: class, constructor>(const Path: string): TResult; overload;
     function PostForm<TResult: class, constructor; TParams: TMultipartFormData, constructor>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
+    function UploadRaw<TResult: class, constructor>(const Path: string; const FileName: string): TResult;
 
   public
     constructor Create; overload;
@@ -218,6 +223,8 @@ type
     /// of the model name within the API framework.
     /// </remarks>
     function SetModel(const ModelName: string; const Supp: string = ''): string;
+
+    function SetFile(const Path: string): string;
   public
     /// <summary>
     /// Initializes the <c>TGeminiAPIModel</c> class by creating necessary
@@ -239,6 +246,41 @@ type
   end;
 
   /// <summary>
+  /// Provides methods for building route parameters related to model retrieval in API requests.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TModelsRouteParams</c> class is responsible for constructing query parameters such as
+  /// pagination settings, including page size and page token, for API calls that retrieve model data.
+  /// This class extends <c>TGeminiAPIRoute</c> and is designed to be used by derived classes that
+  /// perform specific API requests.
+  /// </remarks>
+  TGeminiAPIRequestParams = class(TGeminiAPIModel)
+  protected
+    /// <summary>
+    /// Builds the query string parameters for pagination when fetching models.
+    /// </summary>
+    /// <param name="PageSize">
+    /// The number of models to retrieve per page.
+    /// </param>
+    /// <param name="PageToken">
+    /// An optional token used for fetching the next page of results.
+    /// </param>
+    /// <returns>
+    /// A string containing the formatted query parameters, including the page size and optional page token.
+    /// </returns>
+    /// <remarks>
+    /// The <c>ParamsBuilder</c> method constructs the query string for paginated model requests.
+    /// The page size is mandatory, and the page token is optional but will be included in the query if provided.
+    /// </remarks>
+    function ParamsBuilder(const PageSize: Integer; const PageToken: string = ''): string;
+  end;
+
+  TGeminiAPIFileName = class(TGeminiAPIRequestParams)
+  protected
+    function CheckFileName(const Value: string): string;
+  end;
+
+  /// <summary>
   /// The <c>TGeminiAPIRoute</c> class represents a specific API route within
   /// the Gemini framework, encapsulating the necessary API client and route-specific
   /// configurations.
@@ -249,7 +291,7 @@ type
   /// <c>TGeminiAPI</c>, allowing for the execution of API requests tailored to
   /// the defined route.
   /// </remarks>
-  TGeminiAPIRoute = class(TGeminiAPIModel)
+  TGeminiAPIRoute = class(TGeminiAPIFileName)
   private
     /// <summary>
     /// The instance of <c>TGeminiAPI</c> used to perform API requests for this route.
@@ -363,7 +405,62 @@ var
 begin
   CheckAPI;
   Headers := GetHeaders;
-  Result := FHTTPClient.Post(GetRequestURL(Path), Body, Response, Headers).StatusCode;
+  Result := FHTTPClient.Post(GetFilesURL(Path), Body, Response, Headers).StatusCode;
+end;
+
+function TGeminiAPI.Post(const Path: string; Body: TJSONObject;
+  var ResponseHeader: TNetHeaders): Integer;
+begin
+  CheckAPI;
+  var Headers := GetHeaders;
+  var Stream: TStringStream := nil;
+  try
+    if Assigned(Body) then
+      begin
+        Stream := TStringStream.Create;
+        Stream.WriteString(Body.ToJSON);
+        Stream.Position := 0;
+      end;
+    var response := FHTTPClient.Post(GetRequestFilesURL(Path), Stream, nil, Headers);
+    Result := Response.StatusCode;
+    case Result of
+       200..299:
+         ResponseHeader := Response.Headers;
+       else
+         raise Exception.Create('Error on response headers');
+    end;
+  finally
+    FHTTPClient.OnReceiveData := nil;
+    Stream.Free;
+  end;
+end;
+
+function TGeminiAPI.Find<TParams>(const Path: string;
+  KeyName: string; ParamProc: TProc<TParams>): string;
+var
+  ResponseHeader: TNetHeaders;
+begin
+  var Params: TParams := nil;
+  try
+    if Assigned(ParamProc) then
+      begin
+        Params := TParams.Create;
+        ParamProc(Params);
+        Post(Path, Params.JSON, ResponseHeader);
+      end
+    else
+      Post(Path, nil, ResponseHeader);
+    for var Item in ResponseHeader do
+      begin
+        if Item.Name.ToLower = KeyName then
+          begin
+            Result := Item.Value;
+            Break;
+          end;
+      end;
+  finally
+    Params.Free;
+  end;
 end;
 
 function TGeminiAPI.Post(const Path: string; Response: TStringStream): Integer;
@@ -580,19 +677,29 @@ begin
   end;
 end;
 
+function TGeminiAPI.GetFilesURL(const Path: string): string;
+begin
+  Result := Format('%s/%s', [FBaseURL, Path]);
+end;
+
 function TGeminiAPI.GetHeaders: TNetHeaders;
 begin
-  Result := [TNetHeader.Create('Content-Type', 'application/json')] + FCustomHeaders;
+  Result := FCustomHeaders + [TNetHeader.Create('Content-Type', 'application/json')];
 end;
 
 function TGeminiAPI.GetRequestURL(const Path, Params: string): string;
 begin
-  Result := Format('%s/%s?key=%s%s', [FBaseURL, Path, Token, Params]);
+  Result := Format('%s/v1beta/%s?key=%s%s', [FBaseURL, Path, Token, Params]);
+end;
+
+function TGeminiAPI.GetRequestFilesURL(const Path: string): string;
+begin
+  Result := Format('%s/%s?key=%s', [FBaseURL, Path, Token]);
 end;
 
 function TGeminiAPI.GetRequestURL(const Path: string): string;
 begin
-  Result := Format('%s/%s?key=%s', [FBaseURL, Path, Token]);
+  Result := Format('%s/v1beta/%s?key=%s', [FBaseURL, Path, Token]);
 end;
 
 procedure TGeminiAPI.CheckAPI;
@@ -704,6 +811,25 @@ begin
     end;
 end;
 
+function TGeminiAPI.UploadRaw<TResult>(const Path, FileName: string): TResult;
+var
+  Headers: TNetHeaders;
+  Response: TStringStream;
+  Code: integer;
+begin
+  CheckAPI;
+  Headers := GetHeaders;
+  var FileStream := TFileStream.Create(FileName, fmOpenRead);
+  Response := TStringStream.Create('', TEncoding.UTF8);
+  try
+    Code := FHTTPClient.Post(Path, FileStream, Response, Headers).StatusCode;
+    Result := ParseResponse<TResult>(Code, Response.DataString);
+  finally
+    FileStream.Free;
+    Response.Free;
+  end;
+end;
+
 { GeminiException }
 
 constructor GeminiException.Create(const ACode: Int64; const AError: TErrorCore);
@@ -762,6 +888,11 @@ begin
   GeminiLock.Free;
 end;
 
+function TGeminiAPIModel.SetFile(const Path: string): string;
+begin
+  Result := Path;
+end;
+
 function TGeminiAPIModel.SetModel(const ModelName: string; const Supp: string): string;
 begin
   if ModelName.Trim.IsEmpty then
@@ -771,6 +902,25 @@ begin
   CurrentModel := Result;
   if not Supp.Trim.IsEmpty then
       Result := Result + Supp;
+end;
+
+{ TGeminiAPIRequestParams }
+
+function TGeminiAPIRequestParams.ParamsBuilder(const PageSize: Integer;
+  const PageToken: string): string;
+begin
+  Result := Format('&&pageSize=%d', [PageSize]);
+  if not PageToken.IsEmpty then
+    Result := Format('%s&&pageToken=%s', [Result, PageToken]);
+end;
+
+{ TGeminiAPIFileName }
+
+function TGeminiAPIFileName.CheckFileName(const Value: string): string;
+begin
+  Result := Value;
+  if not Result.ToLower.StartsWith('files/') then
+    Result := 'files/' + Result;
 end;
 
 end.

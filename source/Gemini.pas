@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Gemini.API, System.Net.URLClient,
-  Gemini.Chat, Gemini.Models, Gemini.Embeddings;
+  Gemini.Chat, Gemini.Models, Gemini.Embeddings, Gemini.Files;
 
 type
   /// <summary>
@@ -41,6 +41,7 @@ type
     function GetChatRoute: TChatRoute;
     function GetModelsRoute: TModelsRoute;
     function GetEmbeddingsRoute: TEmbeddingsRoute;
+    function GetFilesRoute: TFilesRoute;
 
     /// <summary>
     /// the main API object used for making requests.
@@ -93,6 +94,8 @@ type
     /// An instance of TEmbeddingsRoute for embedding-related operations.
     /// </returns>
     property Embeddings: TEmbeddingsRoute read GetEmbeddingsRoute;
+    // TODO
+    property Files: TFilesRoute read GetFilesRoute;
   end;
 
   /// <summary>
@@ -144,6 +147,7 @@ type
     FChatRoute: TChatRoute;
     FModelsRoute: TModelsRoute;
     FEmbeddingsRoute: TEmbeddingsRoute;
+    FFilesRoute: TFilesRoute;
 
     function GetAPI: TGeminiAPI;
     function GetToken: string;
@@ -154,6 +158,7 @@ type
     function GetChatRoute: TChatRoute;
     function GetModelsRoute: TModelsRoute;
     function GetEmbeddingsRoute: TEmbeddingsRoute;
+    function GetFilesRoute: TFilesRoute;
 
   public
     /// <summary>
@@ -211,6 +216,8 @@ type
     /// An instance of TEmbeddingsRoute for embedding-related operations.
     /// </returns>
     property Embeddings: TEmbeddingsRoute read GetEmbeddingsRoute;
+    // TODO
+    property Files: TFilesRoute read GetFilesRoute;
 
   public
     /// <summary>
@@ -270,6 +277,7 @@ begin
   FChatRoute.Free;
   FModelsRoute.Free;
   FEmbeddingsRoute.Free;
+  FFilesRoute.Free;
   FAPI.Free;
   inherited;
 end;
@@ -296,6 +304,13 @@ begin
   if not Assigned(FEmbeddingsRoute) then
     FEmbeddingsRoute := TEmbeddingsRoute.CreateRoute(API);
   Result := FEmbeddingsRoute;
+end;
+
+function TGemini.GetFilesRoute: TFilesRoute;
+begin
+  if not Assigned(FFilesRoute) then
+    FFilesRoute := TFilesRoute.CreateRoute(API);
+  Result := FFilesRoute;
 end;
 
 function TGemini.GetModelsRoute: TModelsRoute;

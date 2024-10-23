@@ -183,36 +183,6 @@ type
   end;
 
   /// <summary>
-  /// Provides methods for building route parameters related to model retrieval in API requests.
-  /// </summary>
-  /// <remarks>
-  /// The <c>TModelsRouteParams</c> class is responsible for constructing query parameters such as
-  /// pagination settings, including page size and page token, for API calls that retrieve model data.
-  /// This class extends <c>TGeminiAPIRoute</c> and is designed to be used by derived classes that
-  /// perform specific API requests.
-  /// </remarks>
-  TModelsRouteParams = class(TGeminiAPIRoute)
-  protected
-    /// <summary>
-    /// Builds the query string parameters for pagination when fetching models.
-    /// </summary>
-    /// <param name="PageSize">
-    /// The number of models to retrieve per page.
-    /// </param>
-    /// <param name="PageToken">
-    /// An optional token used for fetching the next page of results.
-    /// </param>
-    /// <returns>
-    /// A string containing the formatted query parameters, including the page size and optional page token.
-    /// </returns>
-    /// <remarks>
-    /// The <c>ParamsBuilder</c> method constructs the query string for paginated model requests.
-    /// The page size is mandatory, and the page token is optional but will be included in the query if provided.
-    /// </remarks>
-    function ParamsBuilder(const PageSize: Integer; const PageToken: string = ''): string;
-  end;
-
-  /// <summary>
   /// Manages asynchronous callbacks for a model search request using <c>TModel</c> as the response type.
   /// </summary>
   /// <remarks>
@@ -242,7 +212,7 @@ type
   /// It includes overloaded <c>List</c> methods that allow for listing all models, fetching paginated results, or retrieving a specific model by name.
   /// This class interacts with the underlying API to fetch model data and returns instances of <c>TModels</c> or <c>TModel</c>.
   /// </remarks>
-  TModelsRoute = class(TModelsRouteParams)
+  TModelsRoute = class(TGeminiAPIRoute)
   public
     /// <summary>
     /// Asynchronously retrieves the list of all available models.
@@ -479,16 +449,6 @@ begin
   inherited;
 end;
 
-{ TModelsRouteParams }
-
-function TModelsRouteParams.ParamsBuilder(const PageSize: Integer;
-  const PageToken: string): string;
-begin
-  Result := Format('&&pageSize=%d', [PageSize]);
-  if not PageToken.IsEmpty then
-    Result := Format('%s&&pageToken=%s', [Result, PageToken]);
-end;
-
 { TModelsRoute }
 
 procedure TModelsRoute.AsynList(CallBacks: TFunc<TAsynModels>);
@@ -554,7 +514,7 @@ end;
 
 function TModelsRoute.List(const ModelName: string; LowerCase: Boolean): TModel;
 begin
-  Result := API.Get<TModel>(CheckModel(ModelName, LowerCase)); //'models/' +
+  Result := API.Get<TModel>(CheckModel(ModelName, LowerCase));
 end;
 
 function TModelsRoute.List(const PageSize: Integer;
