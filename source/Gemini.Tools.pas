@@ -49,6 +49,45 @@ type
     class function Add(const AFunction: IFunctionCore): TToolPluginParams; static;
   end;
 
+  TSchema = TSchemaParams;
+
+  TFunctionDeclaration = class
+  private
+    FName: string;
+    FDescription: string;
+    FParameters: TSchema;
+  public
+    property Name: string read FName write FName;
+    property Description: string read FDescription write FDescription;
+    property Parameters: TSchema read FParameters write FParameters;
+    destructor Destroy; override;
+  end;
+
+  TTool = class
+  private
+    FFunctionDeclarations: TArray<TFunctionDeclaration>;
+  public
+    property FunctionDeclarations: TArray<TFunctionDeclaration> read FFunctionDeclarations write FFunctionDeclarations;
+    destructor Destroy; override;
+  end;
+
+  TFunctionCallingConfig = class
+  private
+   FMode: string;
+   FAllowedFunctionNames: TArray<string>;
+  public
+    property Mode: string read FMode write FMode;
+    property AllowedFunctionNames: TArray<string> read FAllowedFunctionNames write FAllowedFunctionNames;
+  end;
+
+  TToolConfig = class
+  private
+    FFunctionCallingConfig: TFunctionCallingConfig;
+  public
+    property FunctionCallingConfig: TFunctionCallingConfig read FFunctionCallingConfig write FFunctionCallingConfig;
+    destructor Destroy; override;
+  end;
+
 implementation
 
 uses
@@ -80,6 +119,33 @@ end;
 function TToolPluginParams.ToJson: TJSONObject;
 begin
   Result := FFunction.ToJson;
+end;
+
+{ TTool }
+
+destructor TTool.Destroy;
+begin
+  for var Item in FFunctionDeclarations do
+    Item.Free;
+  inherited;
+end;
+
+{ TFunctionDeclaration }
+
+destructor TFunctionDeclaration.Destroy;
+begin
+  if Assigned(FParameters) then
+    FParameters.Free;
+  inherited;
+end;
+
+{ TToolConfig }
+
+destructor TToolConfig.Destroy;
+begin
+  if Assigned(FFunctionCallingConfig) then
+    FFunctionCallingConfig.Free;
+  inherited;
 end;
 
 end.

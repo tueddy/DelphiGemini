@@ -88,15 +88,81 @@ type
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
-  TContentPayload = record
-  private
-    FRole: TMessageRole;
-    FText: string;
+  TLangueType = (
+    /// <summary>
+    /// Language not specified. This value should not be used.
+    /// </summary>
+    LANGUAGE_UNSPECIFIED,
+    /// <summary>
+    /// Python >= 3.10, with numpy and simpy available
+    /// </summary>
+    PYTHON
+  );
+
+  TLangueTypeHelper = record helper for TLangueType
+    function ToString: string;
+    class function Create(const Value: string): TLangueType; static;
+  end;
+
+  TLangueTypeInterceptor = class(TJSONInterceptorStringToString)
+    function StringConverter(Data: TObject; Field: string): string; override;
+    procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
+  end;
+
+  TOutcomeType = (
+    /// <summary>
+    /// State not specified. This value should not be used.
+    /// </summary>
+    OUTCOME_UNSPECIFIED,
+    /// <summary>
+    /// The code execution was successful.
+    /// </summary>
+    OUTCOME_OK,
+    /// <summary>
+    /// Code execution completed, but with failure. stderr should contain the reason.
+    /// </summary>
+    OUTCOME_FAILED,
+    /// <summary>
+    /// Code execution took too long and was canceled. Partial output may or may not be present.
+    /// </summary>
+    OUTCOME_DEADLINE_EXCEEDED
+  );
+
+  TOutcomeTypeHelper = record helper for TOutcomeType
+    function ToString: string;
+    class function Create(const Value: string): TOutcomeType; static;
+  end;
+
+  TOutcomeTypeInterceptor = class(TJSONInterceptorStringToString)
+    function StringConverter(Data: TObject; Field: string): string; override;
+    procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
+  end;
+
+  TInlineData = class(TJSONParam)
+    function MimeType(const Value: string): TInlineData;
+    function Data(const Value: string): TInlineData;
+  end;
+
+  TFileData = class(TJSONParam)
+    function MimeType(const Value: string): TFileData;
+    function FileUri(const Value: string): TFileData;
+  end;
+
+  TTextData = class(TJSONParam)
+    function Text(const Value: string): TTextData;
+  end;
+
+  TContentPayload = class(TJSONParam)
   public
     function Role(const Value: TMessageRole): TContentPayload;
-    function Text(const Value: string): TContentPayload;
-    function ToJSON: TJSONObject;
-    class function New(Role: TMessageRole; Text: string): TContentPayload; static;
+    function Parts(const Value: string; const Attached: TArray<string>): TContentPayload; overload;
+    function Parts(const Attached: TArray<string>): TContentPayload; overload;
+    class function Add(const Text: string; const Attached: TArray<string> = []): TContentPayload; reintroduce; overload;
+    class function Add(const Role: TMessageRole;
+      const Attached: TArray<string> = []): TContentPayload; reintroduce; overload;
+    class function Add(const Role: TMessageRole; const Text: string;
+      const Attached: TArray<string> = []): TContentPayload; reintroduce; overload;
+    class function New(const ParamProc: TProcRef<TContentPayload>): TContentPayload; static;
   end;
 
   TGenerationConfig = class(TJSONParam)
@@ -143,13 +209,65 @@ type
     property Args: string read FArgs write FArgs;
   end;
 
+  TInlineDataPart = class
+  private
+    FMimeType: string;
+    FData: string;
+  public
+    property MimeType: string read FMimeType write FMimeType;
+    property Data: string read FData write FData;
+  end;
+
+  TFileDataPart = class
+  private
+    FMimeType: string;
+    FFileUri: string;
+  public
+    property MimeType: string read FMimeType write FMimeType;
+    property FileUri: string read FFileUri write FFileUri;
+  end;
+
+//  TFunctionResponsePart = class
+//  private
+//
+//  public
+//  end;
+
+  TExecutableCodePart = class
+  private
+    [JsonReflectAttribute(ctString, rtString, TLangueTypeInterceptor)]
+    FLanguage: TLangueType;
+    FCode: string;
+  public
+    property Language: TLangueType read FLanguage write FLanguage;
+    property Code: string read FCode write FCode;
+  end;
+
+  TCodeExecutionResult = class
+  private
+    [JsonReflectAttribute(ctString, rtString, TOutcomeTypeInterceptor)]
+    FOutcome: TOutcomeType;
+    FOutput: string;
+  public
+    property Outcome: TOutcomeType read FOutcome write FOutcome;
+    property Output: string read FOutput write FOutput;
+  end;
+
   TChatPart = class
   private
     FText: string;
     FFunctionCall: TFunctionCall;
+    FInlineData: TInlineDataPart;
+    FFileData: TFileDataPart;
+    FExecutableCode: TExecutableCodePart;
+    FCodeExecutionResult: TCodeExecutionResult;
   public
     property Text: string read FText write FText;
     property FunctionCall: TFunctionCall read FFunctionCall write FFunctionCall;
+    property InlineData: TInlineDataPart read FInlineData write FInlineData;
+    property FileData: TFileDataPart read FFileData write FFileData;
+    property ExecutableCode: TExecutableCodePart read FExecutableCode write FExecutableCode;
+    property CodeExecutionResult: TCodeExecutionResult read FCodeExecutionResult write FCodeExecutionResult;
     destructor Destroy; override;
   end;
 
@@ -305,7 +423,18 @@ type
 implementation
 
 uses
-  System.StrUtils, System.Math, System.Rtti, Rest.Json, Gemini.Async.Params;
+  System.StrUtils, System.Math, System.Rtti, Rest.Json, Gemini.Async.Params,
+  Gemini.NetEncoding.Base64;
+
+type
+  TAttachedManager = record
+  private
+    function IsUri(const FilePath: string): Boolean;
+    function GetMimeType(const FilePath: string): string;
+    function GetEncoded(const FilePath: string): string;
+  public
+    function ToJson(const FilePath: string): TJSONObject;
+  end;
 
 { TChatRoute }
 
@@ -517,8 +646,7 @@ function TChatParams.Contents(
 begin
   var JSONContents := TJSONArray.Create;
   for var Item in Value do
-    JSONContents.Add(Item.ToJSON);
-
+    JSONContents.Add(Item.Detach);
   Result := TChatParams(Add('contents', JSONContents));
 end;
 
@@ -589,16 +717,6 @@ begin
   Result := TChatParams(Add('tools', JSONTool));
 end;
 
-//function TChatParams.Tools(const Value: TArray<TToolParams>): TChatParams;
-//begin
-//  var JSONTools := TJSONArray.Create;
-//  for var Item in Value do
-//    begin
-//      JSONTools.Add(Item.Detach);
-//    end;
-//  Result := TChatParams(Add('tools', JSONTools));
-//end;
-
 { TMessageRoleHelper }
 
 class function TMessageRoleHelper.Create(const Value: string): TMessageRole;
@@ -619,35 +737,6 @@ begin
     &function:
       Exit('function');
   end;
-end;
-
-{ TContentPayload }
-
-class function TContentPayload.New(Role: TMessageRole;
-  Text: string): TContentPayload;
-begin
-  Result := Result.Role(Role).Text(Text);
-end;
-
-function TContentPayload.Role(const Value: TMessageRole): TContentPayload;
-begin
-  FRole := Value;
-  Result := Self;
-end;
-
-function TContentPayload.Text(const Value: string): TContentPayload;
-begin
-  FText := Value;
-  Result := Self;
-end;
-
-function TContentPayload.ToJSON: TJSONObject;
-begin
-  Result := TJSONObject.Create;
-  Result.AddPair('role', FRole.ToString);
-  Result.AddPair('parts',
-    TJSONArray.Create.Add(
-      TJSONObject.Create.AddPair('text', FText)));
 end;
 
 { TChat }
@@ -884,6 +973,14 @@ destructor TChatPart.Destroy;
 begin
   if Assigned(FFunctionCall) then
     FFunctionCall.Free;
+  if Assigned(FInlineData) then
+    FInlineData.Free;
+  if Assigned(FFileData) then
+    FFileData.Free;
+  if Assigned(FExecutableCode) then
+    FExecutableCode.Free;
+  if Assigned(FCodeExecutionResult) then
+    FCodeExecutionResult.Free;
   inherited;
 end;
 
@@ -895,6 +992,204 @@ begin
   while Arg.Contains(', ') do Arg := Arg.Replace(', ', ',');
   Arg := Arg.Replace(',', ', ');
   RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, Arg);
+end;
+
+{ TContentPayload }
+
+class function TContentPayload.Add(const Role: TMessageRole;
+  const Text: string; const Attached: TArray<string>): TContentPayload;
+begin
+  Result := TContentPayload.Create.Role(Role).Parts(Text, Attached);
+end;
+
+class function TContentPayload.Add(const Role: TMessageRole;
+  const Attached: TArray<string>): TContentPayload;
+begin
+  Result := TContentPayload.Create.Role(Role).Parts(Attached);
+end;
+
+class function TContentPayload.New(
+  const ParamProc: TProcRef<TContentPayload>): TContentPayload;
+begin
+  Result := TContentPayload.Create;
+  if Assigned(ParamProc) then
+    begin
+      ParamProc(Result);
+    end;
+end;
+
+function TContentPayload.Parts(const Attached: TArray<string>): TContentPayload;
+var
+  Convert: TAttachedManager;
+begin
+  var JSONParts := TJSONArray.Create;
+  for var Item in Attached do
+    JSONParts.Add(Convert.ToJson(Item));
+  Result := TContentPayload(Add('parts', JSONParts));
+end;
+
+class function TContentPayload.Add(const Text: string;
+  const Attached: TArray<string>): TContentPayload;
+begin
+  Result := TContentPayload.Create.Parts(Text, Attached);
+end;
+
+function TContentPayload.Role(const Value: TMessageRole): TContentPayload;
+begin
+  Result := TContentPayload(Add('role', Value.ToString));
+end;
+
+function TContentPayload.Parts(const Value: string;
+  const Attached: TArray<string>): TContentPayload;
+var
+  Convert: TAttachedManager;
+begin
+  var JSONParts := TJSONArray.Create;
+  if not Value.IsEmpty then
+    JSONParts.Add(TTextData.Create.Text(Value).Detach);
+  for var Item in Attached do
+    JSONParts.Add(Convert.ToJson(Item));
+  Result := TContentPayload(Add('parts', JSONParts));
+end;
+
+{ TTextData }
+
+function TTextData.Text(const Value: string): TTextData;
+begin
+  Result := TTextData(Add('text', Value));
+end;
+
+{ TInlineData }
+
+function TInlineData.Data(const Value: string): TInlineData;
+begin
+  Result := TInlineData(Add('data', Value));
+end;
+
+function TInlineData.MimeType(const Value: string): TInlineData;
+begin
+  Result := TInlineData(Add('mime_type', Value));
+end;
+
+{ TFileData }
+
+function TFileData.FileUri(const Value: string): TFileData;
+begin
+  Result := TFileData(Add('file_uri', Value));
+end;
+
+function TFileData.MimeType(const Value: string): TFileData;
+begin
+  Result := TFileData(Add('mime_type', Value));
+end;
+
+{ TAttachedManager }
+
+function TAttachedManager.GetEncoded(const FilePath: string): string;
+begin
+  Result := EncodeBase64(FilePath);
+end;
+
+function TAttachedManager.GetMimeType(const FilePath: string): string;
+begin
+  Result := EmptyStr;
+  if not IsUri(FilePath) then
+    begin
+      Result := ResolveMimeType(FilePath);
+    end;
+end;
+
+function TAttachedManager.IsUri(const FilePath: string): Boolean;
+begin
+  Result := FilePath.ToLower.StartsWith('http');
+end;
+
+function TAttachedManager.ToJson(const FilePath: string): TJSONObject;
+begin
+  if IsUri(FilePath) then
+    begin
+      Result := TFileData.Create.FileUri(FilePath).Detach;
+      Result := TJSONObject.Create.AddPair('file_data', Result);
+    end
+  else
+    begin
+      Result := TInlineData.Create.MimeType(GetMimeType(FilePath)).Data(GetEncoded(FilePath)).Detach;
+      Result := TJSONObject.Create.AddPair('inline_data', Result);
+    end;
+end;
+
+{ TLangueTypeHelper }
+
+class function TLangueTypeHelper.Create(const Value: string): TLangueType;
+begin
+  var Index := IndexStr(AnsiUpperCase(Value), ['LANGUAGE_UNSPECIFIED', 'PYTHON']);
+  if Index = -1 then
+    raise Exception.CreateFmt('"Langue type" unknown : %s', [Value]);
+  Result := TLangueType(Index);
+end;
+
+function TLangueTypeHelper.ToString: string;
+begin
+  case Self of
+    LANGUAGE_UNSPECIFIED:
+      Exit('LANGUAGE_UNSPECIFIED');
+    PYTHON:
+      Exit('PYTHON');
+  end;
+end;
+
+{ TLangueTypeInterceptor }
+
+function TLangueTypeInterceptor.StringConverter(Data: TObject;
+  Field: string): string;
+begin
+  Result := RTTI.GetType(Data.ClassType).GetField(Field).GetValue(Data).AsType<TLangueType>.ToString;
+end;
+
+procedure TLangueTypeInterceptor.StringReverter(Data: TObject; Field,
+  Arg: string);
+begin
+  RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, TValue.From(TLangueType.Create(Arg)));
+end;
+
+{ TOutcomeTypeHelper }
+
+class function TOutcomeTypeHelper.Create(
+  const Value: string): TOutcomeType;
+begin
+  var Index := IndexStr(AnsiUpperCase(Value), [
+    'OUTCOME_UNSPECIFIED', 'OUTCOME_OK', 'OUTCOME_FAILED', 'OUTCOME_DEADLINE_EXCEEDED']);
+  if Index = -1 then
+    raise Exception.CreateFmt('"Code result type" unknown : %s', [Value]);
+  Result := TOutcomeType(Index);
+end;
+
+function TOutcomeTypeHelper.ToString: string;
+begin
+  case Self of
+    OUTCOME_UNSPECIFIED:
+      Exit('OUTCOME_UNSPECIFIED');
+    OUTCOME_OK:
+      Exit('OUTCOME_OK');
+    OUTCOME_FAILED:
+      Exit('OUTCOME_FAILED');
+    OUTCOME_DEADLINE_EXCEEDED:
+      Exit('OUTCOME_DEADLINE_EXCEEDED');
+  end;
+end;
+
+{ TOutcomeTypeInterceptor }
+
+function TOutcomeTypeInterceptor.StringConverter(Data: TObject;
+  Field: string): string;
+begin
+  Result := RTTI.GetType(Data.ClassType).GetField(Field).GetValue(Data).AsType<TOutcomeType>.ToString;
+end;
+
+procedure TOutcomeTypeInterceptor.StringReverter(Data: TObject; Field,
+  Arg: string);
+begin
+  RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, TValue.From(TOutcomeType.Create(Arg)));
 end;
 
 end.

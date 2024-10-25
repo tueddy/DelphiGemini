@@ -11,7 +11,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, Gemini.API, System.Net.URLClient,
-  Gemini.Chat, Gemini.Models, Gemini.Embeddings, Gemini.Files;
+  Gemini.Chat, Gemini.Models, Gemini.Embeddings, Gemini.Files, Gemini.Caching;
 
 type
   /// <summary>
@@ -42,6 +42,7 @@ type
     function GetModelsRoute: TModelsRoute;
     function GetEmbeddingsRoute: TEmbeddingsRoute;
     function GetFilesRoute: TFilesRoute;
+    function GetCachingRoute: TCachingRoute;
 
     /// <summary>
     /// the main API object used for making requests.
@@ -96,6 +97,7 @@ type
     property Embeddings: TEmbeddingsRoute read GetEmbeddingsRoute;
     // TODO
     property Files: TFilesRoute read GetFilesRoute;
+    property Caching: TCachingRoute read GetCachingRoute;
   end;
 
   /// <summary>
@@ -148,6 +150,7 @@ type
     FModelsRoute: TModelsRoute;
     FEmbeddingsRoute: TEmbeddingsRoute;
     FFilesRoute: TFilesRoute;
+    FCachingRoute: TCachingRoute;
 
     function GetAPI: TGeminiAPI;
     function GetToken: string;
@@ -159,6 +162,7 @@ type
     function GetModelsRoute: TModelsRoute;
     function GetEmbeddingsRoute: TEmbeddingsRoute;
     function GetFilesRoute: TFilesRoute;
+    function GetCachingRoute: TCachingRoute;
 
   public
     /// <summary>
@@ -218,7 +222,7 @@ type
     property Embeddings: TEmbeddingsRoute read GetEmbeddingsRoute;
     // TODO
     property Files: TFilesRoute read GetFilesRoute;
-
+    property Caching: TCachingRoute read GetCachingRoute;
   public
     /// <summary>
     /// Initializes a new instance of the <see cref="TGemini"/> class with optional header configuration.
@@ -278,6 +282,7 @@ begin
   FModelsRoute.Free;
   FEmbeddingsRoute.Free;
   FFilesRoute.Free;
+  FCachingRoute.Free;
   FAPI.Free;
   inherited;
 end;
@@ -290,6 +295,13 @@ end;
 function TGemini.GetBaseUrl: string;
 begin
   Result := FAPI.BaseURL;
+end;
+
+function TGemini.GetCachingRoute: TCachingRoute;
+begin
+  if not Assigned(FCachingRoute) then
+    FCachingRoute := TCachingRoute.CreateRoute(API);
+  Result := FCachingRoute;
 end;
 
 function TGemini.GetChatRoute: TChatRoute;
