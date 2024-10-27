@@ -10,8 +10,7 @@ unit Gemini.Models;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Threading, REST.Json.Types,
-  Gemini.API.Params, Gemini.API, Gemini.Async.Support;
+  System.SysUtils, System.Classes, Gemini.API, Gemini.API.Params, Gemini.Async.Support;
 
 type
   /// <summary>

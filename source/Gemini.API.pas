@@ -119,9 +119,11 @@ type
     function GetRequestURL(const Path: string): string; overload;
     function GetRequestURL(const Path, Params: string): string; overload;
     function GetRequestFilesURL(const Path: string): string;
+    function GetPatchURL(const Path, Params: string): string;
     function Get(const Path, Params: string; Response: TStringStream): Integer; overload;
     function Delete(const Path: string; Response: TStringStream): Integer; overload;
     function Patch(const Path: string; Body: TJSONObject; Response: TStringStream; OnReceiveData: TReceiveDataCallback = nil): Integer; overload;
+    function Patch(const Path, UriParams: string; Body: TJSONObject; Response: TStringStream; OnReceiveData: TReceiveDataCallback = nil): Integer; overload;
     function Post(const Path: string; Response: TStringStream): Integer; overload;
     function Post(const Path: string; Body: TJSONObject; Response: TStringStream; OnReceiveData: TReceiveDataCallback = nil): Integer; overload;
     function Post(const Path: string; Body: TMultipartFormData; Response: TStringStream): Integer; overload;
@@ -136,6 +138,11 @@ type
     procedure GetFile(const Path: string; Response: TStream); overload;
     function Delete<TResult: class, constructor>(const Path: string): TResult; overload;
     function Patch<TResult: class, constructor; TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
+    function Patch<TResult: class, constructor; TParams: TJSONParam>(const Path, UriParams: string; ParamProc: TProc<TParams>): TResult; overload;
+    function Patch<TResult: class, constructor>(const Path, Params: string; ParamJSON: TJSONObject): TResult; overload;
+
+    function Patch<TResult: class, constructor>(const Path: string; ParamJSON: TJSONObject): TResult; overload;
+
     function Post<TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>; Response: TStringStream; Event: TReceiveDataCallback): Boolean; overload;
     function Post<TResult: class, constructor; TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
     function Post<TResult: class, constructor>(const Path: string; ParamJSON: TJSONObject): TResult; overload;
@@ -668,6 +675,11 @@ begin
   Result := FCustomHeaders + [TNetHeader.Create('Content-Type', 'application/json')];
 end;
 
+function TGeminiAPI.GetPatchURL(const Path, Params: string): string;
+begin
+  Result := Format('%s/v1beta/%s?key=%s&&updateMask=%s', [FBaseURL, Path, Token, Params]);
+end;
+
 function TGeminiAPI.GetRequestURL(const Path, Params: string): string;
 begin
   Result := Format('%s/v1beta/%s?key=%s%s', [FBaseURL, Path, Token, Params]);
@@ -744,6 +756,76 @@ begin
   finally
     FHTTPClient.OnReceiveData := nil;
     Stream.Free;
+  end;
+end;
+
+function TGeminiAPI.Patch(const Path, UriParams: string; Body: TJSONObject;
+  Response: TStringStream; OnReceiveData: TReceiveDataCallback): Integer;
+var
+  Headers: TNetHeaders;
+  Stream: TStringStream;
+begin
+  CheckAPI;
+  Headers := GetHeaders;
+  Stream := TStringStream.Create;
+  FHTTPClient.ReceiveDataCallBack := OnReceiveData;
+  try
+    Stream.WriteString(Body.ToJSON);
+    Stream.Position := 0;
+    Result := FHTTPClient.Patch(GetPatchURL(Path, UriParams), Stream, Response, Headers).StatusCode;
+  finally
+    FHTTPClient.OnReceiveData := nil;
+    Stream.Free;
+  end;
+end;
+
+function TGeminiAPI.Patch<TResult, TParams>(const Path, UriParams: string;
+  ParamProc: TProc<TParams>): TResult;
+var
+  Response: TStringStream;
+  Params: TParams;
+  Code: Integer;
+begin
+  Response := TStringStream.Create('', TEncoding.UTF8);
+  Params := TParams.Create;
+  try
+    if Assigned(ParamProc) then
+      ParamProc(Params);
+    Code := Patch(Path, UriParams, Params.JSON, Response);
+    Result := ParseResponse<TResult>(Code, ToStringValueFor(Response.DataString));
+  finally
+    Params.Free;
+    Response.Free;
+  end;
+end;
+
+function TGeminiAPI.Patch<TResult>(const Path: string;
+  ParamJSON: TJSONObject): TResult;
+var
+  Response: TStringStream;
+  Code: Integer;
+begin
+  Response := TStringStream.Create('', TEncoding.UTF8);
+  try
+    Code := Patch(Path, ParamJSON, Response);
+    Result := ParseResponse<TResult>(Code, ToStringValueFor(Response.DataString));
+  finally
+    Response.Free;
+  end;
+end;
+
+function TGeminiAPI.Patch<TResult>(const Path, Params: string;
+  ParamJSON: TJSONObject): TResult;
+var
+  Response: TStringStream;
+  Code: Integer;
+begin
+  Response := TStringStream.Create('', TEncoding.UTF8);
+  try
+    Code := Patch(Path, Params, ParamJSON, Response);
+    Result := ParseResponse<TResult>(Code, ToStringValueFor(Response.DataString));
+  finally
+    Response.Free;
   end;
 end;
 
@@ -929,9 +1011,7 @@ end;
 function TGeminiAPIRequestParams.ParamsBuilder(const PageSize: Integer;
   const PageToken, Filter: string): string;
 begin
-  Result := Format('&&pageSize=%d', [PageSize]);
-  if not PageToken.IsEmpty then
-    Result := Format('%s&&pageToken=%s', [Result, PageToken]);
+  Result := ParamsBuilder(PageSize, PageToken);
   if not Filter.IsEmpty then
     Result := Format('%s&&filter=%s', [Result, Filter]);
 end;

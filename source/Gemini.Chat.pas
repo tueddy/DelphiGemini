@@ -17,8 +17,7 @@ uses
 type
   TMessageRole = (
     user,
-    model,
-    &function
+    model
   );
 
   TMessageRoleHelper = record helper for TMessageRole
@@ -739,7 +738,7 @@ end;
 
 class function TMessageRoleHelper.Create(const Value: string): TMessageRole;
 begin
-  var index := IndexStr(AnsiLowerCase(Value), ['user', 'model', 'function']);
+  var index := IndexStr(AnsiLowerCase(Value), ['user', 'model']);
   if index = -1 then
     raise Exception.Create('String role value not correct');
   Result := TMessageRole(index);
@@ -752,8 +751,6 @@ begin
       Exit('user');
     model:
       Exit('model');
-    &function:
-      Exit('function');
   end;
 end;
 

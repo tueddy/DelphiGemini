@@ -10,11 +10,8 @@ unit Gemini.FineTunings;
 interface
 
 uses
-  System.SysUtils, System.Classes, REST.JsonReflect, System.JSON, System.Threading,
-  REST.Json.Types, Gemini.API.Params, Gemini.API, Gemini.Safety, Gemini.Async.Support,
-  Gemini.Chat,
-
-  Vcl.Dialogs;
+  System.SysUtils, System.Classes, System.JSON, REST.JsonReflect, REST.Json.Types,
+  Gemini.API.Params, Gemini.API, Gemini.Async.Support, Gemini.Chat;
 
 type
   TModelState = (
@@ -95,7 +92,7 @@ type
     property TunedModel: string read FTunedModel write FTunedModel;
   end;
 
-  TTunedModelTraining = class
+  TModelTraining = class
   private
     FName: string;
     FMetadata: TMetadata;
@@ -187,7 +184,7 @@ type
     destructor Destroy; override;
   end;
 
-  TTuneModels = class
+  TTunedModels = class
   private
     FTunedModels: TArray<TTunedModel>;
     FNextPageToken: string;
@@ -197,22 +194,42 @@ type
     destructor Destroy; override;
   end;
 
-  TTuneModelDelete = class
+  TModelDelete = class
   end;
 
+  TAsynModelTraining = TAsynCallBack<TModelTraining>;
+
+  TAsynTunedModel = TAsynCallBack<TTunedModel>;
+
+  TAsynTunedModels = TAsynCallBack<TTunedModels>;
+
+  TAsynModelDelete = TAsynCallBack<TModelDelete>;
+
   TFineTuneRoute = class(TGeminiAPIRoute)
-    function Create(const Value: TJSONObject): TTunedModelTraining;
-    function List(const PageSize: Integer;
-      const PageToken, Filter: string): TTuneModels;
-    function Retrieve(const TuneModelName: string): TTunedModel;
-//    function Update(const Value: TJSONObject; const UpdateMask: string): TTunedModel;
-    function Delete(const TuneModelName: string): TTuneModelDelete;
+    procedure ASynCreate(const Value: TJSONObject; CallBacks: TFunc<TAsynModelTraining>); overload;
+    procedure ASynCreate(ParamProc: TProc<TTunedModelParams>; CallBacks: TFunc<TAsynModelTraining>); overload;
+    procedure ASynList(const PageSize: Integer; const PageToken, Filter: string;
+      CallBacks: TFunc<TAsynTunedModels>);
+    procedure ASynRetrieve(const TunedModelName: string; CallBacks: TFunc<TAsynTunedModel>);
+    procedure ASynUpdate(const TunedModelName: string; const UpdateMask: string; const Value: TJSONObject;
+      CallBacks: TFunc<TAsynTunedModel>); overload;
+    procedure ASynUpdate(const TunedModelName: string; const UpdateMask: string; ParamProc: TProc<TTunedModelParams>;
+      CallBacks: TFunc<TAsynTunedModel>); overload;
+    procedure ASynDelete(const TunedModelName: string; CallBacks: TFunc<TAsynModelDelete>);
+
+    function Create(const Value: TJSONObject): TModelTraining; overload;
+    function Create(ParamProc: TProc<TTunedModelParams>): TModelTraining; overload;
+    function List(const PageSize: Integer; const PageToken, Filter: string): TTunedModels;
+    function Retrieve(const TunedModelName: string): TTunedModel;
+    function Update(const TunedModelName: string; const UpdateMask: string; const Value: TJSONObject): TTunedModel; overload;
+    function Update(const TunedModelName: string; const UpdateMask: string; ParamProc: TProc<TTunedModelParams>): TTunedModel; overload;
+    function Delete(const TunedModelName: string): TModelDelete;
   end;
 
 implementation
 
 uses
-  System.StrUtils, System.IOUtils, System.Rtti, Rest.Json, Gemini.Async.Params;
+  System.StrUtils, System.IOUtils, System.Rtti, Rest.Json;
 
 type
   TTuningTaskHelper = record
@@ -419,37 +436,189 @@ end;
 { TFineTuneRoute }
 
 function TFineTuneRoute.Create(
-  const Value: TJSONObject): TTunedModelTraining;
+  const Value: TJSONObject): TModelTraining;
 begin
-  Result := API.Post<TTunedModelTraining>('tunedModels', Value);
-  Value.Free;
+  try
+    Result := API.Post<TModelTraining>('tunedModels', Value);
+  finally
+    Value.Free;
+  end;
 end;
 
-function TFineTuneRoute.Delete(const TuneModelName: string): TTuneModelDelete;
+procedure TFineTuneRoute.ASynCreate(const Value: TJSONObject;
+  CallBacks: TFunc<TAsynModelTraining>);
 begin
-  Result := API.Delete<TTuneModelDelete>(TuneModelName);
+  with TAsynCallBackExec<TAsynModelTraining, TModelTraining>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TModelTraining
+      begin
+        Result := Self.Create(Value);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TFineTuneRoute.ASynCreate(ParamProc: TProc<TTunedModelParams>;
+  CallBacks: TFunc<TAsynModelTraining>);
+begin
+  with TAsynCallBackExec<TAsynModelTraining, TModelTraining>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TModelTraining
+      begin
+        Result := Self.Create(ParamProc);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TFineTuneRoute.ASynDelete(const TunedModelName: string;
+  CallBacks: TFunc<TAsynModelDelete>);
+begin
+  with TAsynCallBackExec<TAsynModelDelete, TModelDelete>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TModelDelete
+      begin
+        Result := Self.Delete(TunedModelName);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TFineTuneRoute.ASynList(const PageSize: Integer; const PageToken,
+  Filter: string; CallBacks: TFunc<TAsynTunedModels>);
+begin
+  with TAsynCallBackExec<TAsynTunedModels, TTunedModels>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TTunedModels
+      begin
+        Result := Self.List(PageSize, PageToken, Filter);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TFineTuneRoute.ASynRetrieve(const TunedModelName: string;
+  CallBacks: TFunc<TAsynTunedModel>);
+begin
+  with TAsynCallBackExec<TAsynTunedModel, TTunedModel>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TTunedModel
+      begin
+        Result := Self.Retrieve(TunedModelName);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TFineTuneRoute.ASynUpdate(const TunedModelName, UpdateMask: string;
+  ParamProc: TProc<TTunedModelParams>; CallBacks: TFunc<TAsynTunedModel>);
+begin
+  with TAsynCallBackExec<TAsynTunedModel, TTunedModel>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TTunedModel
+      begin
+        Result := Self.Update(TunedModelName, UpdateMask, ParamProc);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TFineTuneRoute.ASynUpdate(const TunedModelName, UpdateMask: string;
+  const Value: TJSONObject; CallBacks: TFunc<TAsynTunedModel>);
+begin
+  with TAsynCallBackExec<TAsynTunedModel, TTunedModel>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TTunedModel
+      begin
+        Result := Self.Update(TunedModelName, UpdateMask, Value);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+function TFineTuneRoute.Create(
+  ParamProc: TProc<TTunedModelParams>): TModelTraining;
+begin
+  Result := API.Post<TModelTraining, TTunedModelParams>('tunedModels', ParamProc);
+end;
+
+function TFineTuneRoute.Delete(const TunedModelName: string): TModelDelete;
+begin
+  Result := API.Delete<TModelDelete>(TunedModelName);
 end;
 
 function TFineTuneRoute.List(const PageSize: Integer;
-  const PageToken, Filter: string): TTuneModels;
+  const PageToken, Filter: string): TTunedModels;
 begin
-  Result := API.Get<TTuneModels>('tunedModels', ParamsBuilder(PageSize, PageToken, Filter));
+  Result := API.Get<TTunedModels>('tunedModels', ParamsBuilder(PageSize, PageToken, Filter));
 end;
 
-function TFineTuneRoute.Retrieve(const TuneModelName: string): TTunedModel;
+function TFineTuneRoute.Retrieve(const TunedModelName: string): TTunedModel;
 begin
-  Result := API.Get<TTunedModel>(TuneModelName);
+  Result := API.Get<TTunedModel>(TunedModelName);
 end;
 
-//function TFineTuneRoute.Update(const Value: TJSONObject;
-//  const UpdateMask: string): TTunedModel;
-//begin
-//
-//end;
+function TFineTuneRoute.Update(const TunedModelName, UpdateMask: string;
+  ParamProc: TProc<TTunedModelParams>): TTunedModel;
+begin
+  Result := API.Patch<TTunedModel, TTunedModelParams>(TunedModelName, UpdateMask, ParamProc);
+end;
 
-{ TTunedModelTraining }
+function TFineTuneRoute.Update(const TunedModelName: string;
+  const UpdateMask: string; const Value: TJSONObject): TTunedModel;
+begin
+  try
+    Result := API.Patch<TTunedModel>(TunedModelName, UpdateMask, Value);
+  finally
+    Value.Free;
+  end;
+end;
 
-destructor TTunedModelTraining.Destroy;
+{ TModelTraining }
+
+destructor TModelTraining.Destroy;
 begin
   if Assigned(FMetadata) then
     FMetadata.Free;
@@ -478,9 +647,9 @@ begin
   inherited;
 end;
 
-{ TTuneModels }
+{ TTunedModels }
 
-destructor TTuneModels.Destroy;
+destructor TTunedModels.Destroy;
 begin
   for var Item in FTunedModels do
     Item.Free;

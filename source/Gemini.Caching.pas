@@ -10,8 +10,7 @@ unit Gemini.Caching;
 interface
 
 uses
-  System.SysUtils, System.Classes, REST.JsonReflect, System.JSON, System.Threading,
-  REST.Json.Types, Gemini.API.Params, Gemini.API, Gemini.Safety, Gemini.Schema,
+  System.SysUtils, System.Classes, System.JSON, Gemini.API.Params, Gemini.API,
   Gemini.Tools, Gemini.Async.Support, Gemini.Chat;
 
 type
@@ -96,14 +95,18 @@ type
       CallBacks: TFunc<TAsynCacheContents>);
     procedure ASynRetrieve(const CacheName: string; CallBacks: TFunc<TAsynCache>);
     procedure ASynUpdate(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>;
-      CallBacks: TFunc<TAsynCache>);
+      CallBacks: TFunc<TAsynCache>); overload;
+    procedure ASynUpdate(const CacheName: string; const ttl: string;
+      CallBacks: TFunc<TAsynCache>); overload;
     procedure ASynDelete(const CacheName: string; CallBacks: TFunc<TAsynCacheDelete>);
 
     function Create(ParamProc: TProc<TCacheParams>): TCache; overload;
     function Create(const Value: TJSONObject): TCache; overload;
     function List(const PageSize: Integer; const PageToken: string): TCacheContents; overload;
     function Retrieve(const CacheName: string): TCache;
-    function Update(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>): TCache;
+    function Update(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>): TCache; overload;
+    function Update(const CacheName: string; Value: TJSONObject): TCache; overload;
+    function Update(const CacheName: string; const ttl: string): TCache; overload;
     function Delete(const CacheName: string): TCacheDelete;
   end;
 
@@ -305,6 +308,25 @@ begin
   end;
 end;
 
+procedure TCachingRoute.ASynUpdate(const CacheName, ttl: string;
+  CallBacks: TFunc<TAsynCache>);
+begin
+  with TAsynCallBackExec<TAsynCache, TCache>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCache
+      begin
+        Result := Self.Update(CacheName, ttl);
+      end);
+  finally
+    Free;
+  end;
+end;
+
 procedure TCachingRoute.ASynUpdate(const CacheName: string;
   ParamProc: TProc<TCacheUpdateParams>; CallBacks: TFunc<TAsynCache>);
 begin
@@ -326,7 +348,11 @@ end;
 
 function TCachingRoute.Create(const Value: TJSONObject): TCache;
 begin
-  Result := API.Post<TCache>('cachedContents', Value);
+  try
+    Result := API.Post<TCache>('cachedContents', Value);
+  finally
+    Value.Free;
+  end;
 end;
 
 function TCachingRoute.Create(ParamProc: TProc<TCacheParams>): TCache;
@@ -348,6 +374,22 @@ end;
 function TCachingRoute.Retrieve(const CacheName: string): TCache;
 begin
   Result := API.Get<TCache>(CacheName);
+end;
+
+function TCachingRoute.Update(const CacheName, ttl: string): TCache;
+begin
+  var Cache := TCacheUpdateParams.Create.ttl(ttl);
+  try
+    Result := Update(CacheName, Cache.JSON)
+  finally
+    Cache.Free;
+  end;
+end;
+
+function TCachingRoute.Update(const CacheName: string;
+  Value: TJSONObject): TCache;
+begin
+  Result := API.Patch<TCache>(CacheName, Value);
 end;
 
 function TCachingRoute.Update(const CacheName: string;
