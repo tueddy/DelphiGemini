@@ -21,11 +21,19 @@ type
     function Tools(const Value: TArray<TToolPluginParams>): TCacheParams;
     function ToolConfig(const Value: TToolMode; AllowedFunctionNames: TArray<string> = []): TCacheParams;
     function ExpireTime(const Value: string): TCacheParams;
-    function Ttl(const Value: string): TCacheParams;
+    function ttl(const Value: string): TCacheParams;
     function Name(const Value: string): TCacheParams;
     function DisplayName(const Value: string): TCacheParams;
     function Model(const Value: string): TCacheParams;
     function SystemInstruction(const Value: string): TCacheParams;
+    class function New(ParamProc: TProcRef<TCacheParams>): TCacheParams; static;
+  end;
+
+  TCacheUpdateParams = class(TJSONParam)
+  public
+    function ExpireTime(const Value: string): TCacheParams;
+    function ttl(const Value: string): TCacheParams;
+    function Name(const Value: string): TCacheParams;
   end;
 
   TContents = TChatContent;
@@ -72,10 +80,31 @@ type
     destructor Destroy; override;
   end;
 
+  TCacheDelete = class
+  end;
+
+  TAsynCache = TAsynCallBack<TCache>;
+
+  TAsynCacheContents = TAsynCallBack<TCacheContents>;
+
+  TAsynCacheDelete = TAsynCallBack<TCacheDelete>;
+
   TCachingRoute = class(TGeminiAPIRoute)
-    function Create(ParamProc: TProc<TCacheParams>): TCache;
+    procedure ASynCreate(ParamProc: TProc<TCacheParams>; CallBacks: TFunc<TAsynCache>); overload;
+    procedure ASynCreate(const Value: TJSONObject; CallBacks: TFunc<TAsynCache>); overload;
+    procedure ASynList(const PageSize: Integer; const PageToken: string;
+      CallBacks: TFunc<TAsynCacheContents>);
+    procedure ASynRetrieve(const CacheName: string; CallBacks: TFunc<TAsynCache>);
+    procedure ASynUpdate(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>;
+      CallBacks: TFunc<TAsynCache>);
+    procedure ASynDelete(const CacheName: string; CallBacks: TFunc<TAsynCacheDelete>);
+
+    function Create(ParamProc: TProc<TCacheParams>): TCache; overload;
+    function Create(const Value: TJSONObject): TCache; overload;
     function List(const PageSize: Integer; const PageToken: string): TCacheContents; overload;
     function Retrieve(const CacheName: string): TCache;
+    function Update(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>): TCache;
+    function Delete(const CacheName: string): TCacheDelete;
   end;
 
 implementation
@@ -109,6 +138,13 @@ end;
 function TCacheParams.Name(const Value: string): TCacheParams;
 begin
   Result := TCacheParams(Add('name', Value));
+end;
+
+class function TCacheParams.New(ParamProc: TProcRef<TCacheParams>): TCacheParams;
+begin
+  Result := TCacheParams.Create;
+  if Assigned(ParamProc) then
+    ParamProc(Result);
 end;
 
 function TCacheParams.SystemInstruction(const Value: string): TCacheParams;
@@ -150,7 +186,7 @@ begin
   Result := TCacheParams(Add('tools', JSONTool));
 end;
 
-function TCacheParams.Ttl(const Value: string): TCacheParams;
+function TCacheParams.ttl(const Value: string): TCacheParams;
 begin
   Result := TCacheParams(Add('ttl', Value));
 end;
@@ -174,9 +210,133 @@ end;
 
 { TCachingRoute }
 
+procedure TCachingRoute.ASynCreate(ParamProc: TProc<TCacheParams>;
+  CallBacks: TFunc<TAsynCache>);
+begin
+  with TAsynCallBackExec<TAsynCache, TCache>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCache
+      begin
+        Result := Self.Create(ParamProc);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TCachingRoute.ASynCreate(const Value: TJSONObject;
+  CallBacks: TFunc<TAsynCache>);
+begin
+  with TAsynCallBackExec<TAsynCache, TCache>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCache
+      begin
+        Result := Self.Create(Value);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TCachingRoute.ASynDelete(const CacheName: string;
+  CallBacks: TFunc<TAsynCacheDelete>);
+begin
+  with TAsynCallBackExec<TAsynCacheDelete, TCacheDelete>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCacheDelete
+      begin
+        Result := Self.Delete(CacheName);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TCachingRoute.ASynList(const PageSize: Integer;
+  const PageToken: string; CallBacks: TFunc<TAsynCacheContents>);
+begin
+  with TAsynCallBackExec<TAsynCacheContents, TCacheContents>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCacheContents
+      begin
+        Result := Self.List(PageSize, PageToken);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TCachingRoute.ASynRetrieve(const CacheName: string;
+  CallBacks: TFunc<TAsynCache>);
+begin
+  with TAsynCallBackExec<TAsynCache, TCache>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCache
+      begin
+        Result := Self.Retrieve(CacheName);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+procedure TCachingRoute.ASynUpdate(const CacheName: string;
+  ParamProc: TProc<TCacheUpdateParams>; CallBacks: TFunc<TAsynCache>);
+begin
+  with TAsynCallBackExec<TAsynCache, TCache>.Create(CallBacks) do
+  try
+    Sender := Use.Param.Sender;
+    OnStart := Use.Param.OnStart;
+    OnSuccess := Use.Param.OnSuccess;
+    OnError := Use.Param.OnError;
+    Run(
+      function: TCache
+      begin
+        Result := Self.Update(CacheName, ParamProc);
+      end);
+  finally
+    Free;
+  end;
+end;
+
+function TCachingRoute.Create(const Value: TJSONObject): TCache;
+begin
+  Result := API.Post<TCache>('cachedContents', Value);
+end;
+
 function TCachingRoute.Create(ParamProc: TProc<TCacheParams>): TCache;
 begin
   Result := API.Post<TCache, TCacheParams>('cachedContents', ParamProc);
+end;
+
+function TCachingRoute.Delete(const CacheName: string): TCacheDelete;
+begin
+  Result := API.Delete<TCacheDelete>(CacheName);
 end;
 
 function TCachingRoute.List(const PageSize: Integer;
@@ -190,6 +350,12 @@ begin
   Result := API.Get<TCache>(CacheName);
 end;
 
+function TCachingRoute.Update(const CacheName: string;
+  ParamProc: TProc<TCacheUpdateParams>): TCache;
+begin
+  Result := API.Patch<TCache, TCacheUpdateParams>(CacheName, ParamProc);
+end;
+
 { TCacheContents }
 
 destructor TCacheContents.Destroy;
@@ -197,6 +363,23 @@ begin
   for var Item in FCachedContents do
     Item.Free;
   inherited;
+end;
+
+{ TCacheUpdateParams }
+
+function TCacheUpdateParams.ExpireTime(const Value: string): TCacheParams;
+begin
+  Result := TCacheParams(Add('expireTime', Value));
+end;
+
+function TCacheUpdateParams.Name(const Value: string): TCacheParams;
+begin
+  Result := TCacheParams(Add('name', Value));
+end;
+
+function TCacheUpdateParams.ttl(const Value: string): TCacheParams;
+begin
+  Result := TCacheParams(Add('ttl', Value));
 end;
 
 end.

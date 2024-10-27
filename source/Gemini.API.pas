@@ -121,6 +121,7 @@ type
     function GetRequestFilesURL(const Path: string): string;
     function Get(const Path, Params: string; Response: TStringStream): Integer; overload;
     function Delete(const Path: string; Response: TStringStream): Integer; overload;
+    function Patch(const Path: string; Body: TJSONObject; Response: TStringStream; OnReceiveData: TReceiveDataCallback = nil): Integer; overload;
     function Post(const Path: string; Response: TStringStream): Integer; overload;
     function Post(const Path: string; Body: TJSONObject; Response: TStringStream; OnReceiveData: TReceiveDataCallback = nil): Integer; overload;
     function Post(const Path: string; Body: TMultipartFormData; Response: TStringStream): Integer; overload;
@@ -134,6 +135,7 @@ type
     function Get(const Path: string; const Params: string = ''): string; overload;
     procedure GetFile(const Path: string; Response: TStream); overload;
     function Delete<TResult: class, constructor>(const Path: string): TResult; overload;
+    function Patch<TResult: class, constructor; TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
     function Post<TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>; Response: TStringStream; Event: TReceiveDataCallback): Boolean; overload;
     function Post<TResult: class, constructor; TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
     function Post<TResult: class, constructor>(const Path: string; ParamJSON: TJSONObject): TResult; overload;
@@ -183,28 +185,6 @@ type
     /// </remarks>
     class var GeminiLock: TCriticalSection;
   protected
-    /// <summary>
-    /// Validates and formats the provided model name to conform to the required
-    /// standards for the Gemini API.
-    /// </summary>
-    /// <param name="Value">
-    /// The input string representing the model name. If the model name does not
-    /// start with 'models/', this prefix will be added.
-    /// </param>
-    /// <param name="LowerCase">
-    /// Optional boolean flag (default: <c>False</c>). If set to <c>True</c>, the
-    /// input string will be converted to lowercase before processing.
-    /// </param>
-    /// <returns>
-    /// The adjusted model name string, ensuring it starts with 'models/' and
-    /// is optionally in lowercase.
-    /// </returns>
-    /// <remarks>
-    /// This method ensures that model names are correctly formatted for use within
-    /// the Gemini API, facilitating consistent model handling and preventing
-    /// formatting-related errors.
-    /// </remarks>
-    function CheckModel(const Value: string; LowerCase: Boolean = False): string;
     /// <summary>
     /// Sets the active model name after validating its format.
     /// </summary>
@@ -272,7 +252,8 @@ type
     /// The <c>ParamsBuilder</c> method constructs the query string for paginated model requests.
     /// The page size is mandatory, and the page token is optional but will be included in the query if provided.
     /// </remarks>
-    function ParamsBuilder(const PageSize: Integer; const PageToken: string = ''): string;
+    function ParamsBuilder(const PageSize: Integer; const PageToken: string = ''): string; overload;
+    function ParamsBuilder(const PageSize: Integer; const PageToken, Filter: string): string; overload;
   end;
 
   TGeminiAPIFileName = class(TGeminiAPIRequestParams)
@@ -746,6 +727,46 @@ begin
     raise GeminiExceptionInvalidResponse.Create(Code, 'Empty or invalid response');
 end;
 
+function TGeminiAPI.Patch(const Path: string; Body: TJSONObject;
+  Response: TStringStream; OnReceiveData: TReceiveDataCallback): Integer;
+var
+  Headers: TNetHeaders;
+  Stream: TStringStream;
+begin
+  CheckAPI;
+  Headers := GetHeaders;
+  Stream := TStringStream.Create;
+  FHTTPClient.ReceiveDataCallBack := OnReceiveData;
+  try
+    Stream.WriteString(Body.ToJSON);
+    Stream.Position := 0;
+    Result := FHTTPClient.Patch(GetRequestURL(Path), Stream, Response, Headers).StatusCode;
+  finally
+    FHTTPClient.OnReceiveData := nil;
+    Stream.Free;
+  end;
+end;
+
+function TGeminiAPI.Patch<TResult, TParams>(const Path: string;
+  ParamProc: TProc<TParams>): TResult;
+var
+  Response: TStringStream;
+  Params: TParams;
+  Code: Integer;
+begin
+  Response := TStringStream.Create('', TEncoding.UTF8);
+  Params := TParams.Create;
+  try
+    if Assigned(ParamProc) then
+      ParamProc(Params);
+    Code := Patch(Path, Params.JSON, Response);
+    Result := ParseResponse<TResult>(Code, ToStringValueFor(Response.DataString));
+  finally
+    Params.Free;
+    Response.Free;
+  end;
+end;
+
 procedure TGeminiAPI.SetBaseUrl(const Value: string);
 begin
   FBaseUrl := Value;
@@ -869,15 +890,6 @@ end;
 
 { TGeminiAPIModel }
 
-function TGeminiAPIModel.CheckModel(const Value: string; LowerCase: Boolean): string;
-begin
-  if LowerCase then
-    Result := Value.ToLower else
-    Result := Value;
-  if not AnsiLowerCase(Result).StartsWith('models/') then
-    Result := 'models/' + Result;
-end;
-
 class constructor TGeminiAPIModel.Create;
 begin
   GeminiLock := TCriticalSection.Create;
@@ -898,10 +910,10 @@ begin
   if ModelName.Trim.IsEmpty then
     raise Exception.Create('Error: Unknown model name provided.');
 
-  Result := CheckModel(ModelName.Trim, True);
+  Result := ModelName.Trim;
   CurrentModel := Result;
   if not Supp.Trim.IsEmpty then
-      Result := Result + Supp;
+    Result := Result + Supp;
 end;
 
 { TGeminiAPIRequestParams }
@@ -912,6 +924,16 @@ begin
   Result := Format('&&pageSize=%d', [PageSize]);
   if not PageToken.IsEmpty then
     Result := Format('%s&&pageToken=%s', [Result, PageToken]);
+end;
+
+function TGeminiAPIRequestParams.ParamsBuilder(const PageSize: Integer;
+  const PageToken, Filter: string): string;
+begin
+  Result := Format('&&pageSize=%d', [PageSize]);
+  if not PageToken.IsEmpty then
+    Result := Format('%s&&pageToken=%s', [Result, PageToken]);
+  if not Filter.IsEmpty then
+    Result := Format('%s&&filter=%s', [Result, Filter]);
 end;
 
 { TGeminiAPIFileName }

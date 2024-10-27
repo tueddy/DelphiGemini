@@ -410,6 +410,8 @@ type
   TAsynChatStream = TAsynStreamCallBack<TChat>;
 
   TChatRoute = class(TGeminiAPIRoute)
+  private
+    procedure ResetStream;
   public
     procedure AsynCreate(const ModelName: string; ParamProc: TProc<TChatParams>;
       CallBacks: TFunc<TAsynChat>);
@@ -581,11 +583,13 @@ var
   Response: TStringStream;
   RetPos: Integer;
   Prev: Integer;
+  Starting: Boolean;
 begin
   Response := TStringStream.Create('', TEncoding.UTF8);
   try
     RetPos := 0;
     Prev := 0;
+    Starting := True;
     Result := API.Post<TChatParams>(SetModel(ModelName, ':streamGenerateContent'), ParamProc, Response,
       procedure(const Sender: TObject; AContentLength: Int64; AReadCount: Int64; var AAbort: Boolean)
       var
@@ -611,7 +615,8 @@ begin
         Data := Line.Trim([' ', #13, #10]);
         Data := Copy(Data, 2, Data.Length-1);
 
-        IsDone := Data.IsEmpty;
+        IsDone := not Starting and Data.IsEmpty;
+        Starting := False;
 
         if not IsDone then
           try
@@ -630,15 +635,28 @@ begin
 
       end);
   finally
+    ResetStream;
     Response.Free;
   end;
+end;
+
+procedure TChatRoute.ResetStream;
+begin
+  AsynCreate('gemini-1.5-pro',
+    procedure (Params : TChatParams)
+    begin
+      Params.Contents([TContentPayload.Add(user, 'nill')]);
+    end,
+    function : TAsynChat
+    begin
+    end);
 end;
 
 { TChatParams }
 
 function TChatParams.CachedContent(const Value: string): TChatParams;
 begin
-  Result := TChatParams(Add('cachedContent', Format('cachedContents/%s', [Value])));
+  Result := TChatParams(Add('cachedContent', Value));
 end;
 
 function TChatParams.Contents(

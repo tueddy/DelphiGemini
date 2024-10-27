@@ -11,7 +11,8 @@ interface
 
 uses
   System.SysUtils, System.Classes, Gemini.API, System.Net.URLClient,
-  Gemini.Chat, Gemini.Models, Gemini.Embeddings, Gemini.Files, Gemini.Caching;
+  Gemini.Chat, Gemini.Models, Gemini.Embeddings, Gemini.Files, Gemini.Caching,
+  Gemini.FineTunings;
 
 type
   /// <summary>
@@ -43,6 +44,7 @@ type
     function GetEmbeddingsRoute: TEmbeddingsRoute;
     function GetFilesRoute: TFilesRoute;
     function GetCachingRoute: TCachingRoute;
+    function GetFineTuneRoute : TFineTuneRoute;
 
     /// <summary>
     /// the main API object used for making requests.
@@ -98,6 +100,7 @@ type
     // TODO
     property Files: TFilesRoute read GetFilesRoute;
     property Caching: TCachingRoute read GetCachingRoute;
+    property FineTune: TFineTuneRoute read GetFineTuneRoute;
   end;
 
   /// <summary>
@@ -151,6 +154,7 @@ type
     FEmbeddingsRoute: TEmbeddingsRoute;
     FFilesRoute: TFilesRoute;
     FCachingRoute: TCachingRoute;
+    FFineTuneRoute: TFineTuneRoute;
 
     function GetAPI: TGeminiAPI;
     function GetToken: string;
@@ -163,6 +167,7 @@ type
     function GetEmbeddingsRoute: TEmbeddingsRoute;
     function GetFilesRoute: TFilesRoute;
     function GetCachingRoute: TCachingRoute;
+    function GetFineTuneRoute : TFineTuneRoute;
 
   public
     /// <summary>
@@ -195,7 +200,6 @@ type
     property BaseURL: string read GetBaseUrl write SetBaseUrl;
 
   public
-
     /// <summary>
     /// Provides access to the chat completion API.
     /// Allows for interaction with models fine-tuned for instruction-based dialogue.
@@ -223,6 +227,7 @@ type
     // TODO
     property Files: TFilesRoute read GetFilesRoute;
     property Caching: TCachingRoute read GetCachingRoute;
+    property FineTune: TFineTuneRoute read GetFineTuneRoute;
   public
     /// <summary>
     /// Initializes a new instance of the <see cref="TGemini"/> class with optional header configuration.
@@ -283,6 +288,7 @@ begin
   FEmbeddingsRoute.Free;
   FFilesRoute.Free;
   FCachingRoute.Free;
+  FFineTuneRoute.Free;
   FAPI.Free;
   inherited;
 end;
@@ -323,6 +329,13 @@ begin
   if not Assigned(FFilesRoute) then
     FFilesRoute := TFilesRoute.CreateRoute(API);
   Result := FFilesRoute;
+end;
+
+function TGemini.GetFineTuneRoute: TFineTuneRoute;
+begin
+  if not Assigned(FFineTuneRoute) then
+    FFineTuneRoute := TFineTuneRoute.CreateRoute(API);
+  Result := FFineTuneRoute;
 end;
 
 function TGemini.GetModelsRoute: TModelsRoute;

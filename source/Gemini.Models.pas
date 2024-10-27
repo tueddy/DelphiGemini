@@ -514,7 +514,7 @@ end;
 
 function TModelsRoute.List(const ModelName: string; LowerCase: Boolean): TModel;
 begin
-  Result := API.Get<TModel>(CheckModel(ModelName, LowerCase));
+  Result := API.Get<TModel>(ModelName);
 end;
 
 function TModelsRoute.List(const PageSize: Integer;
