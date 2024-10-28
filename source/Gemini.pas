@@ -167,7 +167,7 @@ type
     function GetEmbeddingsRoute: TEmbeddingsRoute;
     function GetFilesRoute: TFilesRoute;
     function GetCachingRoute: TCachingRoute;
-    function GetFineTuneRoute : TFineTuneRoute;
+    function GetFineTuneRoute: TFineTuneRoute;
 
   public
     /// <summary>

@@ -19,7 +19,6 @@ type
     function Contents(const Value: TArray<TContentPayload>): TCacheParams;
     function Tools(const Value: TArray<TToolPluginParams>): TCacheParams;
     function ToolConfig(const Value: TToolMode; AllowedFunctionNames: TArray<string> = []): TCacheParams;
-    function ExpireTime(const Value: string): TCacheParams;
     function ttl(const Value: string): TCacheParams;
     function Name(const Value: string): TCacheParams;
     function DisplayName(const Value: string): TCacheParams;
@@ -30,42 +29,27 @@ type
 
   TCacheUpdateParams = class(TJSONParam)
   public
-    function ExpireTime(const Value: string): TCacheParams;
     function ttl(const Value: string): TCacheParams;
     function Name(const Value: string): TCacheParams;
   end;
 
-  TContents = TChatContent;
-
-  TSystemInstruction = TChatContent;
-
   TCache = class
   private
-    FContents: TArray<TContents>;
-    FTools: TArray<TTool>;
     FCreateTime: string;
     FUpdateTime: string;
     FUsageMetadata: TUsageMetadata;
     FExpireTime: string;
-    FTTL: string;
     FName: string;
     FDisplayName: string;
     FModel: string;
-    FSystemInstruction: TSystemInstruction;
-    FToolConfig: TToolConfig;
   public
-    property Contents: TArray<TContents> read FContents write FContents;
-    property Tools: TArray<TTool> read FTools write FTools;
     property CreateTime: string read FCreateTime write FCreateTime;
     property UpdateTime: string read FUpdateTime write FUpdateTime;
     property UsageMetadata: TUsageMetadata read FUsageMetadata write FUsageMetadata;
     property ExpireTime: string read FExpireTime write FExpireTime;
-    property TTL: string read FTTL write FTTL;
     property Name: string read FName write FName;
     property DisplayName: string read FDisplayName write FDisplayName;
     property Model: string read FModel write FModel;
-    property SystemInstruction: TSystemInstruction read FSystemInstruction write FSystemInstruction;
-    property ToolConfig: TToolConfig read FToolConfig write FToolConfig;
     destructor Destroy; override;
   end;
 
@@ -126,11 +110,6 @@ end;
 function TCacheParams.DisplayName(const Value: string): TCacheParams;
 begin
   Result := TCacheParams(Add('displayName', Value));
-end;
-
-function TCacheParams.ExpireTime(const Value: string): TCacheParams;
-begin
-  Result := TCacheParams(Add('expireTime', Value));
 end;
 
 function TCacheParams.Model(const Value: string): TCacheParams;
@@ -198,16 +177,8 @@ end;
 
 destructor TCache.Destroy;
 begin
-  for var Item in FContents do
-    Item.Free;
-  for var Item in FTools do
-    Item.Free;
   if Assigned(FUsageMetadata) then
     FUsageMetadata.Free;
-  if Assigned(FSystemInstruction) then
-    FSystemInstruction.Free;
-  if Assigned(FToolConfig) then
-    FToolConfig.Free;
   inherited;
 end;
 
@@ -408,11 +379,6 @@ begin
 end;
 
 { TCacheUpdateParams }
-
-function TCacheUpdateParams.ExpireTime(const Value: string): TCacheParams;
-begin
-  Result := TCacheParams(Add('expireTime', Value));
-end;
 
 function TCacheUpdateParams.Name(const Value: string): TCacheParams;
 begin

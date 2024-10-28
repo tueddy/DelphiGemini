@@ -7,6 +7,9 @@ uses
   Gemini.API.Params, Gemini.Schema, Gemini.Functions.Core;
 
 type
+  /// <summary>
+  /// Defines the execution behavior for function calling by defining the execution mode.
+  /// </summary>
   TToolMode = (
     /// <summary>
     /// Unspecified function calling mode. This value should not be used.

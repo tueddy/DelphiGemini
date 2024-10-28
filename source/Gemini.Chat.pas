@@ -12,24 +12,89 @@ interface
 uses
   System.SysUtils, System.Classes, REST.JsonReflect, System.JSON, System.Threading,
   REST.Json.Types, Gemini.API.Params, Gemini.API, Gemini.Safety, Gemini.Schema,
-  Gemini.Tools, Gemini.Async.Support;
+  Gemini.Tools, Gemini.Async.Support, Gemini.Functions.Core;
 
 type
+  /// <summary>
+  /// Type of message role
+  /// </summary>
   TMessageRole = (
+    /// <summary>
+    /// User message
+    /// </summary>
     user,
+    /// <summary>
+    /// Assistant message
+    /// </summary>
     model
   );
 
+  /// <summary>
+  /// Helper record for the <c>TMessageRole</c> enumeration, providing utility methods for converting
+  /// between <c>TMessageRole</c> values and their string representations.
+  /// </summary>
   TMessageRoleHelper = record helper for TMessageRole
+    /// <summary>
+    /// Converts the current <c>TMessageRole</c> value to its corresponding string representation.
+    /// </summary>
+    /// <returns>
+    /// A string representing the current <c>TMessageRole</c> value.
+    /// </returns>
     function ToString: string;
+    /// <summary>
+    /// Converts a string representation of a <c>TMessageRole</c> into its corresponding enumeration value.
+    /// </summary>
+    /// <param name="Value">
+    /// The string representing a <c>TMessageRole</c>.
+    /// </param>
+    /// <returns>
+    /// The <c>TMessageRole</c> enumeration value that corresponds to the provided string.
+    /// </returns>
     class function Create(const Value: string): TMessageRole; static;
   end;
 
+  /// <summary>
+  /// Interceptor class for converting <c>TMessageRole</c> values to and from their string representations in JSON serialization and deserialization.
+  /// </summary>
+  /// <remarks>
+  /// This class is used to facilitate the conversion between the <c>TMessageRole</c> enum and its string equivalents during JSON processing.
+  /// It extends the <c>TJSONInterceptorStringToString</c> class to override the necessary methods for custom conversion logic.
+  /// </remarks>
   TMessageRoleInterceptor = class(TJSONInterceptorStringToString)
+    /// <summary>
+    /// Converts the <c>TMessageRole</c> value of the specified field to a string during JSON serialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be converted.
+    /// </param>
+    /// <param name="Field">
+    /// The field name representing the <c>TMessageRole</c> value.
+    /// </param>
+    /// <returns>
+    /// The string representation of the <c>TMessageRole</c> value.
+    /// </returns>
     function StringConverter(Data: TObject; Field: string): string; override;
+    /// <summary>
+    /// Converts a string back to a <c>TMessageRole</c> value for the specified field during JSON deserialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be set.
+    /// </param>
+    /// <param name="Field">
+    /// The field name where the <c>TMessageRole</c> value will be set.
+    /// </param>
+    /// <param name="Arg">
+    /// The string representation of the <c>TMessageRole</c> to be converted back.
+    /// </param>
+    /// <remarks>
+    /// This method converts the string argument back to the corresponding <c>TMessageRole</c> value and assigns it to the specified field in the object.
+    /// </remarks>
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// Defines the reason why the model stopped generating tokens.
+  /// </summary>
   TFinishReason = (
     /// <summary>
     /// Default value. This value is unused.
@@ -77,16 +142,75 @@ type
     MALFORMED_FUNCTION_CALL
   );
 
+  /// <summary>
+  /// Helper record for the <c>TFinishReason</c> enumeration, providing utility methods for converting
+  /// between <c>TFinishReason</c> values and their string representations.
+  /// </summary>
   TFinishReasonHelper = record helper for TFinishReason
+    /// <summary>
+    /// Converts the current <c>TFinishReason</c> value to its string representation.
+    /// </summary>
+    /// <returns>
+    /// A string representing the current <c>TFinishReason</c> value.
+    /// </returns>
     function ToString: string;
+    /// <summary>
+    /// Creates a <c>TFinishReason</c> value from its corresponding string representation.
+    /// </summary>
+    /// <param name="Value">
+    /// The string value representing a <c>TFinishReason</c>.
+    /// </param>
+    /// <returns>
+    /// The corresponding <c>TFinishReason</c> enumeration value for the provided string.
+    /// </returns>
+    /// <remarks>
+    /// This method throws an exception if the input string does not match any valid <c>TFinishReason</c> values.
+    /// </remarks>
     class function Create(const Value: string): TFinishReason; static;
   end;
 
+  /// <summary>
+  /// Interceptor class for converting <c>TFinishReason</c> values to and from their string representations in JSON serialization and deserialization.
+  /// </summary>
+  /// <remarks>
+  /// This class is used to facilitate the conversion between the <c>TFinishReason</c> enum and its string equivalents during JSON processing.
+  /// It extends the <c>TJSONInterceptorStringToString</c> class to override the necessary methods for custom conversion logic.
+  /// </remarks>
   TFinishReasonInterceptor = class(TJSONInterceptorStringToString)
+    /// <summary>
+    /// Converts the <c>TFinishReason</c> value of the specified field to a string during JSON serialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be converted.
+    /// </param>
+    /// <param name="Field">
+    /// The field name representing the <c>TFinishReason</c> value.
+    /// </param>
+    /// <returns>
+    /// The string representation of the <c>TFinishReason</c> value.
+    /// </returns>
     function StringConverter(Data: TObject; Field: string): string; override;
+    /// <summary>
+    /// Converts a string back to a <c>TFinishReason</c> value for the specified field during JSON deserialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be set.
+    /// </param>
+    /// <param name="Field">
+    /// The field name where the <c>TFinishReason</c> value will be set.
+    /// </param>
+    /// <param name="Arg">
+    /// The string representation of the <c>TFinishReason</c> to be converted back.
+    /// </param>
+    /// <remarks>
+    /// This method converts the string argument back to the corresponding <c>TFinishReason</c> value and assigns it to the specified field in the object.
+    /// </remarks>
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// Supported programming languages for the generated code.
+  /// </summary>
   TLangueType = (
     /// <summary>
     /// Language not specified. This value should not be used.
@@ -98,16 +222,74 @@ type
     PYTHON
   );
 
+  /// <summary>
+  /// Helper record for the <c>TLangueType</c> enumeration, providing utility methods for conversion between string representations and <c>TLangueType</c> values.
+  /// </summary>
   TLangueTypeHelper = record helper for TLangueType
+    /// <summary>
+    /// Converts the current <c>TLangueType</c> value to its string representation.
+    /// </summary>
+    /// <returns>
+    /// A string representing the current <c>TLangueType</c> value.
+    /// </returns>
     function ToString: string;
+    /// <summary>
+    /// Creates a <c>TLangueType</c> value from its corresponding string representation.
+    /// </summary>
+    /// <param name="Value">
+    /// The string value representing a <c>TLangueType</c>.
+    /// </param>
+    /// <returns>
+    /// The corresponding <c>TLangueType</c> enumeration value for the provided string.
+    /// </returns>
+    /// <remarks>
+    /// This method throws an exception if the input string does not match any valid <c>TLangueType</c> values.
+    /// </remarks>
     class function Create(const Value: string): TLangueType; static;
   end;
 
+  /// <summary>
+  /// Interceptor class for converting <c>TLangueType</c> values to and from their string representations in JSON serialization and deserialization.
+  /// </summary>
+  /// <remarks>
+  /// This class is used to facilitate the conversion between the <c>TLangueType</c> enum and its string equivalents during JSON processing.
+  /// It extends the <c>TJSONInterceptorStringToString</c> class to override the necessary methods for custom conversion logic.
+  /// </remarks>
   TLangueTypeInterceptor = class(TJSONInterceptorStringToString)
+    /// <summary>
+    /// Converts the <c>TLangueType</c> value of the specified field to a string during JSON serialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be converted.
+    /// </param>
+    /// <param name="Field">
+    /// The field name representing the <c>TLangueType</c> value.
+    /// </param>
+    /// <returns>
+    /// The string representation of the <c>TLangueType</c> value.
+    /// </returns>
     function StringConverter(Data: TObject; Field: string): string; override;
+    /// <summary>
+    /// Converts a string back to a <c>TLangueType</c> value for the specified field during JSON deserialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be set.
+    /// </param>
+    /// <param name="Field">
+    /// The field name where the <c>TLangueType</c> value will be set.
+    /// </param>
+    /// <param name="Arg">
+    /// The string representation of the <c>TLangueType</c> to be converted back.
+    /// </param>
+    /// <remarks>
+    /// This method converts the string argument back to the corresponding <c>TLangueType</c> value and assigns it to the specified field in the object.
+    /// </remarks>
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// Enumeration of possible outcomes of the code execution.
+  /// </summary>
   TOutcomeType = (
     /// <summary>
     /// State not specified. This value should not be used.
@@ -127,160 +309,821 @@ type
     OUTCOME_DEADLINE_EXCEEDED
   );
 
+  /// <summary>
+  /// Helper record for the <c>TOutcomeType</c> enumeration, providing utility methods for conversion between string representations and <c>TOutcomeType</c> values.
+  /// </summary>
   TOutcomeTypeHelper = record helper for TOutcomeType
+    /// <summary>
+    /// Converts the current <c>TOutcomeType</c> value to its string representation.
+    /// </summary>
+    /// <returns>
+    /// A string representing the current <c>TOutcomeType</c> value.
+    /// </returns>
     function ToString: string;
+    /// <summary>
+    /// Creates a <c>TOutcomeType</c> value from its corresponding string representation.
+    /// </summary>
+    /// <param name="Value">
+    /// The string value representing a <c>TOutcomeType</c>.
+    /// </param>
+    /// <returns>
+    /// The corresponding <c>TOutcomeType</c> enumeration value for the provided string.
+    /// </returns>
+    /// <remarks>
+    /// This method throws an exception if the input string does not match any valid <c>TOutcomeType</c> values.
+    /// </remarks>
     class function Create(const Value: string): TOutcomeType; static;
   end;
 
+  /// <summary>
+  /// Interceptor class for converting <c>TOutcomeType</c> values to and from their string representations in JSON serialization and deserialization.
+  /// </summary>
+  /// <remarks>
+  /// This class is used to facilitate the conversion between the <c>TOutcomeType</c> enum and its string equivalents during JSON processing.
+  /// It extends the <c>TJSONInterceptorStringToString</c> class to override the necessary methods for custom conversion logic.
+  /// </remarks>
   TOutcomeTypeInterceptor = class(TJSONInterceptorStringToString)
+    /// <summary>
+    /// Converts the <c>TOutcomeType</c> value of the specified field to a string during JSON serialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be converted.
+    /// </param>
+    /// <param name="Field">
+    /// The field name representing the <c>TOutcomeType</c> value.
+    /// </param>
+    /// <returns>
+    /// The string representation of the <c>TOutcomeType</c> value.
+    /// </returns>
     function StringConverter(Data: TObject; Field: string): string; override;
+    /// <summary>
+    /// Converts a string back to a <c>TOutcomeType</c> value for the specified field during JSON deserialization.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be set.
+    /// </param>
+    /// <param name="Field">
+    /// The field name where the <c>TOutcomeType</c> value will be set.
+    /// </param>
+    /// <param name="Arg">
+    /// The string representation of the <c>TOutcomeType</c> to be converted back.
+    /// </param>
+    /// <remarks>
+    /// This method converts the string argument back to the corresponding <c>TOutcomeType</c> value and assigns it to the specified field in the object.
+    /// </remarks>
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// Raw media bytes.
+  /// </summary>
+  /// <remarks>
+  /// Text should not be sent as raw bytes, use the 'text' field.
+  /// </remarks>
   TInlineData = class(TJSONParam)
+    /// <summary>
+    /// The IANA standard MIME type of the source data.
+    /// </summary>
+    /// <remarks>
+    /// Examples: - image/png - image/jpeg If an unsupported MIME type is provided, an error will be returned.
+    /// </remarks>
     function MimeType(const Value: string): TInlineData;
+    /// <summary>
+    /// Raw bytes for media formats.
+    /// </summary>
+    /// <remarks>
+    /// A base64-encoded string.
+    /// </remarks>
     function Data(const Value: string): TInlineData;
   end;
 
+  /// <summary>
+  /// URI based data.
+  /// </summary>
   TFileData = class(TJSONParam)
+    /// <summary>
+    /// The IANA standard MIME type of the source data.
+    /// </summary>
     function MimeType(const Value: string): TFileData;
+    /// <summary>
+    ///
+    /// </summary>
     function FileUri(const Value: string): TFileData;
   end;
 
+  /// <summary>
+  /// Inline text setter class.
+  /// </summary>
   TTextData = class(TJSONParam)
+    /// <summary>
+    /// Inline text.
+    /// </summary>
     function Text(const Value: string): TTextData;
   end;
 
+  /// <summary>
+  /// Represents the content payload of a chat message, including the message sender's role and its content parts.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TContentPayload</c> class allows you to construct messages with various content parts, specify the role of the message sender (user or assistant), and attach any additional data such as files or media.
+  /// This class is essential for building messages in a chat application, particularly when interacting with AI models that require structured message input.
+  /// </remarks>
   TContentPayload = class(TJSONParam)
   public
+    /// <summary>
+    /// Sets the role of the message sender.
+    /// </summary>
+    /// <param name="Value">
+    /// The role of the message sender, specified as a <c>TMessageRole</c> enumeration value (either <c>user</c> or <c>model</c>).
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TContentPayload</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Setting the role is useful for multi-turn conversations to distinguish between messages from the user and responses from the model.
+    /// If not set, the role can be left blank or unset for single-turn conversations.
+    /// </remarks>
     function Role(const Value: TMessageRole): TContentPayload;
+    /// <summary>
+    /// Adds content parts to the message with specified text and attachments.
+    /// </summary>
+    /// <param name="Value">
+    /// The text content of the message to be included as a part.
+    /// </param>
+    /// <param name="Attached">
+    /// An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TContentPayload</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Each part of the message may have different MIME types.
+    /// This method allows combining text and attachments into a single message payload.
+    /// </remarks>
     function Parts(const Value: string; const Attached: TArray<string>): TContentPayload; overload;
+    /// <summary>
+    /// Adds content parts to the message with specified attachments.
+    /// </summary>
+    /// <param name="Attached">
+    /// An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TContentPayload</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Each part of the message may have different MIME types.
+    /// This method is useful when the message consists only of attachments without any text content.
+    /// </remarks>
     function Parts(const Attached: TArray<string>): TContentPayload; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance with specified text content and optional attachments.
+    /// </summary>
+    /// <param name="Text">
+    /// The text content of the message.
+    /// </param>
+    /// <param name="Attached">
+    /// Optional. An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance containing the specified text and attachments.
+    /// </returns>
     class function Add(const Text: string; const Attached: TArray<string> = []): TContentPayload; reintroduce; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance with a specified role and optional attachments.
+    /// </summary>
+    /// <param name="Role">
+    /// The role of the message sender, specified as a <c>TMessageRole</c> enumeration value (either <c>user</c> or <c>model</c>).
+    /// </param>
+    /// <param name="Attached">
+    /// Optional. An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance with the specified role and attachments.
+    /// </returns>
     class function Add(const Role: TMessageRole;
       const Attached: TArray<string> = []): TContentPayload; reintroduce; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance with specified role, text content, and optional attachments.
+    /// </summary>
+    /// <param name="Role">
+    /// The role of the message sender, specified as a <c>TMessageRole</c> enumeration value (either <c>user</c> or <c>model</c>).
+    /// </param>
+    /// <param name="Text">
+    /// The text content of the message.
+    /// </param>
+    /// <param name="Attached">
+    /// Optional. An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance containing the specified role, text, and attachments.
+    /// </returns>
     class function Add(const Role: TMessageRole; const Text: string;
       const Attached: TArray<string> = []): TContentPayload; reintroduce; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance representing the assistant's message with specified text content and optional attachments.
+    /// </summary>
+    /// <param name="Value">
+    /// The text content of the assistant's message.
+    /// </param>
+    /// <param name="Attached">
+    /// Optional. An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance representing the assistant's message.
+    /// </returns>
+    class function Assistant(const Value: string; const Attached: TArray<string> = []): TContentPayload; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance representing the assistant's message with specified attachments.
+    /// </summary>
+    /// <param name="Attached">
+    /// An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance representing the assistant's message with attachments.
+    /// </returns>
+    class function Assistant(const Attached: TArray<string>): TContentPayload; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance representing the user's message with specified text content and optional attachments.
+    /// </summary>
+    /// <param name="Value">
+    /// The text content of the user's message.
+    /// </param>
+    /// <param name="Attached">
+    /// Optional. An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance representing the user's message.
+    /// </returns>
+    class function User(const Value: string; const Attached: TArray<string> = []): TContentPayload; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance representing the user's message with specified attachments.
+    /// </summary>
+    /// <param name="Attached">
+    /// An array of strings representing attached data or file URIs to be included as parts.
+    /// </param>
+    /// <returns>
+    /// Returns a new <c>TContentPayload</c> instance representing the user's message with attachments.
+    /// </returns>
+    class function User(const Attached: TArray<string>): TContentPayload; overload;
+    /// <summary>
+    /// Creates a new <c>TContentPayload</c> instance and allows configuration through a procedure reference.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure reference that receives a <c>TContentPayload</c> instance to configure its properties.
+    /// </param>
+    /// <returns>
+    /// Returns a new configured <c>TContentPayload</c> instance.
+    /// </returns>
     class function New(const ParamProc: TProcRef<TContentPayload>): TContentPayload; static;
   end;
 
+  /// <summary>
+  /// Represents the content payload of a chat message, including the message sender's role and its content parts.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TPayLoad</c> class allows you to construct messages with various content parts, specify the role of the message sender (user or assistant), and attach any additional data such as files or media.
+  /// This class is essential for building messages in a chat application, particularly when interacting with AI models that require structured message input.
+  /// </remarks>
+  TPayLoad = TContentPayload;
+
+  /// <summary>
+  /// Represents the configuration options for generating model outputs in a chat or completion request.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TGenerationConfig</c> class allows you to specify various parameters that control the behavior of the AI model during text generation.
+  /// These settings can influence the randomness, length, and format of the generated responses.
+  /// Not all parameters are configurable for every model; some models may ignore certain settings.
+  /// </remarks>
   TGenerationConfig = class(TJSONParam)
   public
+    /// <summary>
+    /// Specifies a set of character sequences that will stop the output generation.
+    /// </summary>
+    /// <param name="Value">
+    /// An array of strings representing the stop sequences. The API will stop generating further tokens when any of these sequences are encountered.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// You can specify up to 5 stop sequences. If a stop sequence is encountered, it will not be included in the response.
+    /// </remarks>
     function StopSequences(const Value: TArray<string>): TGenerationConfig;
+    /// <summary>
+    /// Sets the MIME type of the generated candidate text.
+    /// </summary>
+    /// <param name="Value">
+    /// A string representing the MIME type of the response content. Supported MIME types include:
+    /// <para>
+    /// - <c>text/plain</c> (default): Text output.
+    /// </para>
+    /// <para>
+    /// - <c>application/json</c>: JSON response in the response candidates.
+    /// </para>
+    /// <para>
+    /// - <c>text/x.enum</c>: ENUM as a string response in the response candidates.
+    /// </para>
+    /// Refer to the documentation for a complete list of supported MIME types.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
     function ResponseMimeType(const Value: string): TGenerationConfig;
+    /// <summary>
+    /// Specifies the output schema of the generated candidate text using a <c>TSchemaParams</c> instance.
+    /// </summary>
+    /// <param name="Value">
+    /// A <c>TSchemaParams</c> instance representing the desired output schema for the response.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Schemas must be a subset of the OpenAPI schema and can be objects, primitives, or arrays.
+    /// If set, a compatible <c>ResponseMimeType</c> must also be specified. Compatible MIME types include <c>application/json</c>.
+    /// Refer to the JSON text generation guide for more details.
+    /// </remarks>
     function ResponseSchema(const Value: TSchemaParams): TGenerationConfig; overload;
+    /// <summary>
+    /// Specifies the output schema of the generated candidate text using a JSON object.
+    /// </summary>
+    /// <param name="Value">
+    /// A <c>TJSONObject</c> instance representing the desired output schema for the response.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Schemas must be a subset of the OpenAPI schema and can be objects, primitives, or arrays.
+    /// If set, a compatible <c>ResponseMimeType</c> must also be specified. Compatible MIME types include <c>application/json</c>.
+    /// Refer to the JSON text generation guide for more details.
+    /// </remarks>
+    function ResponseSchema(const Value: TJSONObject): TGenerationConfig; overload;
+    /// <summary>
+    /// Specifies the output schema of the generated candidate text using a procedure to configure <c>TSchemaParams</c>.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure reference that receives a <c>TSchemaParams</c> instance to configure the desired output schema.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Schemas must be a subset of the OpenAPI schema and can be objects, primitives, or arrays.
+    /// If set, a compatible <c>ResponseMimeType</c> must also be specified. Compatible MIME types include <c>application/json</c>.
+    /// Refer to the JSON text generation guide for more details.
+    /// </remarks>
     function ResponseSchema(const ParamProc: TProcRef<TSchemaParams>): TGenerationConfig; overload;
+    /// <summary>
+    /// Sets the number of generated response candidates to return.
+    /// </summary>
+    /// <param name="Value">
+    /// An integer specifying the number of response candidates. Currently, this value can only be set to 1.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// If not set, this defaults to 1.
+    /// </remarks>
     function CandidateCount(const Value: Integer): TGenerationConfig;
+    /// <summary>
+    /// Specifies the maximum number of tokens to include in a response candidate.
+    /// </summary>
+    /// <param name="Value">
+    /// An integer representing the maximum number of tokens for the response.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// The default value varies by model. Refer to the model's <c>output_token_limit</c> attribute returned from the <c>getModel</c> function.
+    /// </remarks>
     function MaxOutputTokens(const Value: Integer): TGenerationConfig;
+    /// <summary>
+    /// Controls the randomness of the output by setting the temperature parameter.
+    /// </summary>
+    /// <param name="Value">
+    /// A double value ranging from 0.0 to 2.0, where higher values produce more random outputs, and lower values make the output more deterministic.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// The default value varies by model. Refer to the model's <c>temperature</c> attribute returned from the <c>getModel</c> function.
+    /// </remarks>
     function Temperature(const Value: Double): TGenerationConfig;
+    /// <summary>
+    /// Sets the maximum cumulative probability of tokens to consider when sampling, known as nucleus sampling (Top-p).
+    /// </summary>
+    /// <param name="Value">
+    /// A double value between 0.0 and 1.0 representing the cumulative probability threshold.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// The model uses a combination of Top-k and Top-p sampling. Tokens are considered based on their cumulative probability until the threshold is reached.
+    /// The default value varies by model and is specified by the model's <c>top_p</c> attribute returned from the <c>getModel</c> function.
+    /// </remarks>
     function TopP(const Value: Double): TGenerationConfig;
+    /// <summary>
+    /// Sets the maximum number of tokens to consider when sampling, known as Top-k sampling.
+    /// </summary>
+    /// <param name="Value">
+    /// An integer specifying the number of top tokens to consider during sampling.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Some models may not support Top-k sampling. The default value varies by model and is specified by the model's <c>top_k</c> attribute returned from the <c>getModel</c> function.
+    /// </remarks>
     function TopK(const Value: Integer): TGenerationConfig;
+    /// <summary>
+    /// Applies a presence penalty to the next token's log probabilities if the token has already appeared in the response.
+    /// </summary>
+    /// <param name="Value">
+    /// A double value representing the penalty. Positive values discourage repetition, while negative values encourage it.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// This penalty is binary (on/off) and does not depend on the number of times the token has been used after the first occurrence.
+    /// Use <c>FrequencyPenalty</c> for a penalty that increases with each use.
+    /// </remarks>
     function PresencePenalty(const Value: Double): TGenerationConfig;
+    /// <summary>
+    /// Applies a frequency penalty to the next token's log probabilities, proportional to the number of times each token has been used in the response so far.
+    /// </summary>
+    /// <param name="Value">
+    /// A double value representing the penalty. Positive values discourage repetition proportionally to frequency; negative values encourage repetition.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Caution: Negative values can cause the model to start repeating tokens excessively, potentially leading to outputs like "the the the...".
+    /// </remarks>
     function FrequencyPenalty(const Value: Double): TGenerationConfig;
+    /// <summary>
+    /// Specifies whether to include log probabilities of tokens in the response.
+    /// </summary>
+    /// <param name="Value">
+    /// A boolean value where <c>True</c> indicates that log probabilities should be included in the response.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
     function ResponseLogprobs(const Value: Boolean): TGenerationConfig;
+    /// <summary>
+    /// Sets the number of top log probabilities to return at each decoding step.
+    /// </summary>
+    /// <param name="Value">
+    /// An integer specifying the number of top tokens to include in the log probabilities.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TGenerationConfig</c> instance, allowing for method chaining.
+    /// </returns>
+    /// <remarks>
+    /// Only valid if <c>ResponseLogprobs</c> is set to <c>True</c>. This parameter determines the number of top tokens for which log probabilities are returned in each decoding step.
+    /// </remarks>
     function Logprobs(const Value: Integer): TGenerationConfig;
+    /// <summary>
+    /// Creates a new <c>TGenerationConfig</c> instance and allows configuration through a procedure reference.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure reference that receives a <c>TGenerationConfig</c> instance to configure its properties.
+    /// </param>
+    /// <returns>
+    /// Returns a new configured <c>TGenerationConfig</c> instance.
+    /// </returns>
     class function New(const ParamProc: TProcRef<TGenerationConfig>): TGenerationConfig; overload;
   end;
 
+  /// <summary>
+  /// The <c>TChatParams</c> class represents the set of parameters used to configure a chat interaction with an AI model.
+  /// </summary>
+  /// <remarks>
+  /// This class allows you to define various settings that control how the model behaves, including which model to use, how many tokens to generate,
+  /// what kind of messages to send, and how the model should handle its output. By using this class, you can fine-tune the AI's behavior and response format
+  /// based on your application's specific needs.
+  /// <para>
+  /// It inherits from <c>TJSONParam</c>, which provides methods for handling and serializing the parameters as JSON, allowing seamless integration
+  /// with JSON-based APIs.
+  /// </para>
+  /// </remarks>
   TChatParams = class(TJSONParam)
+    /// <summary>
+    /// Required. The content of the current conversation with the model.
+    /// </summary>
+    /// <remarks>
+    /// For single-turn queries, this is a single instance. For multi-turn queries like chat, this is a repeated field that contains the conversation history and the latest request.
+    /// </remarks>
     function Contents(const Value: TArray<TContentPayload>): TChatParams;
-    function Tools(const Value: TArray<TToolPluginParams>): TChatParams;
+    /// <summary>
+    /// Optional. A list of Tools the Model may use to generate the next response.
+    /// </summary>
+    /// <remarks>
+    /// A Tool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the Model. Supported Tools are Function and codeExecution. Refer to the Function calling and the Code execution guides to learn more.
+    /// </remarks>
+    function Tools(const Value: TArray<IFunctionCore>): TChatParams; overload;
+    /// <summary>
+    /// Optional. A list of Tools the Model may use to generate the next response.
+    /// </summary>
+    /// <remarks>
+    /// A Tool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the Model. Supported Tools are Function and codeExecution. Refer to the Function calling and the Code execution guides to learn more.
+    /// </remarks>
+    function Tools(const CodeExecution: Boolean): TChatParams; overload;
+    /// <summary>
+    /// Optional. Tool configuration for any Tool specified in the request.
+    /// </summary>
+    /// <remarks>
+    /// Refer to the Function calling guide for a usage example.
+    /// </remarks>
     function ToolConfig(const Value: TToolMode; AllowedFunctionNames: TArray<string> = []): TChatParams;
+    /// <summary>
+    /// Optional. A list of unique SafetySetting instances for blocking unsafe content.
+    /// </summary>
+    /// <remarks>
+    /// This will be enforced on the GenerateContentRequest.contents and GenerateContentResponse.candidates. There should not be more than one setting for each SafetyCategory type. The API will block any contents and responses that fail to meet the thresholds set by these settings. This list overrides the default settings for each SafetyCategory specified in the safetySettings. If there is no SafetySetting for a given SafetyCategory provided in the list, the API will use the default safety setting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH, HARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT, HARM_CATEGORY_HARASSMENT are supported. Refer to the guide for detailed information on available safety settings. Also refer to the Safety guidance to learn how to incorporate safety considerations in your AI applications.
+    /// </remarks>
     function SafetySettings(const Value: TArray<TSafety>): TChatParams;
+    /// <summary>
+    /// Optional. Developer set system instruction(s).
+    /// </summary>
+    /// <remarks>
+    /// Currently, text only.
+    /// </remarks>
     function SystemInstruction(const Value: string): TChatParams;
+    /// <summary>
+    /// Optional. Configuration options for model generation and outputs.
+    /// </summary>
+    /// <remarks>
+    /// See the configuration options for model generation and outputs. Not all parameters are configurable for every model.
+    /// </remarks>
     function GenerationConfig(const ParamProc: TProcRef<TGenerationConfig>): TChatParams;
+    /// <summary>
+    /// Optional. The name of the content cached to use as context to serve the prediction.
+    /// </summary>
+    /// <remarks>
+    /// Format: cachedContents/{cachedContent}
+    /// </remarks>
     function CachedContent(const Value: string): TChatParams;
+    /// <summary>
+    ///
+    /// </summary>
+    /// <remarks>
+    ///
+    /// </remarks>
     class function New(const ParamProc: TProcRef<TChatParams>): TChatParams; overload;
   end;
 
+  /// <summary>
+  /// Interceptor class for converting <c>args</c> and <c>response</c> values into JSON string format in JSON deserialization.
+  /// </summary>
+  /// <remarks>
+  /// This class is used to facilitate the conversion between the <c>args</c>, <c>response</c> and theirs string equivalent during JSON processing.
+  /// It extends the <c>TJSONInterceptorStringToString</c> class to override the necessary methods for custom conversion logic.
+  /// </remarks>
   TArgsFixInterceptor = class(TJSONInterceptorStringToString)
   public
+    /// <summary>
+    /// When JSON deserialization, converts <c>args</c>, <c>response<c/> values into JSON string to retrieve arguments made by the tool.
+    /// </summary>
+    /// <param name="Data">
+    /// The object containing the field to be set.
+    /// </param>
+    /// <param name="Field">
+    /// The field name where the <c>input</c> value will be set.
+    /// </param>
+    /// <param name="Arg">
+    /// The string representation of the <c>args</c> or <c>response</c> to be converted back.
+    /// </param>
+    /// <remarks>
+    /// This method converts the string argument back to the corresponding <c>args</c> or <c>response</c> value and assigns it to the specified field in the object.
+    /// </remarks>
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// A predicted FunctionCall returned from the model that contains a string representing the FunctionDeclaration.name with the arguments and their values.
+  /// </summary>
   TFunctionCall = class
   private
     FName: string;
     [JsonReflectAttribute(ctString, rtString, TArgsFixInterceptor)]
     FArgs: string;
   public
+    /// <summary>
+    /// Required. The name of the function to call. Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 63.
+    /// </summary>
     property Name: string read FName write FName;
+    /// <summary>
+    /// Optional. The function parameters and values in JSON object format.
+    /// </summary>
     property Args: string read FArgs write FArgs;
   end;
 
+  /// <summary>
+  /// Raw media bytes.
+  /// </summary>
+  /// <remarks>
+  /// Text should not be sent as raw bytes, use the 'text' field.
+  /// </remarks>
   TInlineDataPart = class
   private
     FMimeType: string;
     FData: string;
   public
+    /// <summary>
+    /// The IANA standard MIME type of the source data.
+    /// </summary>
     property MimeType: string read FMimeType write FMimeType;
+    /// <summary>
+    /// Raw bytes for media formats.
+    /// </summary>
     property Data: string read FData write FData;
   end;
 
+  /// <summary>
+  /// URI based data.
+  /// </summary>
   TFileDataPart = class
   private
     FMimeType: string;
     FFileUri: string;
   public
+    /// <summary>
+    /// The IANA standard MIME type of the source data.
+    /// </summary>
     property MimeType: string read FMimeType write FMimeType;
+    /// <summary>
+    /// Uri of the data
+    /// </summary>
     property FileUri: string read FFileUri write FFileUri;
   end;
 
-//  TFunctionResponsePart = class
-//  private
-//
-//  public
-//  end;
+  /// <summary>
+  /// The result output from a FunctionCall that contains a string representing the FunctionDeclaration.name and a structured JSON object containing any output from the function is used as context to the model.
+  /// </summary>
+  /// <remarks>
+  /// This should contain the result of aFunctionCall made based on model prediction.
+  /// </remarks>
+  TFunctionResponsePart = class
+  private
+    FName: string;
+    [JsonReflectAttribute(ctString, rtString, TArgsFixInterceptor)]
+    FResponse: string;
+  public
+    /// <summary>
+    /// Required. The name of the function to call.
+    /// </summary>
+    /// <remarks>
+    /// Must be a-z, A-Z, 0-9, or contain underscores and dashes, with a maximum length of 63.
+    /// </remarks>
+    property Name: string read FName write FName;
+    /// <summary>
+    /// Required. The function response in JSON object format.
+    /// </summary>
+    property Response: string read FResponse write FResponse;
+  end;
 
+  /// <summary>
+  /// Code generated by the model that is meant to be executed, and the result returned to the model.
+  /// </summary>
+  /// <remarks>
+  /// Only generated when using the CodeExecution tool, in which the code will be automatically executed, and a corresponding CodeExecutionResult will also be generated.
+  /// </remarks>
   TExecutableCodePart = class
   private
     [JsonReflectAttribute(ctString, rtString, TLangueTypeInterceptor)]
     FLanguage: TLangueType;
     FCode: string;
   public
+    /// <summary>
+    /// Required. Programming language of the code.
+    /// </summary>
     property Language: TLangueType read FLanguage write FLanguage;
+    /// <summary>
+    /// Required. The code to be executed.
+    /// </summary>
     property Code: string read FCode write FCode;
   end;
 
+  /// <summary>
+  /// Result of executing the ExecutableCode.
+  /// </summary>
+  /// <remarks>
+  /// Only generated when using the CodeExecution, and always follows a part containing the ExecutableCode.
+  /// </remarks>
   TCodeExecutionResult = class
   private
     [JsonReflectAttribute(ctString, rtString, TOutcomeTypeInterceptor)]
     FOutcome: TOutcomeType;
     FOutput: string;
   public
+    /// <summary>
+    /// Required. Outcome of the code execution.
+    /// </summary>
     property Outcome: TOutcomeType read FOutcome write FOutcome;
+    /// <summary>
+    /// Optional. Contains stdout when code execution is successful, stderr or other description otherwise.
+    /// </summary>
     property Output: string read FOutput write FOutput;
   end;
 
+  /// <summary>
+  /// A datatype containing media that is part of a multi-part Content message.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// - A Part consists of data which has an associated datatype. A Part can only contain one of the accepted types in Part.data.
+  /// </para>
+  /// <para>
+  /// - A Part must have a fixed IANA MIME type identifying the type and subtype of the media if the inlineData field is filled with raw bytes.
+  /// </para>
+  /// <para>
+  /// Data can be only one of the following field of the class
+  /// </para>
+  /// </remarks>
   TChatPart = class
   private
     FText: string;
     FFunctionCall: TFunctionCall;
+    FFunctionResponse: TFunctionResponsePart;
     FInlineData: TInlineDataPart;
     FFileData: TFileDataPart;
     FExecutableCode: TExecutableCodePart;
     FCodeExecutionResult: TCodeExecutionResult;
   public
+    /// <summary>
+    /// Inline text.
+    /// </summary>
     property Text: string read FText write FText;
+    /// <summary>
+    /// A predicted FunctionCall returned from the model that contains a string representing the FunctionDeclaration.name with the arguments and their values.
+    /// </summary>
     property FunctionCall: TFunctionCall read FFunctionCall write FFunctionCall;
+    /// <summary>
+    /// The result output of a FunctionCall that contains a string representing the FunctionDeclaration.name and a structured JSON object containing any output from the function is used as context to the model.
+    /// </summary>
+    property FunctionResponse: TFunctionResponsePart read FFunctionResponse write FFunctionResponse;
+    /// <summary>
+    /// Inline media bytes.
+    /// </summary>
     property InlineData: TInlineDataPart read FInlineData write FInlineData;
+    /// <summary>
+    /// URI based data.
+    /// </summary>
     property FileData: TFileDataPart read FFileData write FFileData;
+    /// <summary>
+    /// Code generated by the model that is meant to be executed.
+    /// </summary>
     property ExecutableCode: TExecutableCodePart read FExecutableCode write FExecutableCode;
+    /// <summary>
+    /// Result of executing the ExecutableCode.
+    /// </summary>
     property CodeExecutionResult: TCodeExecutionResult read FCodeExecutionResult write FCodeExecutionResult;
+    /// <summary>
+    ///
+    /// </summary>
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// The base structured datatype containing multi-part content of a message.
+  /// </summary>
+  /// <remarks>
+  /// A Content includes a role field designating the producer of the Content and a parts field containing multi-part data that contains the content of the message turn.
+  /// </remarks>
   TChatContent = class
   private
     FParts: TArray<TChatPart>;
     [JsonReflectAttribute(ctString, rtString, TMessageRoleInterceptor)]
     FRole: TMessageRole;
   public
+    /// <summary>
+    /// Ordered Parts that constitute a single message. Parts may have different MIME types.
+    /// </summary>
     property Parts: TArray<TChatPart> read FParts write FParts;
+    /// <summary>
+    /// Optional. The producer of the content. Must be either 'user' or 'model'.
+    /// </summary>
+    /// <remarks>
+    /// Useful to set for multi-turn conversations, otherwise can be left blank or unset.
+    /// </remarks>
     property Role: TMessageRole read FRole write FRole;
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// Safety rating for a piece of content.
+  /// </summary>
+  /// <remarks>
+  /// The safety rating contains the category of harm and the harm probability level in that category for a piece of content. Content is classified for safety across a number of harm categories and the probability of the harm classification is included here.
+  /// </remarks>
   TSafetyRatings = class
   private
     [JsonReflectAttribute(ctString, rtString, THarmCategoryInterceptor)]
@@ -289,11 +1132,23 @@ type
     FProbability: THarmProbability;
     FBlocked: Boolean;
   public
+    /// <summary>
+    /// Required. The category for this rating.
+    /// </summary>
     property Category: THarmCategory read FCategory write FCategory;
+    /// <summary>
+    /// Required. The probability of harm for this content.
+    /// </summary>
     property Probability: THarmProbability read FProbability write FProbability;
+    /// <summary>
+    /// Was this content blocked because of this rating?
+    /// </summary>
     property Blocked: Boolean read FBlocked write FBlocked;
   end;
 
+  /// <summary>
+  /// A citation to a source for a portion of a specific response.
+  /// </summary>
   TCitationSource = class
   private
     FStartIndex: Int64;
@@ -301,48 +1156,102 @@ type
     FUri: string;
     FLicense: string;
   public
+    /// <summary>
+    /// Optional. Start of segment of the response that is attributed to this source.
+    /// </summary>
+    /// <remarks>
+    /// Index indicates the start of the segment, measured in bytes
+    /// </remarks>
     property StartIndex: Int64 read FStartIndex write FStartIndex;
+    /// <summary>
+    /// Optional. End of the attributed segment, exclusive.
+    /// </summary>
     property EndIndex: Int64 read FEndIndex write FEndIndex;
+    /// <summary>
+    /// Optional. URI that is attributed as a source for a portion of the text.
+    /// </summary>
     property Uri: string read FUri write FUri;
+    /// <summary>
+    /// Optional. License for the GitHub project that is attributed as a source for segment.
+    /// </summary>
+    /// <remarks>
+    /// License info is required for code citations.
+    /// </remarks>
     property License: string read FLicense write FLicense;
   end;
 
+  /// <summary>
+  /// A collection of source attributions for a piece of content.
+  /// </summary>
   TCitationMetadata = class
   private
     FCitationSources: TArray<TCitationSource>;
   public
+    /// <summary>
+    /// Citations to sources for a specific response.
+    /// </summary>
     property CitationSources: TArray<TCitationSource> read FCitationSources write FCitationSources;
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// Candidate for the logprobs token and score.
+  /// </summary>
   TCandidate = class
   private
     FToken: string;
     FTokenId: Int64;
     FLogProbability: Double;
   public
+    /// <summary>
+    /// The candidate’s token string value.
+    /// </summary>
     property Token: string read FToken write FToken;
+    /// <summary>
+    /// The candidate’s token id value.
+    /// </summary>
     property TokenId: Int64 read FTokenId write FTokenId;
+    /// <summary>
+    /// The candidate's log probability.
+    /// </summary>
     property LogProbability: Double read FLogProbability write FLogProbability;
   end;
 
+  /// <summary>
+  /// Candidates with top log probabilities at each decoding step.
+  /// </summary>
   TTopCandidates = class
   private
     FCandidates: TArray<TCandidate>;
   public
+    /// <summary>
+    /// Sorted by log probability in descending order.
+    /// </summary>
     property Candidates: TArray<TCandidate> read Fcandidates write Fcandidates;
   end;
 
+  /// <summary>
+  /// Logprobs Result
+  /// </summary>
   TLogprobsResult = class
   private
     FTopCandidates: TArray<TTopCandidates>;
     FChosenCandidates: TArray<TCandidate>;
   public
+    /// <summary>
+    /// Length = total number of decoding steps.
+    /// </summary>
     property TopCandidates: TArray<TTopCandidates> read FTopCandidates write FTopCandidates;
+    /// <summary>
+    /// Length = total number of decoding steps. The chosen candidates may or may not be in topCandidates.
+    /// </summary>
     property ChosenCandidates: TArray<TCandidate> read FChosenCandidates write FChosenCandidates;
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// A response candidate generated from the model.
+  /// </summary>
   TChatCandidate = class
   private
     FContent: TChatContent;
@@ -355,28 +1264,78 @@ type
     FLogprobsResult: TLogprobsResult;
     FIndex: Int64;
   public
+    /// <summary>
+    /// Output only. Generated content returned from the model.
+    /// </summary>
     property Content: TChatContent read FContent write FContent;
+    /// <summary>
+    /// Optional. Output only. The reason why the model stopped generating tokens.
+    /// </summary>
+    /// <remarks>
+    /// If empty, the model has not stopped generating tokens.
+    /// </remarks>
     property FinishReason: TFinishReason read FFinishReason write FFinishReason;
+    /// <summary>
+    /// List of ratings for the safety of a response candidate.
+    /// </summary>
+    /// <remarks>
+    /// There is at most one rating per category.
+    /// </remarks>
     property SafetyRatings: TArray<TSafetyRatings> read FSafetyRatings write FSafetyRatings;
+    /// <summary>
+    /// Output only. Citation information for model-generated candidate.
+    /// </summary>
+    /// <summary>
+    /// This field may be populated with recitation information for any text included in the content. These are passages that are "recited" from copyrighted material in the foundational LLM's training data.
+    /// </summary>
     property CitationMetadata: TCitationMetadata read FCitationMetadata write FCitationMetadata;
+    /// <summary>
+    /// Output only. Token count for this candidate.
+    /// </summary>
     property TokenCount: Int64 read FTokenCount write FTokenCount;
+    /// <summary>
+    /// Output only.
+    /// </summary>
     property AvgLogprobs: Double read FAvgLogprobs write FAvgLogprobs;
+    /// <summary>
+    /// Output only. Log-likelihood scores for the response tokens and top tokens
+    /// </summary>
     property LogprobsResult: TLogprobsResult read FLogprobsResult write FLogprobsResult;
+    /// <summary>
+    /// Output only. Index of the candidate in the list of response candidates.
+    /// </summary>
     property Index: Int64 read FIndex write FIndex;
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// A set of the feedback metadata the prompt specified in GenerateContentRequest.content.
+  /// </summary>
   TPromptFeedback = class
   private
     [JsonReflectAttribute(ctString, rtString, TBlockReasonInterceptor)]
     FBlockReason: TBlockReason;
     FSafetyRatings: TArray<TsafetyRatings>;
   public
+    /// <summary>
+    /// Optional. If set, the prompt was blocked and no candidates are returned. Rephrase the prompt.
+    /// </summary>
     property BlockReason: TBlockReason read FBlockReason write FBlockReason;
+    /// <summary>
+    /// Ratings for safety of the prompt. There is at most one rating per category.
+    /// </summary>
     property SafetyRatings: TArray<TsafetyRatings> read FSafetyRatings write FSafetyRatings;
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// Contains metadata about the token usage in a generation request.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TUsageMetadata</c> class provides detailed information regarding the number of tokens used during a request to the AI model.
+  /// This includes counts for the prompt, any cached content, the generated response candidates, and the total tokens used.
+  /// This information is valuable for monitoring and optimizing token usage, which can impact both performance and cost.
+  /// </remarks>
   TUsageMetadata = class
   private
     FPromptTokenCount: Int64;
@@ -384,40 +1343,288 @@ type
     FCandidatesTokenCount: Int64;
     FTotalTokenCount: Int64;
   public
+    /// <summary>
+    /// Gets or sets the number of tokens used in the prompt.
+    /// </summary>
+    /// <remarks>
+    /// When <c>CachedContent</c> is set, this value still represents the total effective prompt size, including the tokens in the cached content.
+    /// </remarks>
     property PromptTokenCount: Int64 read FPromptTokenCount write FPromptTokenCount;
+    /// <summary>
+    /// Gets or sets the number of tokens in the cached part of the prompt (the cached content).
+    /// </summary>
     property CachedContentTokenCount: Int64 read FCachedContentTokenCount write FCachedContentTokenCount;
+    /// <summary>
+    /// Gets or sets the total number of tokens across all the generated response candidates.
+    /// </summary>
     property CandidatesTokenCount: Int64 read FCandidatesTokenCount write FCandidatesTokenCount;
+    /// <summary>
+    /// Gets or sets the total token count for the generation request, including both the prompt and the response candidates.
+    /// </summary>
     property TotalTokenCount: Int64 read FTotalTokenCount write FTotalTokenCount;
   end;
 
+  /// <summary>
+  /// Response from the model supporting multiple candidate responses.
+  /// </summary>
+  /// <remarks>
+  /// Safety ratings and content filtering are reported for both prompt in GenerateContentResponse.prompt_feedback and for each candidate in finishReason and in safetyRatings. The API: - Returns either all requested candidates or none of them - Returns no candidates at all only if there was something wrong with the prompt (check promptFeedback) - Reports feedback on each candidate in finishReason and safetyRatings.
+  /// </remarks>
   TChat = class
   private
     FCandidates: TArray<TChatCandidate>;
     FPromptFeedback: TPromptFeedback;
     FUsageMetadata: TUsageMetadata;
   public
+    /// <summary>
+    /// Candidate responses from the model.
+    /// </summary>
     property Candidates: TArray<TChatCandidate> read FCandidates write FCandidates;
+    /// <summary>
+    /// Returns the prompt's feedback related to the content filters.
+    /// </summary>
     property PromptFeedback: TPromptFeedback read FPromptFeedback write FPromptFeedback;
+    /// <summary>
+    /// Output only. Metadata on the generation requests' token usage.
+    /// </summary>
     property UsageMetadata: TUsageMetadata read FUsageMetadata write FUsageMetadata;
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  /// Represents a callback procedure used during the reception of responses from a chat request in streaming mode.
+  /// </summary>
+  /// <param name="Chat">
+  /// The <c>TChat</c> object containing the current information about the response generated by the model.
+  /// If this value is <c>nil</c>, it indicates that the data stream is complete.
+  /// </param>
+  /// <param name="IsDone">
+  /// A boolean flag indicating whether the streaming process is complete.
+  /// If <c>True</c>, it means the model has finished sending all response data.
+  /// </param>
+  /// <param name="Cancel">
+  /// A boolean flag that can be set to <c>True</c> within the callback to cancel the streaming process.
+  /// If set to <c>True</c>, the streaming will be terminated immediately.
+  /// </param>
+  /// <remarks>
+  /// This callback is invoked multiple times during the reception of the response data from the model.
+  /// It allows for real-time processing of received messages and interaction with the user interface or other systems
+  /// based on the state of the data stream.
+  /// When the <c>IsDone</c> parameter is <c>True</c>, it indicates that the model has finished responding,
+  /// and the <c>Chat</c> parameter will be <c>nil</c>.
+  /// </remarks>
   TChatEvent = reference to procedure(var Chat: TChat; IsDone: Boolean; var Cancel: Boolean);
 
+  /// <summary>
+  /// Manages asynchronous chat callBacks for a chat request using <c>TChat</c> as the response type.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TAsynChat</c> type extends the <c>TAsynParams&lt;TChat&gt;</c> record to handle the lifecycle of an asynchronous chat operation.
+  /// It provides event handlers that trigger at various stages, such as when the operation starts, completes successfully, or encounters an error.
+  /// This structure facilitates non-blocking chat operations and is specifically tailored for scenarios where multiple choices from a chat model are required.
+  /// </remarks>
   TAsynChat = TAsynCallBack<TChat>;
 
+  /// <summary>
+  /// Manages asynchronous streaming chat callBacks for a chat request using <c>TChat</c> as the response type.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TAsynChatStream</c> type extends the <c>TAsynStreamParams&lt;TChat&gt;</c> record to support the lifecycle of an asynchronous streaming chat operation.
+  /// It provides callbacks for different stages, including when the operation starts, progresses with new data chunks, completes successfully, or encounters an error.
+  /// This structure is ideal for handling scenarios where the chat response is streamed incrementally, providing real-time updates to the user interface.
+  /// </remarks>
   TAsynChatStream = TAsynStreamCallBack<TChat>;
 
+  /// <summary>
+  /// The <c>TChatRoute</c> class inherits from <c>TGeminiAPIRoute</c> and provides an interface for managing various interactions with the chat API.
+  /// It supports creating chat completion requests in synchronous, asynchronous, and streaming modes, offering mechanisms to handle responses generated by the model.
+  /// </summary>
+  /// <remarks>
+  /// This class facilitates sending messages to a chat model, receiving responses, and managing them, whether synchronously or asynchronously.
+  /// The primary methods in the class are:
+  /// <para>
+  /// - <c>Create</c> : Sends a chat request and waits for a full response.
+  /// </para>
+  /// <para>
+  /// - <c>AsynCreate</c> : Performs an asynchronous chat completion request with event handling.
+  /// </para>
+  /// <para>
+  /// - <c>CreateStream</c> : Initiates a chat completion request in streaming mode, receiving tokens progressively.
+  /// </para>
+  /// <para>
+  /// - <c>ASynCreateStream</c> : Performs an asynchronous request in streaming mode with event handling.
+  /// </para>
+  /// Each method allows configuring model parameters, setting input messages, managing token limits, and including callbacks for processing responses or errors.
+  /// </remarks>
   TChatRoute = class(TGeminiAPIRoute)
   private
     procedure ResetStream;
   public
+    /// <summary>
+    /// Create an asynchronous completion for chat message
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure to configure the parameters for the chat request, such as model selection, messages, and other parameters.
+    /// </param>
+    /// <param name="CallBacks">
+    /// A function that returns a record containing event handlers for the asynchronous chat completion, such as on success and on error.
+    /// </param>
+    /// <remarks>
+    /// This procedure initiates an asynchronous request to generate a chat completion based on the provided parameters. The response or error is handled by the provided callBacks.
+    /// <code>
+    /// // WARNING - Move the following line into the main OnCreate
+    /// //var Gemini := TGeminiFactory.CreateInstance(BaererKey);
+    /// Gemini.Chat.AsynCreate(
+    ///   procedure (Params: TChatParams)
+    ///   begin
+    ///     // Define chat parameters
+    ///   end,
+    ///   function: TAsynChat
+    ///   begin
+    ///     Result.Sender := Memo1;  // Instance passed to callback parameter
+    ///
+    ///     Result.OnStart := nil;   // If nil then; Can be omitted
+    ///
+    ///     Result.OnSuccess := procedure (Sender: TObject; Chat: TChat)
+    ///     begin
+    ///       var M := Sender as TMemo; // Because Result.Sender = Memo1
+    ///       // Handle success operation
+    ///     end;
+    ///
+    ///     Result.OnError := procedure (Sender: TObject; Value: string)
+    ///     begin
+    ///       // Handle error message
+    ///     end;
+    ///   end);
+    /// </code>
+    /// </remarks>
     procedure AsynCreate(const ModelName: string; ParamProc: TProc<TChatParams>;
       CallBacks: TFunc<TAsynChat>);
+    /// <summary>
+    /// Creates an asynchronous streaming chat completion request.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure used to configure the parameters for the chat request, including the model, messages, and additional options such as max tokens and streaming mode.
+    /// </param>
+    /// <param name="CallBacks">
+    /// A function that returns a <c>TAsynChatStream</c> record which contains event handlers for managing different stages of the streaming process: progress updates, success, errors, and cancellation.
+    /// </param>
+    /// <remarks>
+    /// This procedure initiates an asynchronous chat operation in streaming mode, where tokens are progressively received and processed.
+    /// The provided event handlers allow for handling progress (i.e., receiving tokens in real time), detecting success, managing errors, and enabling cancellation logic.
+    /// <code>
+    /// CheckBox1.Checked := False;  //Click to stop the streaming
+    /// // WARNING - Move the following line into the main OnCreate
+    /// //var Gemini := TGeminiFactory.CreateInstance(BaererKey);
+    /// Gemini.Chat.AsynCreateStream(
+    ///   procedure(Params: TChatParams)
+    ///   begin
+    ///     // Define chat parameters
+    ///   end,
+    ///
+    ///   function: TAsynChatStream
+    ///   begin
+    ///     Result.Sender := Memo1; // Instance passed to callback parameter
+    ///     Result.OnProgress :=
+    ///         procedure (Sender: TObject; Chat: TChat)
+    ///         begin
+    ///           // Handle progressive updates to the chat response
+    ///         end;
+    ///     Result.OnSuccess :=
+    ///         procedure (Sender: TObject)
+    ///         begin
+    ///           // Handle success when the operation completes
+    ///         end;
+    ///     Result.OnError :=
+    ///         procedure (Sender: TObject; Value: string)
+    ///         begin
+    ///           // Handle error message
+    ///         end;
+    ///     Result.OnDoCancel :=
+    ///         function: Boolean
+    ///         begin
+    ///           Result := CheckBox1.Checked; // Click on checkbox to cancel
+    ///         end;
+    ///     Result.OnCancellation :=
+    ///         procedure (Sender: TObject)
+    ///         begin
+    ///           // Processing when process has been canceled
+    ///         end;
+    ///   end);
+    /// </code>
+    /// </remarks>
     procedure AsynCreateStream(const ModelName: string; ParamProc: TProc<TChatParams>;
       CallBacks: TFunc<TAsynChatStream>);
-
+    /// <summary>
+    /// Creates a completion for the chat message using the provided parameters.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure used to configure the parameters for the chat request, such as selecting the model, providing messages, setting token limits, etc.
+    /// </param>
+    /// <returns>
+    /// Returns a <c>TChat</c> object that contains the chat response, including the choices generated by the model.
+    /// </returns>
+    /// <exception cref="GeminiExceptionAPI">
+    /// Thrown when there is an error in the communication with the API or other underlying issues in the API call.
+    /// </exception>
+    /// <exception cref="GeminiExceptionInvalidRequestError">
+    /// Thrown when the request is invalid, such as when required parameters are missing or values exceed allowed limits.
+    /// </exception>
+    /// <remarks>
+    /// The <c>Create</c> method sends a chat completion request and waits for the full response. The returned <c>TChat</c> object contains the model's generated response, including multiple choices if available.
+    ///
+    /// Example usage:
+    /// <code>
+    ///   var Gemini := TGeminiFactory.CreateInstance(BaererKey);
+    ///   var Chat := Gemini.Chat.Create(
+    ///     procedure (Params: TChatParams)
+    ///     begin
+    ///       // Define chat parameters
+    ///     end);
+    ///   try
+    ///     for var Item in Chat.Candidates do
+    ///       WriteLn(Item.Text);
+    ///   finally
+    ///     Chat.Free;
+    ///   end;
+    /// </code>
+    /// </remarks>
     function Create(const ModelName: string; ParamProc: TProc<TChatParams>): TChat;
+    /// <summary>
+    /// Creates a chat message completion with a streamed response.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure used to configure the parameters for the chat request, such as selecting the model, providing messages, and adjusting other settings like token limits or temperature.
+    /// </param>
+    /// <param name="Event">
+    /// A callback of type <c>TChatEvent</c> that is triggered with each chunk of data received during the streaming process. It includes the current state of the <c>TChat</c> object, a flag indicating if the stream is done, and a boolean to handle cancellation.
+    /// </param>
+    /// <returns>
+    /// Returns <c>True</c> if the streaming process started successfully, <c>False</c> otherwise.
+    /// </returns>
+    /// <remarks>
+    /// This method initiates a chat request in streaming mode, where the response is delivered incrementally in real-time.
+    /// The <c>Event</c> callback will be invoked multiple times as tokens are received.
+    /// When the response is complete, the <c>IsDone</c> flag will be set to <c>True</c>, and the <c>Chat</c> object will be <c>nil</c>.
+    /// The streaming process can be interrupted by setting the <c>Cancel</c> flag to <c>True</c> within the event.
+    ///
+    /// Example usage:
+    /// <code>
+    ///   var Gemini := TGeminiFactory.CreateInstance(BaererKey);
+    ///   Gemini.Chat.CreateStream(
+    ///     procedure (Params: TChatParams)
+    ///     begin
+    ///       // Define chat parameters
+    ///       Params.Stream(True);
+    ///     end,
+    ///
+    ///     procedure(var Chat: TChat; IsDone: Boolean; var Cancel: Boolean)
+    ///     begin
+    ///       // Handle displaying
+    ///     end
+    ///   );
+    /// </code>
+    /// </remarks>
     function CreateStream(const ModelName: string; ParamProc: TProc<TChatParams>; Event: TChatEvent): Boolean;
   end;
 
@@ -715,23 +1922,27 @@ begin
         end;
       Temp.AddPair('allowedFunctionNames', JSONArray);
     end;
-
   Result := TChatParams(Add('toolConfig',
               TJSONObject.Create.AddPair('function_calling_config', Temp)));
 end;
 
-function TChatParams.Tools(const Value: TArray<TToolPluginParams>): TChatParams;
+function TChatParams.Tools(const Value: TArray<IFunctionCore>): TChatParams;
 begin
   var JSONFuncs := TJSONArray.Create;
   for var Item in value do
     begin
-      JSONFuncs.Add(Item.ToJson);
+      JSONFuncs.Add(TToolPluginParams.Add(Item).ToJson);
     end;
   var JSONDeclaration := TJSONObject.Create.AddPair('function_declarations', JSONFuncs);
+  Result := TChatParams(Add('tools', TJSONArray.Create.Add(JSONDeclaration)));
+end;
 
-  var JSONTool := TJSONArray.Create.Add(JSONDeclaration);
-
-  Result := TChatParams(Add('tools', JSONTool));
+function TChatParams.Tools(const CodeExecution: Boolean): TChatParams;
+begin
+  if not CodeExecution then
+    Exit(Self);
+  var JSONCodeExecution := TJSONObject.Create.AddPair('codeExecution', TJSONObject.Create);
+  Result := TChatParams(Add('tools', TJSONArray.Create.Add(JSONCodeExecution)));
 end;
 
 { TMessageRoleHelper }
@@ -927,6 +2138,12 @@ begin
 end;
 
 function TGenerationConfig.ResponseSchema(
+  const Value: TJSONObject): TGenerationConfig;
+begin
+  Result := TGenerationConfig(Add('responseSchema', Value));
+end;
+
+function TGenerationConfig.ResponseSchema(
   const ParamProc: TProcRef<TSchemaParams>): TGenerationConfig;
 begin
   if Assigned(ParamProc) then
@@ -949,7 +2166,6 @@ function TGenerationConfig.StopSequences(
 begin
   if Length(Value) = 0 then
     Exit(Self);
-
   Result := TGenerationConfig(Add('stopSequences', Value));
 end;
 
@@ -988,6 +2204,8 @@ destructor TChatPart.Destroy;
 begin
   if Assigned(FFunctionCall) then
     FFunctionCall.Free;
+  if Assigned(FFunctionResponse) then
+    FFunctionResponse.Free;
   if Assigned(FInlineData) then
     FInlineData.Free;
   if Assigned(FFileData) then
@@ -1015,6 +2233,18 @@ class function TContentPayload.Add(const Role: TMessageRole;
   const Text: string; const Attached: TArray<string>): TContentPayload;
 begin
   Result := TContentPayload.Create.Role(Role).Parts(Text, Attached);
+end;
+
+class function TContentPayload.Assistant(
+  const Attached: TArray<string>): TContentPayload;
+begin
+  Result := Add(TMessageRole.model, Attached);
+end;
+
+class function TContentPayload.Assistant(const Value: string;
+  const Attached: TArray<string>): TContentPayload;
+begin
+  Result := Add(Value, Attached).Role(TMessageRole.model);
 end;
 
 class function TContentPayload.Add(const Role: TMessageRole;
@@ -1052,6 +2282,18 @@ end;
 function TContentPayload.Role(const Value: TMessageRole): TContentPayload;
 begin
   Result := TContentPayload(Add('role', Value.ToString));
+end;
+
+class function TContentPayload.User(
+  const Attached: TArray<string>): TContentPayload;
+begin
+  Result := Add(TMessageRole.user, Attached);
+end;
+
+class function TContentPayload.User(const Value: string;
+  const Attached: TArray<string>): TContentPayload;
+begin
+  Result := Add(Value, Attached).Role(TMessageRole.user);
 end;
 
 function TContentPayload.Parts(const Value: string;

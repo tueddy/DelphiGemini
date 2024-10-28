@@ -7,6 +7,9 @@ uses
   Gemini.API.Params;
 
 type
+  /// <summary>
+  /// Block at and beyond a specified harm probability.
+  /// </summary>
   THarmBlockThreshold = (
     /// <summary>
     /// Threshold is unspecified.
@@ -38,6 +41,12 @@ type
     function ToString: string;
   end;
 
+  /// <summary>
+  /// The category of a rating.
+  /// </summary>
+  /// <remarks>
+  /// These categories cover various kinds of harms that developers may wish to adjust.
+  /// </remarks>
   THarmCategory = (
     /// <summary>
     /// Harassment content.
@@ -86,6 +95,9 @@ type
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// Specifies the reason why the prompt was blocked.
+  /// </summary>
   TBlockReason = (
     /// <summary>
     /// Default value. This value is unused.
@@ -119,6 +131,12 @@ type
     procedure StringReverter(Data: TObject; Field: string; Arg: string); override;
   end;
 
+  /// <summary>
+  /// The probability that a piece of content is harmful.
+  /// </summary>
+  /// <remarks>
+  /// The classification system gives the probability of the content being unsafe. This does not indicate the severity of harm for a piece of content.
+  /// </remarks>
   THarmProbability = (
     /// <summary>
     /// Probability is unspecified.

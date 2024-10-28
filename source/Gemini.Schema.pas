@@ -7,6 +7,9 @@ uses
   Gemini.API.Params;
 
 type
+  /// <summary>
+  /// Type contains the list of OpenAPI data types as defined by https://spec.openapis.org/oas/v3.0.3#data-types
+  /// </summary>
   TSchemaType = (
     /// <summary>
     /// Not specified, should not be used.
