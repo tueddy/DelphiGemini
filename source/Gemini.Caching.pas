@@ -14,6 +14,13 @@ uses
   Gemini.Tools, Gemini.Async.Support, Gemini.Chat, Gemini.Functions.Core;
 
 type
+  /// <summary>
+  /// Represents parameters for configuring cached content in the caching API.
+  /// </summary>
+  /// <remarks>
+  /// Use this class to set various parameters when creating or updating cached content.
+  /// Supports method chaining for setting multiple parameters in a fluent style.
+  /// </remarks>
   TCacheParams = class(TJSONParam)
   public
     /// <summary>
