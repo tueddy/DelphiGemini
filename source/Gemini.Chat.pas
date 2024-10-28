@@ -406,7 +406,7 @@ type
     /// </summary>
     function MimeType(const Value: string): TFileData;
     /// <summary>
-    ///
+    /// Uri of thsdata
     /// </summary>
     function FileUri(const Value: string): TFileData;
   end;
@@ -803,80 +803,139 @@ type
   end;
 
   /// <summary>
-  /// The <c>TChatParams</c> class represents the set of parameters used to configure a chat interaction with an AI model.
+  /// Represents the set of parameters used to configure a chat interaction with an AI model.
   /// </summary>
   /// <remarks>
-  /// This class allows you to define various settings that control how the model behaves, including which model to use, how many tokens to generate,
-  /// what kind of messages to send, and how the model should handle its output. By using this class, you can fine-tune the AI's behavior and response format
-  /// based on your application's specific needs.
-  /// <para>
-  /// It inherits from <c>TJSONParam</c>, which provides methods for handling and serializing the parameters as JSON, allowing seamless integration
-  /// with JSON-based APIs.
-  /// </para>
+  /// The <c>TChatParams</c> class allows you to define various settings that control how the AI model behaves during a chat session.
+  /// You can specify the messages to send, tools the model can use, safety settings, system instructions, and generation configurations.
+  /// By customizing these parameters, you can fine-tune the AI's responses to better suit your application's needs.
   /// </remarks>
   TChatParams = class(TJSONParam)
     /// <summary>
-    /// Required. The content of the current conversation with the model.
+    /// Sets the content of the current conversation with the model.
     /// </summary>
+    /// <param name="Value">
+    /// An array of <c>TContentPayload</c> instances representing the messages exchanged in the conversation, including both user and assistant messages.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// For single-turn queries, this is a single instance. For multi-turn queries like chat, this is a repeated field that contains the conversation history and the latest request.
+    /// For single-turn queries, this array contains a single message. For multi-turn conversations, include the entire conversation history and the latest message.
     /// </remarks>
     function Contents(const Value: TArray<TContentPayload>): TChatParams;
     /// <summary>
-    /// Optional. A list of Tools the Model may use to generate the next response.
+    /// Specifies a list of tools that the model may use to generate the next response.
     /// </summary>
+    /// <param name="Value">
+    /// An array of <c>IFunctionCore</c> instances representing the tools available to the model.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// A Tool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the Model. Supported Tools are Function and codeExecution. Refer to the Function calling and the Code execution guides to learn more.
+    /// A tool is a piece of code that allows the model to interact with external systems or perform actions outside its knowledge base.
+    /// Supported tools include functions and code execution capabilities. Refer to the Function Calling and Code Execution guides for more information.
     /// </remarks>
     function Tools(const Value: TArray<IFunctionCore>): TChatParams; overload;
     /// <summary>
-    /// Optional. A list of Tools the Model may use to generate the next response.
+    /// Specifies whether code execution is available as a tool for the model.
     /// </summary>
+    /// <param name="CodeExecution">
+    /// A boolean value where <c>True</c> enables code execution as a tool, and <c>False</c> disables it.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// A Tool is a piece of code that enables the system to interact with external systems to perform an action, or set of actions, outside of knowledge and scope of the Model. Supported Tools are Function and codeExecution. Refer to the Function calling and the Code execution guides to learn more.
+    /// When enabled, the model can generate code that can be executed to perform tasks.
     /// </remarks>
     function Tools(const CodeExecution: Boolean): TChatParams; overload;
     /// <summary>
-    /// Optional. Tool configuration for any Tool specified in the request.
+    /// Configures the tool settings for any tools specified in the request.
     /// </summary>
+    /// <param name="Value">
+    /// A <c>TToolMode</c> value specifying the mode in which tools are used by the model.
+    /// </param>
+    /// <param name="AllowedFunctionNames">
+    /// Optional. An array of strings representing the names of functions that the model is allowed to use.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// Refer to the Function calling guide for a usage example.
+    /// Use this method to specify how the model should use the available tools, including restricting which functions can be called.
+    /// Refer to the Function Calling guide for usage examples.
     /// </remarks>
     function ToolConfig(const Value: TToolMode; AllowedFunctionNames: TArray<string> = []): TChatParams;
     /// <summary>
-    /// Optional. A list of unique SafetySetting instances for blocking unsafe content.
+    /// Specifies safety settings to block unsafe content.
     /// </summary>
+    /// <param name="Value">
+    /// An array of <c>TSafety</c> instances representing safety settings for different harm categories.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// This will be enforced on the GenerateContentRequest.contents and GenerateContentResponse.candidates. There should not be more than one setting for each SafetyCategory type. The API will block any contents and responses that fail to meet the thresholds set by these settings. This list overrides the default settings for each SafetyCategory specified in the safetySettings. If there is no SafetySetting for a given SafetyCategory provided in the list, the API will use the default safety setting for that category. Harm categories HARM_CATEGORY_HATE_SPEECH, HARM_CATEGORY_SEXUALLY_EXPLICIT, HARM_CATEGORY_DANGEROUS_CONTENT, HARM_CATEGORY_HARASSMENT are supported. Refer to the guide for detailed information on available safety settings. Also refer to the Safety guidance to learn how to incorporate safety considerations in your AI applications.
+    /// These settings are enforced on both the request and the response.
+    /// There should not be more than one setting for each safety category.
+    /// The API will block any content that fails to meet the thresholds set by these settings.
+    /// This list overrides the default settings for each specified category.
+    /// If a category is not specified, the API uses the default safety setting for that category.
+    /// Supported harm categories include <c>HARM_CATEGORY_HATE_SPEECH</c>, <c>HARM_CATEGORY_SEXUALLY_EXPLICIT</c>, <c>HARM_CATEGORY_DANGEROUS_CONTENT</c>, and <c>HARM_CATEGORY_HARASSMENT</c>.
+    /// Refer to the documentation for detailed information on available safety settings and how to incorporate safety considerations into your application.
     /// </remarks>
     function SafetySettings(const Value: TArray<TSafety>): TChatParams;
     /// <summary>
-    /// Optional. Developer set system instruction(s).
+    /// Sets developer-defined system instructions for the model.
     /// </summary>
+    /// <param name="Value">
+    /// A string containing the system instruction text.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// Currently, text only.
+    /// Use this to provide guidelines or constraints for the model's behavior during the chat session.
     /// </remarks>
     function SystemInstruction(const Value: string): TChatParams;
     /// <summary>
-    /// Optional. Configuration options for model generation and outputs.
+    /// Configures generation options for the model's outputs.
     /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure reference that receives a <c>TGenerationConfig</c> instance to configure various generation settings.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// See the configuration options for model generation and outputs. Not all parameters are configurable for every model.
+    /// Use this method to specify parameters such as temperature, maximum tokens, response format, and other generation options.
+    /// Not all parameters are configurable for every model.
     /// </remarks>
     function GenerationConfig(const ParamProc: TProcRef<TGenerationConfig>): TChatParams;
     /// <summary>
-    /// Optional. The name of the content cached to use as context to serve the prediction.
+    /// Specifies the name of the cached content to use as context for the prediction.
     /// </summary>
+    /// <param name="Value">
+    /// A string representing the name of the cached content in the format <c>"cachedContents/{cachedContent}"</c>.
+    /// </param>
+    /// <returns>
+    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// </returns>
     /// <remarks>
-    /// Format: cachedContents/{cachedContent}
+    /// Use this to provide additional context to the model by referencing pre-cached content.
     /// </remarks>
     function CachedContent(const Value: string): TChatParams;
     /// <summary>
-    ///
+    /// Creates a new <c>TChatParams</c> instance and allows configuration through a procedure reference.
     /// </summary>
-    /// <remarks>
-    ///
-    /// </remarks>
+    /// <param name="ParamProc">
+    /// A procedure reference that receives a <c>TChatParams</c> instance to configure its properties.
+    /// </param>
+    /// <returns>
+    /// Returns a new configured <c>TChatParams</c> instance.
+    /// </returns>
     class function New(const ParamProc: TProcRef<TChatParams>): TChatParams; overload;
   end;
 
@@ -1086,9 +1145,6 @@ type
     /// Result of executing the ExecutableCode.
     /// </summary>
     property CodeExecutionResult: TCodeExecutionResult read FCodeExecutionResult write FCodeExecutionResult;
-    /// <summary>
-    ///
-    /// </summary>
     destructor Destroy; override;
   end;
 
