@@ -481,7 +481,7 @@ end;
 function TCacheParams.ToolConfig(const Value: TToolMode;
   AllowedFunctionNames: TArray<string>): TCacheParams;
 begin
-  var Temp := TJSONObject.Create.AddPair('mode', Value.ToString);
+  var JSONResult := TJSONObject.Create.AddPair('mode', Value.ToString);
   if Length(AllowedFunctionNames) > 0 then
     begin
       var JSONArray := TJSONArray.Create;
@@ -489,11 +489,10 @@ begin
         begin
           JSONArray.Add(Item);
         end;
-      Temp.AddPair('allowedFunctionNames', JSONArray);
+      JSONResult.AddPair('allowedFunctionNames', JSONArray);
     end;
-
   Result := TCacheParams(Add('toolConfig',
-              TJSONObject.Create.AddPair('function_calling_config', Temp)));
+              TJSONObject.Create.AddPair('function_calling_config', JSONResult)));
 end;
 
 function TCacheParams.Tools(const CodeExecution: Boolean): TCacheParams;
@@ -513,10 +512,7 @@ begin
       JSONFuncs.Add(TToolPluginParams.Add(Item).ToJson);
     end;
   var JSONDeclaration := TJSONObject.Create.AddPair('function_declarations', JSONFuncs);
-
-  var JSONTool := TJSONArray.Create.Add(JSONDeclaration);
-
-  Result := TCacheParams(Add('tools', JSONTool));
+  Result := TCacheParams(Add('tools', TJSONArray.Create.Add(JSONDeclaration)));
 end;
 
 function TCacheParams.ttl(const Value: string): TCacheParams;
