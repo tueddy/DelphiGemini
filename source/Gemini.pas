@@ -97,9 +97,27 @@ type
     /// An instance of TEmbeddingsRoute for embedding-related operations.
     /// </returns>
     property Embeddings: TEmbeddingsRoute read GetEmbeddingsRoute;
-    // TODO
+    /// <summary>
+    /// Provides access to the file management API.
+    /// </summary>
+    /// <returns>
+    /// An instance of TFilesRoute for file-related operations.
+    /// </returns>
     property Files: TFilesRoute read GetFilesRoute;
+    /// <summary>
+    /// Provides access to the caching management API.
+    /// </summary>
+    /// <returns>
+    /// An instance of TFilesRoute for file-related operations.
+    /// </returns>
     property Caching: TCachingRoute read GetCachingRoute;
+    /// <summary>
+    /// Provides access to fine-tuning API for user and organization.
+    /// Allows managing fine-tuning jobs.
+    /// </summary>
+    /// <returns>
+    /// An instance of TFineTuningRoute for fine-tuning operations.
+    /// </returns>
     property FineTune: TFineTuneRoute read GetFineTuneRoute;
   end;
 
@@ -224,9 +242,27 @@ type
     /// An instance of TEmbeddingsRoute for embedding-related operations.
     /// </returns>
     property Embeddings: TEmbeddingsRoute read GetEmbeddingsRoute;
-    // TODO
+    /// <summary>
+    /// Provides access to the file management API.
+    /// </summary>
+    /// <returns>
+    /// An instance of TFilesRoute for file-related operations.
+    /// </returns>
     property Files: TFilesRoute read GetFilesRoute;
+    /// <summary>
+    /// Provides access to the caching management API.
+    /// </summary>
+    /// <returns>
+    /// An instance of TFilesRoute for file-related operations.
+    /// </returns>
     property Caching: TCachingRoute read GetCachingRoute;
+    /// <summary>
+    /// Provides access to fine-tuning API for user and organization.
+    /// Allows managing fine-tuning jobs.
+    /// </summary>
+    /// <returns>
+    /// An instance of TFineTuningRoute for fine-tuning operations.
+    /// </returns>
     property FineTune: TFineTuneRoute read GetFineTuneRoute;
   public
     /// <summary>
