@@ -136,6 +136,15 @@ type
     /// Returns the updated <c>TCacheParams</c> instance, allowing for method chaining.
     /// </returns>
     function SystemInstruction(const Value: string): TCacheParams;
+    /// <summary>
+    /// Creates a new <c>TCacheParams</c> instance and allows configuration through a procedure reference.
+    /// </summary>
+    /// <param name="ParamProc">
+    /// A procedure reference that receives a <c>TCacheParams</c> instance to configure its properties.
+    /// </param>
+    /// <returns>
+    /// Returns a new configured <c>TCacheParams</c> instance.
+    /// </returns>
     class function New(ParamProc: TProcRef<TCacheParams>): TCacheParams; static;
   end;
 
@@ -304,6 +313,39 @@ type
     /// <remarks>
     /// This method initiates an asynchronous operation to create cached content.
     /// The provided callbacks will be invoked to handle success, error, and progress updates.
+    /// <para>
+    /// Example :
+    /// </para>
+    /// <code>
+    ///   ASynCreate(
+    ///    procedure (Params: TCacheParams)
+    ///    begin
+    ///      // Set parameters
+    ///    end,
+    ///
+    ///    function : TAsynCache
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; Cache: TCache)
+    ///        begin
+    ///          // Trigger the success method
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
     /// </remarks>
     procedure ASynCreate(ParamProc: TProc<TCacheParams>; CallBacks: TFunc<TAsynCache>); overload;
     /// <summary>
@@ -314,6 +356,34 @@ type
     /// <remarks>
     /// Use this method when you have the cache parameters prepared in a JSON format.
     /// The method takes ownership of the provided JSON object and will free it after use.
+    /// <para>
+    /// Example :
+    /// </para>
+    /// <code>
+    ///   ASynCreate(Value,
+    ///    function : TAsynCache
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; Cache: TCache)
+    ///        begin
+    ///          // Trigger the success method
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
     /// </remarks>
     procedure ASynCreate(const Value: TJSONObject; CallBacks: TFunc<TAsynCache>); overload;
     /// <summary>
@@ -325,6 +395,36 @@ type
     /// <remarks>
     /// If <c>PageToken</c> is empty, the first page is returned.
     /// The provided callbacks will be invoked as the operation progresses.
+    /// <para>
+    /// Example :
+    /// </para>
+    /// <code>
+    ///   // Declare the variable "Next" as a string type earlier in the code.
+    ///   ASynList(PageSize, Next
+    ///    function : TAsynCacheContents
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; CacheContents: TCacheContents)
+    ///        begin
+    ///          // Trigger the success method
+    ///          Next := CacheContents.NextPageToken;
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
     /// </remarks>
     procedure ASynList(const PageSize: Integer; const PageToken: string;
       CallBacks: TFunc<TAsynCacheContents>);
@@ -333,18 +433,34 @@ type
     /// </summary>
     /// <param name="CacheName">The unique name of the cached content to retrieve, in the format 'cachedContents/{id}'.</param>
     /// <param name="CallBacks">A function that returns asynchronous callbacks for handling the operation's lifecycle.</param>
-    procedure ASynRetrieve(const CacheName: string; CallBacks: TFunc<TAsynCache>);
-    /// <summary>
-    /// Asynchronously updates a cached content using specified parameters.
-    /// </summary>
-    /// <param name="CacheName">The unique name of the cached content to update.</param>
-    /// <param name="ParamProc">A procedure to configure the update parameters.</param>
-    /// <param name="CallBacks">A function that returns asynchronous callbacks for handling the operation's lifecycle.</param>
     /// <remarks>
-    /// Only the TTL can be updated for a cached content.
+    /// <code>
+    ///   ASynRetrieve('CacheName_to_retrieve',
+    ///    function : TAsynCache
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; Cache: TCache)
+    ///        begin
+    ///          // Trigger the success method
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
     /// </remarks>
-    procedure ASynUpdate(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>;
-      CallBacks: TFunc<TAsynCache>); overload;
+    procedure ASynRetrieve(const CacheName: string; CallBacks: TFunc<TAsynCache>);
     /// <summary>
     /// Asynchronously updates the TTL (Time To Live) of a cached content.
     /// </summary>
@@ -353,8 +469,79 @@ type
     /// <param name="CallBacks">A function that returns asynchronous callbacks for handling the operation's lifecycle.</param>
     /// <remarks>
     /// This overload simplifies updating the TTL without the need to specify other parameters.
+    /// <para>
+    /// Example :
+    /// </para>
+    /// <code>
+    ///   ASynUpdate(CacheName, '2500s',
+    ///    function : TAsynCache
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; Cache: TCache)
+    ///        begin
+    ///          // Trigger the success method
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
     /// </remarks>
     procedure ASynUpdate(const CacheName: string; const ttl: string;
+      CallBacks: TFunc<TAsynCache>); overload;
+    /// <summary>
+    /// Asynchronously updates a cached content using specified parameters.
+    /// </summary>
+    /// <param name="CacheName">The unique name of the cached content to update.</param>
+    /// <param name="ParamProc">A procedure to configure the update parameters.</param>
+    /// <param name="CallBacks">A function that returns asynchronous callbacks for handling the operation's lifecycle.</param>
+    /// <remarks>
+    /// Only the TTL can be updated for a cached content.
+    /// <para>
+    /// Example :
+    /// </para>
+    /// <code>
+    ///   ASynUpdate(CacheName,
+    ///    procedure (Params: TCacheUpdateParams)
+    ///    begin
+    ///      // Set parameters
+    ///    end,
+    ///    function : TAsynCache
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; Cache: TCache)
+    ///        begin
+    ///          // Trigger the success method
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
+    /// </remarks>
+    procedure ASynUpdate(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>;
       CallBacks: TFunc<TAsynCache>); overload;
     /// <summary>
     /// Asynchronously deletes a cached content by its name.
@@ -363,17 +550,36 @@ type
     /// <param name="CallBacks">A function that returns asynchronous callbacks for handling the operation's lifecycle.</param>
     /// <remarks>
     /// Upon successful deletion, the callbacks will be invoked with the result.
+    /// <para>
+    /// Example :
+    /// </para>
+    /// <code>
+    ///   ASynDelete(CacheName,
+    ///    function : TAsynCacheDelete
+    ///    begin
+    ///      Result.Sender := my_display_component;
+    ///
+    ///      Result.OnStart :=
+    ///        procedure (Sender: TObject)
+    ///        begin
+    ///           // Trigger the start method
+    ///        end;
+    ///
+    ///      Result.OnSuccess :=
+    ///        procedure (Sender: TObject; Cache: TCacheDelete)
+    ///        begin
+    ///          // Trigger the success method
+    ///        end;
+    ///
+    ///      Result.OnError :=
+    ///        procedure (Sender: TObject; Error: string)
+    ///        begin
+    ///          // Trigger the error method
+    ///        end;
+    ///    end);
+    /// </code>
     /// </remarks>
     procedure ASynDelete(const CacheName: string; CallBacks: TFunc<TAsynCacheDelete>);
-    /// <summary>
-    /// Synchronously creates a new cached content using specified parameters.
-    /// </summary>
-    /// <param name="ParamProc">A procedure to configure the cache parameters.</param>
-    /// <returns>The created <c>TCache</c> object representing the cached content.</returns>
-    /// <remarks>
-    /// This method blocks until the cached content is created.
-    /// </remarks>
-    function Create(ParamProc: TProc<TCacheParams>): TCache; overload;
     /// <summary>
     /// Synchronously creates a new cached content from a JSON object.
     /// </summary>
@@ -383,6 +589,30 @@ type
     /// The method takes ownership of the provided JSON object and will free it after use.
     /// </remarks>
     function Create(const Value: TJSONObject): TCache; overload;
+    /// <summary>
+    /// Synchronously creates a new cached content using specified parameters.
+    /// </summary>
+    /// <param name="ParamProc">A procedure to configure the cache parameters.</param>
+    /// <returns>The created <c>TCache</c> object representing the cached content.</returns>
+    /// <remarks>
+    /// This method blocks until the cached content is created.
+    /// <para>
+    /// Example
+    /// </para>
+    /// <code>
+    ///   var Cache := Create(
+    ///     procedure (Params: TCacheParams)
+    ///     begin
+    ///       // Set parameters
+    ///     end);
+    ///   try
+    ///     // Do something
+    ///   finally
+    ///     Cache.Free;
+    ///   end;
+    /// </code>
+    /// </remarks>
+    function Create(ParamProc: TProc<TCacheParams>): TCache; overload;
     /// <summary>
     /// Synchronously lists cached contents with pagination support.
     /// </summary>
@@ -400,16 +630,6 @@ type
     /// <returns>The retrieved <c>TCache</c> object representing the cached content.</returns>
     function Retrieve(const CacheName: string): TCache;
     /// <summary>
-    /// Synchronously updates a cached content using specified parameters.
-    /// </summary>
-    /// <param name="CacheName">The unique name of the cached content to update.</param>
-    /// <param name="ParamProc">A procedure to configure the update parameters.</param>
-    /// <returns>The updated <c>TCache</c> object representing the cached content.</returns>
-    /// <remarks>
-    /// Only the TTL can be updated for a cached content.
-    /// </remarks>
-    function Update(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>): TCache; overload;
-    /// <summary>
     /// Synchronously updates a cached content from a JSON object.
     /// </summary>
     /// <param name="CacheName">The unique name of the cached content to update.</param>
@@ -418,7 +638,7 @@ type
     /// <remarks>
     /// The method takes ownership of the provided JSON object and will free it after use.
     /// </remarks>
-    function Update(const CacheName: string; Value: TJSONObject): TCache; overload;
+    function Update(const CacheName: string; const Value: TJSONObject): TCache; overload;
     /// <summary>
     /// Synchronously updates the TTL (Time To Live) of a cached content.
     /// </summary>
@@ -429,6 +649,31 @@ type
     /// This overload simplifies updating the TTL without the need to specify other parameters.
     /// </remarks>
     function Update(const CacheName: string; const ttl: string): TCache; overload;
+    /// <summary>
+    /// Synchronously updates a cached content using specified parameters.
+    /// </summary>
+    /// <param name="CacheName">The unique name of the cached content to update.</param>
+    /// <param name="ParamProc">A procedure to configure the update parameters.</param>
+    /// <returns>The updated <c>TCache</c> object representing the cached content.</returns>
+    /// <remarks>
+    /// Only the TTL can be updated for a cached content.
+    /// <para>
+    /// Example
+    /// </para>
+    /// <code>
+    ///   var Cache := Create(
+    ///     procedure (Params: TCacheUpdateParams)
+    ///     begin
+    ///       // Set parameters
+    ///     end);
+    ///   try
+    ///     // Do something
+    ///   finally
+    ///     Cache.Free;
+    ///   end;
+    /// </code>
+    /// </remarks>
+    function Update(const CacheName: string; ParamProc: TProc<TCacheUpdateParams>): TCache; overload;
     /// <summary>
     /// Synchronously deletes a cached content by its name.
     /// </summary>
@@ -694,6 +939,12 @@ begin
   Result := API.Get<TCache>(CacheName);
 end;
 
+function TCachingRoute.Update(const CacheName: string;
+  const Value: TJSONObject): TCache;
+begin
+  Result := API.Patch<TCache>(CacheName, Value);
+end;
+
 function TCachingRoute.Update(const CacheName, ttl: string): TCache;
 begin
   var Cache := TCacheUpdateParams.Create.ttl(ttl);
@@ -702,12 +953,6 @@ begin
   finally
     Cache.Free;
   end;
-end;
-
-function TCachingRoute.Update(const CacheName: string;
-  Value: TJSONObject): TCache;
-begin
-  Result := API.Patch<TCache>(CacheName, Value);
 end;
 
 function TCachingRoute.Update(const CacheName: string;

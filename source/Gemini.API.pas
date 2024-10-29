@@ -337,7 +337,7 @@ uses
   REST.Json;
 
 const
-  FieldsToString : TArray<string> = ['"args": {', '"response": {'];
+  FieldsToString : TArray<string> = ['"args": {', '"response": {', '"metadata": {'];
 
 constructor TGeminiAPI.Create;
 begin

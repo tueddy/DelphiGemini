@@ -227,7 +227,7 @@ type
     /// Gemini.Models.AsynList(
     ///    function : TAsynModels
     ///    begin
-    ///      Result.Sender := Memo1;
+    ///      Result.Sender := my_display_component;
     ///
     ///      Result.OnStart :=
     ///        procedure (Sender: TObject);
@@ -238,7 +238,6 @@ type
     ///      Result.OnSuccess :=
     ///        procedure (Sender: TObject; List: TModels)
     ///        begin
-    ///          var M := Sender as TMemo;
     ///          // Handle the display
     ///        end;
     ///
@@ -247,9 +246,7 @@ type
     ///        begin
     ///          // Handle the error message
     ///        end;
-    ///
-    ///    end
-    ///  );
+    ///    end);
     /// </code>
     /// </remarks>
     procedure AsynList(CallBacks: TFunc<TAsynModels>); overload;
@@ -276,7 +273,7 @@ type
     /// Gemini.Models.AsynList(5, Next,
     ///    function : TAsynModels
     ///    begin
-    ///      Result.Sender := Memo1;
+    ///      Result.Sender := my_display_component;
     ///
     ///      Result.OnStart :=
     ///        procedure (Sender: TObject);
@@ -287,7 +284,6 @@ type
     ///      Result.OnSuccess :=
     ///        procedure (Sender: TObject; List: TModels)
     ///        begin
-    ///          var M := Sender as TMemo;
     ///          // Handle the display
     ///          Next := List.NextPageToken;
     ///        end;
@@ -297,15 +293,13 @@ type
     ///        begin
     ///          // Handle the error message
     ///        end;
-    ///
-    ///    end
-    ///  );
+    ///    end);
     /// </code>
     /// </remarks>
     procedure AsynList(const PageSize: Integer; const PageToken: string;
       CallBacks: TFunc<TAsynModels>); overload;
     /// <summary>
-    /// Asynchronously retrieves a specific model by its name, ensuring the name is properly formatted.
+    /// Asynchronously retrieves a specific model by its name.
     /// </summary>
     /// <param name="ModelName">
     /// The name of the model to retrieve. If the model name does not already start with 'models/',
@@ -315,20 +309,16 @@ type
     /// A <c>TFunc&lt;TAsynModel&gt;</c> representing the callback to handle the asynchronous result, including
     /// the start, success, and error handling processes.
     /// </param>
-    /// <param name="LowerCase">
-    /// An optional boolean flag (default: False). If set to True, the model name will be converted to lowercase
-    /// before processing. This ensures uniformity when querying the API asynchronously.
-    /// </param>
     /// <remarks>
     /// This method sends a request to the API to asynchronously retrieve a specific model by its name.
     /// The <paramref name="ModelName"/> parameter is required and can be automatically adjusted with the
     /// <c>LowerCase</c> flag. The model name will be properly formatted to ensure compatibility with the
     /// LLM Gemini framework.
     /// <code>
-    /// Gemini.Models.AsynList('Gemini-1.5-flash',
+    /// Gemini.Models.AsynList('models/Gemini-1.5-flash',
     ///     function : TAsynModel
     ///     begin
-    ///       Result.Sender := Memo1;
+    ///       Result.Sender := my_display_component;
     ///
     ///       Result.OnStart :=
     ///         procedure (Sender: TObject)
@@ -348,13 +338,10 @@ type
     ///         begin
     ///           // Handle the error message
     ///         end
-    ///     end,
-    ///     True);  // Optional LowerCase flag
+    ///     end);
     /// </code>
-    /// The <c>LowerCase</c> flag ensures that model names are standardized before retrieval in asynchronous calls.
     /// </remarks>
-    procedure AsynList(const ModelName: string; CallBacks: TFunc<TAsynModel>;
-      LowerCase: Boolean = False); overload;
+    procedure AsynList(const ModelName: string; CallBacks: TFunc<TAsynModel>); overload;
     /// <summary>
     /// Retrieves the list of all available models.
     /// </summary>
@@ -407,15 +394,10 @@ type
     /// </remarks>
     function List(const PageSize: Integer; const PageToken: string): TModels; overload;
     /// <summary>
-    /// Retrieves a specific model by its name, ensuring the name is properly formatted.
+    /// Retrieves a specific model by its name.
     /// </summary>
     /// <param name="ModelName">
-    /// The name of the model to retrieve. If the model name does not already start with 'models/',
-    /// it will be prefixed with 'models/'.
-    /// </param>
-    /// <param name="LowerCase">
-    /// An optional boolean flag (default: False). If set to True, the model name will be converted to lowercase
-    /// before processing, ensuring uniformity when querying the API.
+    /// The name of the model to retrieve. If the model name does not already start with 'models/', it will be prefixed with 'models/'.
     /// </param>
     /// <returns>
     /// A <c>TModel</c> object representing the requested model.
@@ -425,16 +407,15 @@ type
     /// parameter is required and can be automatically adjusted with the <c>LowerCase</c> flag. The model name
     /// will be properly formatted to ensure compatibility with the LLM Gemini framework.
     /// <code>
-    /// var Model := Gemini.Models.List('Gemini-1.5-flash', True);
+    /// var Model := Gemini.Models.List('models/Gemini-1.5-flash');
     /// try
-    ///    WriteLn( Model.DisplayName );
+    ///   WriteLn( Model.DisplayName );
     /// finally
-    ///    Model.Free;
+    ///   Model.Free;
     /// end;
     /// </code>
-    /// The <c>LowerCase</c> flag ensures that model names are standardized before retrieval.
     /// </remarks>
-    function List(const ModelName: string; LowerCase: Boolean = False): TModel; overload;
+    function List(const ModelName: string): TModel; overload;
   end;
 
 implementation
@@ -488,7 +469,7 @@ begin
 end;
 
 procedure TModelsRoute.AsynList(const ModelName: string;
-  CallBacks: TFunc<TAsynModel>; LowerCase: Boolean);
+  CallBacks: TFunc<TAsynModel>);
 begin
   with TAsynCallBackExec<TAsynModel, TModel>.Create(CallBacks) do
   try
@@ -499,7 +480,7 @@ begin
     Run(
       function: TModel
       begin
-        Result := List(ModelName, LowerCase);
+        Result := List(ModelName);
       end);
   finally
     Free;
@@ -511,15 +492,15 @@ begin
   Result := API.Get<TModels>('models');
 end;
 
-function TModelsRoute.List(const ModelName: string; LowerCase: Boolean): TModel;
-begin
-  Result := API.Get<TModel>(ModelName);
-end;
-
 function TModelsRoute.List(const PageSize: Integer;
   const PageToken: string): TModels;
 begin
   Result := API.Get<TModels>('models', ParamsBuilder(PageSize, PageToken));
+end;
+
+function TModelsRoute.List(const ModelName: string): TModel;
+begin
+  Result := API.Get<TModel>(ModelName);
 end;
 
 end.
