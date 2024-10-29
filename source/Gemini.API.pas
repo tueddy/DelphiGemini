@@ -36,60 +36,93 @@ type
   GeminiExceptionAPI = class(Exception);
 
   /// <summary>
-  /// An InvalidRequestError indicates that your request was malformed or
-  /// missing some required parameters, such as a token or an input.
-  /// This could be due to a typo, a formatting error, or a logic error in your code.
+  /// The request body is malformed.
+  /// <para>
+  /// There is a typo, or a missing required field in your request.
+  /// </para>
   /// </summary>
-  GeminiExceptionInvalidRequestError = class(GeminiException);
+  /// <remarks>
+  /// Check the API reference for request format, examples, and supported versions. Using features from a newer API version with an older endpoint can cause errors.
+  /// </remarks>
+  GeminiExceptionInvalidArgument = class(GeminiException);
 
   /// <summary>
-  /// A `RateLimitError` indicates that you have hit your assigned rate limit.
-  /// This means that you have sent too many tokens or requests in a given period of time,
-  /// and our services have temporarily blocked you from sending more.
+  /// The API key doesn't have the required permissions.
+  /// <para>
+  /// Wrong API key is used; trying to use a tuned model without going through proper authentication.
+  /// </para>
   /// </summary>
-  GeminiExceptionRateLimitError = class(GeminiException);
+  /// <remarks>
+  /// Check that the API key is set and has the right access. And make sure to go through proper authentication to use tuned models.
+  /// </remarks>
+  GeminiExceptionPermissionDenied = class(GeminiException);
 
   /// <summary>
-  /// An `AuthenticationError` indicates that your API key or token was invalid,
-  /// expired, or revoked. This could be due to a typo, a formatting error, or a security breach.
+  /// The requested resource wasn't found.
+  /// <para>
+  /// An image, audio, or video file referenced in your request was not found.
+  /// </para>
   /// </summary>
-  GeminiExceptionAuthenticationError = class(GeminiException);
+  /// <remarks>
+  /// Check if all parameters in your request are valid for your API version.
+  /// </remarks>
+  GeminiExceptionNotFound = class(GeminiException);
 
   /// <summary>
-  /// This error message indicates that your account is not part of an organization
+  /// The rate limit have been exceeded.
+  /// <para>
+  /// Too many requests per minute with the free tier Gemini API.
+  /// </para>
   /// </summary>
-  GeminiExceptionPermissionError = class(GeminiException);
+  /// <remarks>
+  /// Ensure you're within the model's rate limit. Request a quota increase if needed.
+  /// </remarks>
+  GeminiExceptionResourceExhausted = class(GeminiException);
+
+  /// <summary>
+  /// An unexpected error occurred on Google's side.
+  /// <para>
+  /// The input context is too long.
+  /// </para>
+  /// </summary>
+  /// <remarks>
+  /// Reduce your input context or temporarily switch to another model (e.g. from Gemini 1.5 Pro to Gemini 1.5 Flash) and see if it works. Or wait a bit and retry your request. If the issue persists after retrying, please report it using the Send feedback button in Google AI Studio.
+  /// </remarks>
+  GeminiExceptionInternal = class(GeminiException);
+
+  /// <summary>
+  /// The service may be temporarily overloaded or down.
+  /// <para>
+  /// The service is temporarily running out of capacity.
+  /// </para>
+  /// </summary>
+  /// <remarks>
+  /// Temporarily switch to another model (e.g. from Gemini 1.5 Pro to Gemini 1.5 Flash) and see if it works. Or wait a bit and retry your request. If the issue persists after retrying, please report it using the Send feedback button in Google AI Studio.
+  /// </remarks>
+  GeminiExceptionUnavailable = class(GeminiException);
+
+  /// <summary>
+  /// The service is unable to finish processing within the deadline.
+  /// <para>
+  /// The prompt (or context) is too large to be processed in time.
+  /// </para>
+  /// </summary>
+  /// <remarks>
+  /// Set a larger 'timeout' in your client request to avoid this error.
+  /// </remarks>
+  GeminiExceptionDeadlineExceeded = class(GeminiException);
+
+
 
   /// <summary>
   /// An `InvalidResponse` error occurs when the API response is either empty or not in the expected format.
   /// This error indicates that the API did not return a valid response that can be processed, possibly due to a server-side issue,
   /// a malformed request, or unexpected input data.
   /// </summary>
+  /// <remarks>
+  /// Check if all parameters in your request are valid for your API version.
+  /// </remarks>
   GeminiExceptionInvalidResponse = class(GeminiException);
-
-  /// <summary>
-  /// An `InvalidResponse` error occurs when the API response is either empty or not in the expected format.
-  /// This error indicates that the API did not return a valid response that can be processed, possibly due to a server-side issue,
-  /// a malformed request, or unexpected input data.
-  /// </summary>
-  GeminiExceptionNotFoundError = class(GeminiException);
-
-  /// <summary>
-  /// Une erreur `not_found_error` se produit lorsque la ressource demandée n'a pas été trouvée.
-  /// Cette erreur indique que l'API n'a pas renvoyé de réponse valide pouvant être traitée, probablement en raison d'un problème côté serveur,
-  /// d'une demande mal formulée ou de données d'entrée inattendues.
-  /// </summary>
-  GeminiExceptionRequestTooLarge = class(GeminiException);
-
-  /// <summary>
-  /// An `api_error` error occurs when an unexpected error has occurred internal to Gemini’s systems
-  /// </summary>
-  GeminiExceptionAPIError = class(GeminiException);
-
-  /// <summary>
-  /// An `overloaded_error` error occurs when Gemini’s API is temporarily overloaded.
-  /// </summary>
-  GeminiExceptionOverloadedError = class(GeminiException);
 
   TGeminiAPI = class
   public
@@ -591,21 +624,19 @@ procedure TGeminiAPI.RaiseError(Code: Int64; Error: TErrorCore);
 begin
   case Code of
     400:
-      raise GeminiExceptionInvalidRequestError.Create(Code, Error);
-    401:
-      raise GeminiExceptionAuthenticationError.Create(Code, Error);
+      raise GeminiExceptionInvalidArgument.Create(Code, Error);
     403:
-      raise GeminiExceptionPermissionError.Create(Code, Error);
+      raise GeminiExceptionPermissionDenied.Create(Code, Error);
     404:
-      raise GeminiExceptionNotFoundError.Create(Code, Error);
-    413:
-      raise GeminiExceptionRequestTooLarge.Create(Code, Error);
+      raise GeminiExceptionNotFound.Create(Code, Error);
     429:
-      raise GeminiExceptionRateLimitError.Create(Code, Error);
+      raise GeminiExceptionResourceExhausted.Create(Code, Error);
     500:
-      raise GeminiExceptionAPIError.Create(Code, Error);
-    529:
-      raise GeminiExceptionOverloadedError.Create(Code, Error);
+      raise GeminiExceptionInternal.Create(Code, Error);
+    503:
+      raise GeminiExceptionUnavailable.Create(Code, Error);
+    504:
+      raise GeminiExceptionDeadlineExceeded.Create(Code, Error);
   else
     raise GeminiException.Create(Code, Error);
   end;
