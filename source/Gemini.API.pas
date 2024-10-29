@@ -112,8 +112,6 @@ type
   /// </remarks>
   GeminiExceptionDeadlineExceeded = class(GeminiException);
 
-
-
   /// <summary>
   /// An `InvalidResponse` error occurs when the API response is either empty or not in the expected format.
   /// This error indicates that the API did not return a valid response that can be processed, possibly due to a server-side issue,
