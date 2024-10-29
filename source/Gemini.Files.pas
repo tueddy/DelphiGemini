@@ -621,7 +621,7 @@ type
     /// Asynchronously deletes a specified file from the Gemini API.
     /// </summary>
     /// <param name="FileName">
-    /// The name of the file to be deleted.
+    /// Example: files/abc-123 It takes the form files/{filename}.
     /// </param>
     /// <param name="CallBacks">
     /// A callback function that handles the asynchronous response encapsulated in a <c>TAsynFileDelete</c> object.
@@ -658,7 +658,7 @@ type
     /// Asynchronously retrieves the content and metadata of a specified file from the Gemini API.
     /// </summary>
     /// <param name="FileName">
-    /// The name of the file to be retrieved.
+    /// Example: files/abc-123 It takes the form files/{filename}.
     /// </param>
     /// <param name="CallBacks">
     /// A callback function that handles the asynchronous response encapsulated in a <c>TAsynFileContent</c> object.
@@ -728,7 +728,7 @@ type
     /// Synchronously deletes a specified file from the Gemini API.
     /// </summary>
     /// <param name="FileName">
-    /// The name of the file to be deleted.
+    /// Example: files/abc-123 It takes the form files/{filename}.
     /// </param>
     /// <returns>
     /// An instance of <c>TFileDelete</c> representing the result of the delete operation.
@@ -738,7 +738,7 @@ type
     /// Synchronously retrieves the content and metadata of a specified file from the Gemini API.
     /// </summary>
     /// <param name="FileName">
-    /// The name of the file to be retrieved.
+    /// Example: files/abc-123 It takes the form files/{filename}.
     /// </param>
     /// <returns>
     /// An instance of <c>TFileContent</c> containing the file's metadata and content.
@@ -860,7 +860,7 @@ end;
 
 function TFilesRoute.Delete(const FileName: string): TFileDelete;
 begin
-  Result := API.Delete<TFileDelete>(CheckFileName(FileName));
+  Result := API.Delete<TFileDelete>(FileName);
 end;
 
 function TFilesRoute.List(const PageSize: Integer;
@@ -871,7 +871,7 @@ end;
 
 function TFilesRoute.Retrieve(const FileName: string): TFileContent;
 begin
-  Result := API.Get<TFileContent>(CheckFileName(FileName));
+  Result := API.Get<TFileContent>(FileName);
 end;
 
 function TFilesRoute.Upload(const FilePath, DisplayName: string): TFile;

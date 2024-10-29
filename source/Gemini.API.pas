@@ -244,7 +244,6 @@ type
     /// </remarks>
     function SetModel(const ModelName: string; const Supp: string = ''): string;
 
-    function SetFile(const Path: string): string;
   public
     /// <summary>
     /// Initializes the <c>TGeminiAPIModel</c> class by creating necessary
@@ -293,12 +292,26 @@ type
     /// The page size is mandatory, and the page token is optional but will be included in the query if provided.
     /// </remarks>
     function ParamsBuilder(const PageSize: Integer; const PageToken: string = ''): string; overload;
+    /// <summary>
+    /// Builds the query string parameters for pagination when fetching models, including an optional filter.
+    /// </summary>
+    /// <param name="PageSize">
+    /// The number of models to retrieve per page.
+    /// </param>
+    /// <param name="PageToken">
+    /// An optional token used for fetching the next page of results.
+    /// </param>
+    /// <param name="Filter">
+    /// An optional filter string used to refine the results based on specific criteria.
+    /// </param>
+    /// <returns>
+    /// A string containing the formatted query parameters, including the page size, optional page token, and filter.
+    /// </returns>
+    /// <remarks>
+    /// The <c>ParamsBuilder</c> method constructs the query string for paginated model requests with an optional filter.
+    /// The page size is mandatory, while the page token and filter are optional but will be included in the query if provided.
+    /// </remarks>
     function ParamsBuilder(const PageSize: Integer; const PageToken, Filter: string): string; overload;
-  end;
-
-  TGeminiAPIFileName = class(TGeminiAPIRequestParams)
-  protected
-    function CheckFileName(const Value: string): string;
   end;
 
   /// <summary>
@@ -312,7 +325,7 @@ type
   /// <c>TGeminiAPI</c>, allowing for the execution of API requests tailored to
   /// the defined route.
   /// </remarks>
-  TGeminiAPIRoute = class(TGeminiAPIFileName)
+  TGeminiAPIRoute = class(TGeminiAPIRequestParams)
   private
     /// <summary>
     /// The instance of <c>TGeminiAPI</c> used to perform API requests for this route.
@@ -1019,16 +1032,10 @@ begin
   GeminiLock.Free;
 end;
 
-function TGeminiAPIModel.SetFile(const Path: string): string;
-begin
-  Result := Path;
-end;
-
 function TGeminiAPIModel.SetModel(const ModelName: string; const Supp: string): string;
 begin
   if ModelName.Trim.IsEmpty then
     raise Exception.Create('Error: Unknown model name provided.');
-
   Result := ModelName.Trim;
   CurrentModel := Result;
   if not Supp.Trim.IsEmpty then
@@ -1051,15 +1058,6 @@ begin
   Result := ParamsBuilder(PageSize, PageToken);
   if not Filter.IsEmpty then
     Result := Format('%s&&filter=%s', [Result, Filter]);
-end;
-
-{ TGeminiAPIFileName }
-
-function TGeminiAPIFileName.CheckFileName(const Value: string): string;
-begin
-  Result := Value;
-  if not Result.ToLower.StartsWith('files/') then
-    Result := 'files/' + Result;
 end;
 
 end.
