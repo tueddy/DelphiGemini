@@ -126,14 +126,17 @@ type
   public
     const
       URL_BASE = 'https://generativelanguage.googleapis.com';
+      VERSION_BASE = 'v1beta';
   private
     FHTTPClient: THTTPClient;
     FToken: string;
     FBaseUrl: string;
+    FVersion: string;
     FOrganization: string;
     FCustomHeaders: TNetHeaders;
     procedure SetToken(const Value: string);
     procedure SetBaseUrl(const Value: string);
+    procedure SetVersion(const Value: string);
     procedure SetOrganization(const Value: string);
     procedure RaiseError(Code: Int64; Error: TErrorCore);
     procedure ParseError(const Code: Int64; const ResponseText: string);
@@ -171,9 +174,7 @@ type
     function Patch<TResult: class, constructor; TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
     function Patch<TResult: class, constructor; TParams: TJSONParam>(const Path, UriParams: string; ParamProc: TProc<TParams>): TResult; overload;
     function Patch<TResult: class, constructor>(const Path, Params: string; ParamJSON: TJSONObject): TResult; overload;
-
     function Patch<TResult: class, constructor>(const Path: string; ParamJSON: TJSONObject): TResult; overload;
-
     function Post<TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>; Response: TStringStream; Event: TReceiveDataCallback): Boolean; overload;
     function Post<TResult: class, constructor; TParams: TJSONParam>(const Path: string; ParamProc: TProc<TParams>): TResult; overload;
     function Post<TResult: class, constructor>(const Path: string; ParamJSON: TJSONObject): TResult; overload;
@@ -187,6 +188,7 @@ type
     destructor Destroy; override;
     property Token: string read FToken write SetToken;
     property BaseUrl: string read FBaseUrl write SetBaseUrl;
+    property Version: string read FVersion write SetVersion;
     property Organization: string read FOrganization write SetOrganization;
     property Client: THTTPClient read FHTTPClient;
     property CustomHeaders: TNetHeaders read FCustomHeaders write SetCustomHeaders;
@@ -376,6 +378,7 @@ begin
   FHTTPClient := THTTPClient.Create;
   FToken := EmptyStr;
   FBaseUrl := URL_BASE;
+  FVersion := VERSION_BASE;
 end;
 
 constructor TGeminiAPI.Create(const AToken: string);
@@ -706,12 +709,12 @@ end;
 
 function TGeminiAPI.GetPatchURL(const Path, Params: string): string;
 begin
-  Result := Format('%s/v1beta/%s?key=%s&&updateMask=%s', [FBaseURL, Path, Token, Params]);
+  Result := Format('%s/%s/%s?key=%s&&updateMask=%s', [FBaseURL, Fversion, Path, Token, Params]);
 end;
 
 function TGeminiAPI.GetRequestURL(const Path, Params: string): string;
 begin
-  Result := Format('%s/v1beta/%s?key=%s%s', [FBaseURL, Path, Token, Params]);
+  Result := Format('%s/%s/%s?key=%s%s', [FBaseURL, FVersion, Path, Token, Params]);
 end;
 
 function TGeminiAPI.GetRequestFilesURL(const Path: string): string;
@@ -721,7 +724,7 @@ end;
 
 function TGeminiAPI.GetRequestURL(const Path: string): string;
 begin
-  Result := Format('%s/v1beta/%s?key=%s', [FBaseURL, Path, Token]);
+  Result := Format('%s/%s/%s?key=%s', [FBaseURL, FVersion, Path, Token]);
 end;
 
 procedure TGeminiAPI.CheckAPI;
@@ -896,6 +899,11 @@ end;
 procedure TGeminiAPI.SetToken(const Value: string);
 begin
   FToken := Value;
+end;
+
+procedure TGeminiAPI.SetVersion(const Value: string);
+begin
+  FVersion := Value;
 end;
 
 function TGeminiAPI.ToStringValueFor(const Value: string): string;
