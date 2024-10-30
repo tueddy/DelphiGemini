@@ -179,6 +179,20 @@ The previous example displays the models in batches of 5.
 **Embeddings** are numerical representations of text inputs that enable a variety of unique applications, including *clustering*, *measuring similarity*, and *information retrieval*. For an introduction, take a look at the [Embeddings guide](https://ai.google.dev/gemini-api/docs/embeddings). <br/>
 See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/gemini#text-embedding).
 
+In the following examples, we will use the procedure, 'Display' to simplify the examples.
+
+```Pascal
+  procedure Display(Sender: TObject; const Chat: TChat);
+  begin
+    var M := Sender as TMemo;
+    for var Item in Embed.Embedding.Values do
+      begin
+        M.Lines.Text := M.Text + sLineBreak + Item.ToString;
+      end;
+    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+  end;
+```
+
 1. **Synchronously** : Get the vector representation of the text *'This is an example'*.
 
 ```Pascal
@@ -189,19 +203,11 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
             begin
               Params.Content(['This is an example']);
             end);
-
-  var M := Memo1; //Set a TMemo on the form
+  //For displaying, add a TMemo on the form
   try
-     M.Lines.BeginUpdate;
-     try
-       for var Item in Integration.Embedding.Values do
-         M.Text := M.Text + sLineBreak + Item.ToString;
-       M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-     finally
-       M.Lines.EndUpdate;
-     end;
+    Display(Memo1, Integration)
   finally
-     Integration.Free;
+    Integration.Free;
   end;
 ```
 
@@ -231,30 +237,11 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
               end)
            ]);
        end,
-
+       //For displaying, add a TMemo on the form
        function : TAsynEmbeddings
        begin
          Result.Sender := Memo1; // Set a TMemo on the form
-
-         Result.OnSuccess :=
-           procedure (Sender: TObject; Integration: TEmbeddings)
-           begin
-             var M := Sender as TMemo;
-             M.Lines.BeginUpdate;
-             try
-               for var Item in Integration.Embeddings do
-                 begin
-                   for var Value in Item.Values do
-                     begin
-                       M.Text := M.Text + sLineBreak + Value.ToString;
-                     end;
-                   M.Text := M.Text + sLineBreak;
-                 end;
-               M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-             finally
-               M.Lines.EndUpdate;
-             end;
-           end
+         Result.OnSuccess := Display;
        end);  
 ```
 <br/>
@@ -284,6 +271,7 @@ In the following examples, we will use two procedures, 'Display' and 'DisplayErr
             begin
               M.Lines.Text := M.Text + sLineBreak + SubItem.Text;
             end;
+        M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
       end;
   end;
 ```
@@ -293,6 +281,7 @@ In the following examples, we will use two procedures, 'Display' and 'DisplayErr
   begin
     var M := Sender as TMemo;
     M.Lines.Text := M.Text + sLineBreak + Error;
+    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;  
 ```
 
@@ -309,7 +298,6 @@ Synchronous mode
     begin
       Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
     end);
-
   //For displaying, add a TMemo on the form
   try
     Display(Memo1, Chat);
