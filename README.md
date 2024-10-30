@@ -17,6 +17,7 @@ ___
     - [Embeddings](#embeddings)
     - [Generate text](#Generate-text)
         - [Generate text from text-only input](#Generate-text-from-text-only-input)
+        - [Generate a text stream](#Generate-a-text-stream)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -336,6 +337,21 @@ Asynchronous mode
       Result.OnSuccess := Display;
       Result.OnError := DisplayError;
     end);
+```
+
+In this example, the prompt ("Write a story about a magic backpack") doesn’t include output examples, system instructions, or formatting details, making it a zero-shot approach. In some cases, using a one-shot or few-shot prompt could generate responses that better match user expectations. You might also consider adding system instructions to guide the model in understanding the task or following specific guidelines.
+
+<br/>
+
+### Generate a text stream
+
+The model typically returns a response only after finishing the entire text generation process. Faster interactions can be achieved by enabling streaming, allowing partial results to be handled as they’re generated.
+
+The example below demonstrates how to implement streaming using the streamGenerateContent method to generate text from a text-only input prompt.
+
+```Pascal
+// uses Gemini, Gemini.Chat;
+
 ```
 
 <br/>
