@@ -17,6 +17,7 @@ ___
     - [Embeddings](#embeddings)
     - [Generate text](#Generate-text)
         - [Generate text from text-only input](#Generate-text-from-text-only-input)
+        - [Generate text from text-and-image input](#Generate-text-from-text-and-image-input)
         - [Generate a text stream](#Generate-a-text-stream)
         - [Build an interactive chat](#Build-an-interactive-chat)
         - [Configure text generation](#Configure-text-generation)
@@ -343,6 +344,30 @@ Asynchronous mode
 ```
 
 In this example, the prompt ("Write a story about a magic backpack") doesn’t include output examples, system instructions, or formatting details, making it a [`zero-shot`](https://ai.google.dev/gemini-api/docs/models/generative-models#zero-shot-prompts) approach. In some cases, using a [`one-shot`](https://ai.google.dev/gemini-api/docs/models/generative-models#one-shot-prompts) or [`few-shot`](https://ai.google.dev/gemini-api/docs/models/generative-models#few-shot-prompts) prompt could generate responses that better match user expectations. You might also consider adding [`system instructions`](https://ai.google.dev/gemini-api/docs/system-instructions?lang=rest) to guide the model in understanding the task or following specific guidelines.
+
+<br/>
+
+### Generate text from text-and-image input
+
+The Gemini API supports multimodal inputs that combine text with media files. The example below demonstrates how to generate text from an input that includes both text and images.
+
+```Pascal
+  var Ref := 'D:\MyFolder\Images\Image.png';
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Describe this image.', [Ref])]);
+    end,
+    // For displaying, add a TMemo on the form
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := DisplayError;
+    end);
+```
+
+In multimodal prompting, as with text-only prompting, various strategies and refinements can be applied. Based on the results from this example, you may want to add additional steps to the prompt or provide more specific instructions. For further information, [refer to strategies for file-based prompting](https://ai.google.dev/gemini-api/docs/file-prompting-strategies).
 
 <br/>
 
