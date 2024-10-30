@@ -160,7 +160,7 @@ The previous example displays the models in batches of 5.
 
 // Set a TMemo on the form
 
-  Gemini.Models.AsynList('Gemini-1.5-flash',
+  Gemini.Models.AsynList('models/Gemini-1.5-flash',
     function : TAsynModel
     begin
       Result.OnSuccess :=
@@ -198,7 +198,7 @@ In the following examples, we will use the procedure, 'Display' to simplify the 
 ```Pascal
 // uses Gemini, Gemini.Embeddings; 
 
-  var Integration := Gemini.Embeddings.Create('text-embedding-004',
+  var Integration := Gemini.Embeddings.Create('models/text-embedding-004',
             procedure (Params: TEmbeddingParams)
             begin
               Params.Content(['This is an example']);
@@ -217,7 +217,7 @@ In the following examples, we will use the procedure, 'Display' to simplify the 
 ```Pascal
 // uses Gemini, Gemini.Embeddings; 
 
-    Gemini.Embeddings.AsynCreateBatch('text-embedding-004',
+    Gemini.Embeddings.AsynCreateBatch('models/text-embedding-004',
        procedure (Parameters: TEmbeddingBatchParams)
        begin
          Parameters.Requests(
