@@ -19,8 +19,8 @@ ___
         - [GenerateContent](#GenerateContent)
         - [StreamGenerateContent](#StreamGenerateContent)
     - [Chat asynchronous](#Chat-asynchronous)
-        - [](#)
-        - [](#)
+        - [GenerateContent](#GenerateContent)
+        - [StreamGenerateContent](#StreamGenerateContent)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -279,11 +279,11 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
 
 <br/>
 
-### GenerateContent
+### `GenerateContent`
 
 <br/>
 
-### StreamGenerateContent
+### `StreamGenerateContent`
 
 <br/>
 
