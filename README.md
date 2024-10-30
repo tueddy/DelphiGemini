@@ -276,9 +276,9 @@ The Gemini API enables [`text generation`](https://ai.google.dev/api/generate-co
 - Chatbots
 - Your own unique use cases
 
-In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
 
-> [!NOTE]
+
+> [!NOTE] In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
 >```Pascal
 >  procedure Display(Sender: TObject; Chat: TChat); overload;
 >  begin
