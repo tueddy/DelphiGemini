@@ -15,12 +15,8 @@ ___
     - [Asynchronous callback mode management](#Asynchronous-callback-mode-management)
     - [Gemini Models Overview](#Gemini-Models-Overview)
     - [Embeddings](#embeddings)
-    - [Chat synchronous](#Chat-synchronous)
-        - [GenerateContent](#GenerateContent)
-        - [StreamGenerateContent](#StreamGenerateContent)
-    - [Chat asynchronous](#Chat-asynchronous)
-        - [GenerateContent](#GenerateContent)
-        - [StreamGenerateContent](#StreamGenerateContent)
+    - [Generate text](#Generate-text)
+        - [Generate text from text-only input](#Generate-text-from-text-only-input)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -263,29 +259,64 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
 ```
 <br/>
 
-## Chat synchronous
+## Generate text
+
+The Gemini API enables text generation from a variety of inputs, including text, images, video, and audio. It can be used for a range of applications, such as:
+
+- Creative writing
+- Describing or interpreting media assets
+- Text completion
+- Summarizing open-form text
+- Translating between languages
+- Chatbots
+- Your own unique use cases
+
+In the following examples, we will use two procedures, 'Display' and 'DisplayError,' to simplify the examples.
+
+```Pascal
+  procedure Display(Sender: TObject; const Chat: TChat);
+  begin
+    var M := Sender as TMemo;
+    for var Item in Chat.Candidates do
+      begin
+        if Item.FinishReason = STOP then
+          for var SubItem in Item.Content.Parts do
+            begin
+              M.Lines.Text := M.Text + sLineBreak + SubItem.Text;
+            end;
+      end;
+  end;
+```
+
+```Pascal
+  procedure DisplayError(Sender: TObject; Error: string);
+  begin
+    var M := Sender as TMemo;
+    M.Lines.Text := M.Text + sLineBreak + Error;
+  end;  
+```
 
 <br/>
 
-### `GenerateContent`
+### Generate text from text-only input
 
-<br/>
+```Pascal
+// uses Gemini, Gemini.Chat;
 
-### `StreamGenerateContent`
+  var Chat := Gemini.Chat.Create('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
+    end);
 
-<br/>
+  //For displaying, add a TMemo on the form
+  try
+    Display(Memo1, Chat);
+  finally
+    Chat.Free;
+  end;
+```
 
-## Chat asynchronous
-
-<br/>
-
-### `GenerateContent`
-
-<br/>
-
-### `StreamGenerateContent`
-
-<br/>
 
 # Contributing
 
