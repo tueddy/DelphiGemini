@@ -499,10 +499,12 @@ Here's an example demonstrating how to adjust several of these options.
     procedure (Params: TChatParams)
     begin
       Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
+
       {--- Specifies safety settings to block unsafe content. }
       Params.SafetySettings([
         TSafety.DangerousContent(BLOCK_ONLY_HIGH),
         TSafety.HateSpeech(BLOCK_MEDIUM_AND_ABOVE) ]);
+
       {--- Configures generation options for the model's outputs. }
       Params.GenerationConfig(
         procedure (var Params: TGenerationConfig)
