@@ -493,6 +493,35 @@ Each prompt sent to the model includes settings that control how responses are g
  
 Here's an example demonstrating how to adjust several of these options.
 
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Safety;
+  var GenerateContent := Gemini.Chat.Create('models/gemini-1.5-flash',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
+      {--- Specifies safety settings to block unsafe content. }
+      Params.SafetySettings([
+        TSafety.DangerousContent(BLOCK_ONLY_HIGH),
+        TSafety.HateSpeech(BLOCK_MEDIUM_AND_ABOVE) ]);
+      {--- Configures generation options for the model's outputs. }
+      Params.GenerationConfig(
+        procedure (var Params: TGenerationConfig)
+        begin
+          Params.StopSequences(['Title']);
+          Params.Temperature(1.0);
+          Params.MaxOutputTokens(800);
+          Params.TopP(0.8);
+          Params.TopK(10);
+        end);
+    end);
+```
+
+- The Gemini API offers adjustable safety settings that you can configure during the prototyping phase to decide if your application needs a stricter or more flexible safety setup. [Refer to the official documentation](https://ai.google.dev/gemini-api/docs/safety-settings).
+See also the `Gemini.Safety.pas` unit and the `TSafety` record.
+
+- The generation configuration allows for setting up the output production of a model. A complete description of the manageable parameters can be found at the following [`GitHub address`](https://github.com/google-gemini/generative-ai-python/blob/main/docs/api/google/generativeai/types/GenerationConfig.md). Internally, these parameters are defined within the `TGenerationConfig` class, which extends TJSONParam in the `Gemini.Chat.pas` unit.
+
+
 <br/>
 
 # Contributing
