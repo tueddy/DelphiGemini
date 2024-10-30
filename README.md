@@ -379,6 +379,7 @@ Declare this method for displaying.
     begin
       Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
     end,
+    // For displaying, add a TMemo on the form
     procedure (var Chat: TChat; IsDone: Boolean; var Cancel: Boolean)
     begin
       if IsDone then
@@ -419,6 +420,7 @@ Here’s an example of a basic chat implementation:
         TPayload.User('I have two dogs in my house. How many paws are in my house?')
       ]);
     end,
+    // For displaying, add a TMemo on the form
     procedure (var Chat: TChat; IsDone: Boolean; var Cancel: Boolean)
     begin
       if IsDone then
@@ -437,6 +439,45 @@ Here’s an example of a basic chat implementation:
             end;
         end;
     end);  
+```
+<br/>
+
+Here’s an example of a asynchronous chat implementation
+
+Declare this method for displaying.
+```Pascal
+  procedure DisplayStream(Sender: TObject; Chat: TChat);
+  begin
+    Display(Sender, Chat.Candidates[0]);
+  end;
+```
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Safety;
+
+  Gemini.Chat.AsynCreateStream('models/gemini-1.5-flash',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([
+        TPayload.User('Hello'),
+        TPayload.Assistant('Great to meet you. What would you like to know?'),
+        TPayload.User('I have two dogs in my house. How many paws are in my house?')
+      ]);
+    end,
+    // For displaying, add a TMemo on the form    
+    function : TAsynChatStream
+    begin
+      Result.Sender := Memo1;
+      Result.OnProgress := DisplayStream;
+      Result.OnSuccess :=
+        procedure (Sender: TObject)
+        begin
+          var M := Sender as TMemo;
+          M.Lines.Text := M.Text + sLineBreak;
+          M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+        end;
+      Result.OnError := DisplayError;
+    end);
 ```
 
 <br/>
