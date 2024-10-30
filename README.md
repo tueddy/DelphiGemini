@@ -22,6 +22,7 @@ ___
         - [Build an interactive chat](#Build-an-interactive-chat)
         - [Configure text generation](#Configure-text-generation)
     - [Document processing](#Document-processing)
+        - [Upload a document and generate content](#Upload-a-document-and-generate-content)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -580,6 +581,12 @@ To achieve optimal results:
 Ensure pages are oriented correctly before uploading. Use **high-quality images** without blurring. If uploading a single page, add the text prompt following the page.
 
 There aren’t any strict pixel limits for documents beyond the model’s context capacity. Larger pages are scaled down to a maximum of **3072x3072 pixels** while keeping their aspect ratio, whereas smaller pages are scaled up to **768x768 pixels**. However, there’s no cost savings for using smaller images, other than reduced bandwidth, nor any performance boost for higher-resolution pages.
+
+<br/>
+
+### Upload a document and generate content
+
+
 
 <br/>
 
