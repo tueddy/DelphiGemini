@@ -18,6 +18,7 @@ ___
     - [Generate text](#Generate-text)
         - [Generate text from text-only input](#Generate-text-from-text-only-input)
         - [Generate a text stream](#Generate-a-text-stream)
+        - [Build an interactive chat](#Build-an-interactive-chat)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -349,9 +350,93 @@ The model typically returns a response only after finishing the entire text gene
 
 The example below demonstrates how to implement streaming using the streamGenerateContent method to generate text from a text-only input prompt.
 
-```Pascal
-// uses Gemini, Gemini.Chat;
+Declare this method for displaying.
 
+```Pascal
+  procedure Display(Sender: TObject; Candidate: TChatCandidate); overload;
+  begin
+    var M := Sender as TMemo;
+    var Buffer := Candidate.Content.Parts[0].Text;
+    for var i := 1 to Length(Buffer) do
+      begin
+        M.Lines.Text := M.Text + Buffer[i];
+        M.Lines.BeginUpdate;
+        try
+          Application.ProcessMessages;
+          M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+        finally
+          M.Lines.EndUpdate;
+        end;
+      end;
+  end;
+```
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Safety;
+
+  Gemini.Chat.CreateStream('models/gemini-1.5-flash',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
+    end,
+    procedure (var Chat: TChat; IsDone: Boolean; var Cancel: Boolean)
+    begin
+      if IsDone then
+        begin
+          Memo1.Lines.Text := Memo1.Text + sLineBreak;
+          Memo1.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+        end;
+      if Assigned(Chat) then
+        begin
+          for var Item in Chat.Candidates do
+            begin
+              if Item.FinishReason <> TFinishReason.SAFETY then
+                begin
+                  Display(Memo1, Item);
+                end;
+            end;
+        end;
+    end);
+```
+
+<br/>
+
+### Build an interactive chat
+
+You can leverage the Gemini API to create interactive chat experiences tailored for your users. By using the API’s chat feature, you can gather multiple rounds of questions and responses, enabling users to progress gradually toward their answers or receive assistance with complex, multi-part issues. This functionality is especially useful for applications that require continuous communication, such as chatbots, interactive learning tools, or customer support assistants.
+
+Here’s an example of a basic chat implementation:
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Safety;
+
+  Gemini.Chat.CreateStream('models/gemini-1.5-flash',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([
+        TPayload.User('Hello'),
+        TPayload.Assistant('Great to meet you. What would you like to know?'),
+        TPayload.User('I have two dogs in my house. How many paws are in my house?')
+      ]);
+    end,
+    procedure (var Chat: TChat; IsDone: Boolean; var Cancel: Boolean)
+    begin
+      if IsDone then
+        begin
+          Memo1.Lines.Text := Memo1.Text + sLineBreak;
+          Memo1.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+        end;
+      if Assigned(Chat) then
+        begin
+          for var Item in Chat.Candidates do
+            begin
+              if Item.FinishReason <> TFinishReason.SAFETY then
+                begin
+                  Display(Memo1, Item);
+                end;
+            end;
+        end;
+    end);  
 ```
 
 <br/>
