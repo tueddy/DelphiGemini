@@ -561,6 +561,26 @@ The Gemini API can handle and perform inference on uploaded PDF documents. Once 
 
 This guide illustrates various methods for prompting the Gemini API using uploaded PDF documents. All outputs are text-only.
 
+The `Gemini 1.5 Pro` and `1.5 Flash` models can handle up to **3,600 pages** per document. Supported file types for text data include:
+
+- PDF: `application/pdf`
+- JavaScript: `application/x-javascript, text/javascript`
+- Python: `application/x-python, text/x-python`
+- TXT: `text/plain`
+- HTML: `text/html`
+- CSS: `text/css`
+- Markdown: `text/md`
+- CSV: `text/csv`
+- XML: `text/xml`
+- RTF: `text/rtf`
+Each page consists of **258 tokens**.
+
+To achieve optimal results:
+
+Ensure pages are oriented correctly before uploading. Use **high-quality images** without blurring. If uploading a single page, add the text prompt following the page.
+
+There aren’t any strict pixel limits for documents beyond the model’s context capacity. Larger pages are scaled down to a maximum of **3072x3072 pixels** while keeping their aspect ratio, whereas smaller pages are scaled up to **768x768 pixels**. However, there’s no cost savings for using smaller images, other than reduced bandwidth, nor any performance boost for higher-resolution pages.
+
 <br/>
 
 # Contributing
