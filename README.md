@@ -300,6 +300,7 @@ In the following examples, we will use two procedures, 'Display' and 'DisplayErr
 
 ### Generate text from text-only input
 
+Synchronous mode
 ```Pascal
 // uses Gemini, Gemini.Chat;
 
@@ -317,6 +318,24 @@ In the following examples, we will use two procedures, 'Display' and 'DisplayErr
   end;
 ```
 
+Asynchronous mode
+```Pascal
+// uses Gemini, Gemini.Chat;
+
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := DisplayError;
+    end);
+```
+
+<br/>
 
 # Contributing
 
