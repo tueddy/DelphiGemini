@@ -179,7 +179,7 @@ The previous example displays the models in batches of 5.
 **Embeddings** are numerical representations of text inputs that enable a variety of unique applications, including *clustering*, *measuring similarity*, and *information retrieval*. For an introduction, take a look at the [Embeddings guide](https://ai.google.dev/gemini-api/docs/embeddings). <br/>
 See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/gemini#text-embedding).
 
-In the following examples, we will use the procedure, 'Display' to simplify the examples.
+In the following examples, we will use the procedure 'Display' to simplify the examples.
 
 ```Pascal
   procedure Display(Sender: TObject; const Chat: TChat);
@@ -203,7 +203,7 @@ In the following examples, we will use the procedure, 'Display' to simplify the 
             begin
               Params.Content(['This is an example']);
             end);
-  //For displaying, add a TMemo on the form
+  // For displaying, add a TMemo on the form
   try
     Display(Memo1, Integration)
   finally
@@ -237,7 +237,7 @@ In the following examples, we will use the procedure, 'Display' to simplify the 
               end)
            ]);
        end,
-       //For displaying, add a TMemo on the form
+       // For displaying, add a TMemo on the form
        function : TAsynEmbeddings
        begin
          Result.Sender := Memo1; // Set a TMemo on the form
@@ -258,7 +258,7 @@ The Gemini API enables text generation from a variety of inputs, including text,
 - Chatbots
 - Your own unique use cases
 
-In the following examples, we will use two procedures, 'Display' and 'DisplayError,' to simplify the examples.
+In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
 
 ```Pascal
   procedure Display(Sender: TObject; const Chat: TChat);
@@ -298,7 +298,7 @@ Synchronous mode
     begin
       Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
     end);
-  //For displaying, add a TMemo on the form
+  // For displaying, add a TMemo on the form
   try
     Display(Memo1, Chat);
   finally
@@ -315,6 +315,7 @@ Asynchronous mode
     begin
       Params.Contents([TPayload.Add('Write a story about a magic backpack.')]);
     end,
+    // For displaying, add a TMemo on the form
     function : TAsynChat
     begin
       Result.Sender := Memo1;
