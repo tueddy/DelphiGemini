@@ -373,6 +373,15 @@ Declare this method for displaying.
 >      end;
 >  end;
 >```
+>
+>```Pascal
+>  procedure DisplayCR(Sender: TObject);
+>  begin
+>    var M := Sender as TMemo;
+>    M.Lines.Text := M.Text + sLineBreak;
+>    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>  end;
+>
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Safety;
@@ -387,8 +396,7 @@ Declare this method for displaying.
     begin
       if IsDone then
         begin
-          Memo1.Lines.Text := Memo1.Text + sLineBreak;
-          Memo1.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+          DisplayCR(Memo1);
         end;
       if Assigned(Chat) then
         begin
@@ -428,8 +436,7 @@ Here’s an example of a basic chat implementation:
     begin
       if IsDone then
         begin
-          Memo1.Lines.Text := Memo1.Text + sLineBreak;
-          Memo1.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+          DisplayCR(Memo1);
         end;
       if Assigned(Chat) then
         begin
@@ -473,13 +480,7 @@ Declare this method for displaying.
     begin
       Result.Sender := Memo1;
       Result.OnProgress := DisplayStream;
-      Result.OnSuccess :=
-        procedure (Sender: TObject)
-        begin
-          var M := Sender as TMemo;
-          M.Lines.Text := M.Text + sLineBreak;
-          M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-        end;
+      Result.OnSuccess := DisplayCR;
       Result.OnError := DisplayError;
     end);
 ```
