@@ -21,6 +21,7 @@ ___
         - [Generate a text stream](#Generate-a-text-stream)
         - [Build an interactive chat](#Build-an-interactive-chat)
         - [Configure text generation](#Configure-text-generation)
+    - [Document processing](#Document-processing)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -548,6 +549,17 @@ See also the `Gemini.Safety.pas` unit and the `TSafety` record.
 
 - The generation configuration allows for setting up the output production of a model. A complete description of the manageable parameters can be found at the following [`GitHub address`](https://github.com/google-gemini/generative-ai-python/blob/main/docs/api/google/generativeai/types/GenerationConfig.md). Internally, these parameters are defined within the `TGenerationConfig` class, which extends TJSONParam in the `Gemini.Chat.pas` unit.
 
+<br/>
+
+## Document processing
+
+The Gemini API can handle and perform inference on uploaded PDF documents. Once a PDF is provided, the Gemini API can:
+
+- Describe or answer questions about the content
+- Summarize the content
+- Generate extrapolations based on the content
+
+This guide illustrates various methods for prompting the Gemini API using uploaded PDF documents. All outputs are text-only.
 
 <br/>
 
