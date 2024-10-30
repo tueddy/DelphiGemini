@@ -15,6 +15,12 @@ ___
     - [Asynchronous callback mode management](#Asynchronous-callback-mode-management)
     - [Gemini Models Overview](#Gemini-Models-Overview)
     - [Embeddings](#embeddings)
+    - [Chat synchronous](#Chat-synchronous)
+        - [GenerateContent](#GenerateContent)
+        - [StreamGenerateContent](#StreamGenerateContent)
+    - [Chat asynchronous](#Chat-asynchronous)
+        - [](#)
+        - [](#)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -255,6 +261,29 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
            end
        end);  
 ```
+<br/>
+
+## Chat synchronous
+
+<br/>
+
+### `GenerateContent`
+
+<br/>
+
+### `StreamGenerateContent`
+
+<br/>
+
+## Chat asynchronous
+
+<br/>
+
+### GenerateContent
+
+<br/>
+
+### StreamGenerateContent
 
 <br/>
 
