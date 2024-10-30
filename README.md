@@ -341,7 +341,7 @@ Asynchronous mode
     end);
 ```
 
-In this example, the prompt ("Write a story about a magic backpack") doesn’t include output examples, system instructions, or formatting details, making it a zero-shot approach. In some cases, using a one-shot or few-shot prompt could generate responses that better match user expectations. You might also consider adding system instructions to guide the model in understanding the task or following specific guidelines.
+In this example, the prompt ("Write a story about a magic backpack") doesn’t include output examples, system instructions, or formatting details, making it a [`zero-shot`](https://ai.google.dev/gemini-api/docs/models/generative-models#zero-shot-prompts) approach. In some cases, using a [`one-shot`](https://ai.google.dev/gemini-api/docs/models/generative-models#one-shot-prompts) or [`few-shot`](https://ai.google.dev/gemini-api/docs/models/generative-models#few-shot-prompts) prompt could generate responses that better match user expectations. You might also consider adding [`system instructions`](https://ai.google.dev/gemini-api/docs/system-instructions?lang=rest) to guide the model in understanding the task or following specific guidelines.
 
 <br/>
 
@@ -349,7 +349,7 @@ In this example, the prompt ("Write a story about a magic backpack") doesn’t i
 
 The model typically returns a response only after finishing the entire text generation process. Faster interactions can be achieved by enabling streaming, allowing partial results to be handled as they’re generated.
 
-The example below demonstrates how to implement streaming using the streamGenerateContent method to generate text from a text-only input prompt.
+The example below demonstrates how to implement streaming using the [`streamGenerateContent`](https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent) method to generate text from a text-only input prompt.
 
 Declare this method for displaying.
 
