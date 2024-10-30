@@ -184,31 +184,32 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
 
 In the following examples, we will use the procedures 'Display' to simplify the examples.
 
-```Pascal
-  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
-  begin
-    var M := Sender as TMemo;
-    for var Item in Embed.Embedding.Values do
-      begin
-        M.Lines.Text := M.Text + sLineBreak + Item.ToString;
-      end;
-    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-  end;
-
-  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
-  begin
-    var M := Sender as TMemo;
-    for var Item in Embed.Embeddings do
-      begin
-        for var Value in Item.Values do
-          begin
-            M.Lines.Text := M.Text + sLineBreak + Value.ToString;
-          end;
-        M.Lines.Text := M.Text + sLineBreak;
-      end;
-    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-end;
-```
+> [!NOTE]
+>```Pascal
+>  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
+>  begin
+>    var M := Sender as TMemo;
+>    for var Item in Embed.Embedding.Values do
+>      begin
+>        M.Lines.Text := M.Text + sLineBreak + Item.ToString;
+>      end;
+>    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>  end;
+>
+>  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
+>  begin
+>    var M := Sender as TMemo;
+>    for var Item in Embed.Embeddings do
+>      begin
+>        for var Value in Item.Values do
+>          begin
+>            M.Lines.Text := M.Text + sLineBreak + Value.ToString;
+>          end;
+>        M.Lines.Text := M.Text + sLineBreak;
+>      end;
+>    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>end;
+>```
 
 1. **Synchronously** : Get the vector representation of the text *'This is an example'*.
 
@@ -277,30 +278,31 @@ The Gemini API enables [`text generation`](https://ai.google.dev/api/generate-co
 
 In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
 
-```Pascal
-  procedure Display(Sender: TObject; Chat: TChat); overload;
-  begin
-    var M := Sender as TMemo;
-    for var Item in Chat.Candidates do
-      begin
-        if Item.FinishReason = STOP then
-          for var SubItem in Item.Content.Parts do
-            begin
-              M.Lines.Text := M.Text + sLineBreak + SubItem.Text;
-            end;
-        M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-      end;
-  end;
-```
-
-```Pascal
-  procedure DisplayError(Sender: TObject; Error: string);
-  begin
-    var M := Sender as TMemo;
-    M.Lines.Text := M.Text + sLineBreak + Error;
-    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-  end;  
-```
+> [!NOTE]
+>```Pascal
+>  procedure Display(Sender: TObject; Chat: TChat); overload;
+>  begin
+>    var M := Sender as TMemo;
+>    for var Item in Chat.Candidates do
+>      begin
+>        if Item.FinishReason = STOP then
+>          for var SubItem in Item.Content.Parts do
+>            begin
+>              M.Lines.Text := M.Text + sLineBreak + SubItem.Text;
+>            end;
+>        M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>      end;
+>  end;
+>```
+>
+>```Pascal
+>  procedure DisplayError(Sender: TObject; Error: string);
+>  begin
+>    var M := Sender as TMemo;
+>    M.Lines.Text := M.Text + sLineBreak + Error;
+>    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>  end;  
+>```
 
 <br/>
 
@@ -353,24 +355,25 @@ The example below demonstrates how to implement streaming using the [`streamGene
 
 Declare this method for displaying.
 
-```Pascal
-  procedure Display(Sender: TObject; Candidate: TChatCandidate); overload;
-  begin
-    var M := Sender as TMemo;
-    var Buffer := Candidate.Content.Parts[0].Text;
-    for var i := 1 to Length(Buffer) do
-      begin
-        M.Lines.Text := M.Text + Buffer[i];
-        M.Lines.BeginUpdate;
-        try
-          Application.ProcessMessages;
-          M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
-        finally
-          M.Lines.EndUpdate;
-        end;
-      end;
-  end;
-```
+> [!NOTE]
+>```Pascal
+>  procedure Display(Sender: TObject; Candidate: TChatCandidate); overload;
+>  begin
+>    var M := Sender as TMemo;
+>    var Buffer := Candidate.Content.Parts[0].Text;
+>    for var i := 1 to Length(Buffer) do
+>      begin
+>        M.Lines.Text := M.Text + Buffer[i];
+>        M.Lines.BeginUpdate;
+>        try
+>          Application.ProcessMessages;
+>          M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>        finally
+>          M.Lines.EndUpdate;
+>        end;
+>      end;
+>  end;
+>```
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Safety;
@@ -446,12 +449,13 @@ Here’s an example of a basic chat implementation:
 Here’s an example of a asynchronous chat implementation
 
 Declare this method for displaying.
-```Pascal
-  procedure DisplayStream(Sender: TObject; Chat: TChat);
-  begin
-    Display(Sender, Chat.Candidates[0]);
-  end;
-```
+> [!NOTE]
+>```Pascal
+>  procedure DisplayStream(Sender: TObject; Chat: TChat);
+>  begin
+>    Display(Sender, Chat.Candidates[0]);
+>  end;
+>```
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Safety;
