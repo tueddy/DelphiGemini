@@ -265,7 +265,7 @@ end;
 
 ## Generate text
 
-The Gemini API enables text generation from a variety of inputs, including text, images, video, and audio. It can be used for a range of applications, such as:
+The Gemini API enables [`text generation`](https://ai.google.dev/api/generate-content#method:-models.generatecontent) from a variety of inputs, including text, images, video, and audio. It can be used for a range of applications, such as:
 
 - Creative writing
 - Describing or interpreting media assets
