@@ -179,10 +179,10 @@ The previous example displays the models in batches of 5.
 **Embeddings** are numerical representations of text inputs that enable a variety of unique applications, including *clustering*, *measuring similarity*, and *information retrieval*. For an introduction, take a look at the [Embeddings guide](https://ai.google.dev/gemini-api/docs/embeddings). <br/>
 See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/gemini#text-embedding).
 
-In the following examples, we will use the procedure 'Display' to simplify the examples.
+In the following examples, we will use the procedures 'Display' to simplify the examples.
 
 ```Pascal
-  procedure Display(Sender: TObject; const Chat: TChat);
+  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
   begin
     var M := Sender as TMemo;
     for var Item in Embed.Embedding.Values do
@@ -191,6 +191,20 @@ In the following examples, we will use the procedure 'Display' to simplify the e
       end;
     M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
   end;
+
+  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
+  begin
+    var M := Sender as TMemo;
+    for var Item in Embed.Embeddings do
+      begin
+        for var Value in Item.Values do
+          begin
+            M.Lines.Text := M.Text + sLineBreak + Value.ToString;
+          end;
+        M.Lines.Text := M.Text + sLineBreak;
+      end;
+    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+end;
 ```
 
 1. **Synchronously** : Get the vector representation of the text *'This is an example'*.
@@ -261,7 +275,7 @@ The Gemini API enables text generation from a variety of inputs, including text,
 In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
 
 ```Pascal
-  procedure Display(Sender: TObject; const Chat: TChat);
+  procedure Display(Sender: TObject; Chat: TChat);
   begin
     var M := Sender as TMemo;
     for var Item in Chat.Candidates do
