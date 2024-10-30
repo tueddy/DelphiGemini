@@ -275,7 +275,7 @@ The Gemini API enables text generation from a variety of inputs, including text,
 In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
 
 ```Pascal
-  procedure Display(Sender: TObject; Chat: TChat);
+  procedure Display(Sender: TObject; Chat: TChat); overload;
   begin
     var M := Sender as TMemo;
     for var Item in Chat.Candidates do
