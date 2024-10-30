@@ -159,6 +159,81 @@ type
   Example = TTuningExample;
 
   /// <summary>
+  /// Provides utility methods for handling tuning tasks, including converting training data to JSON formats.
+  /// </summary>
+  /// <remarks>
+  /// The <c>TTuningTaskHelper</c> record contains static methods that assist in transforming training data from various sources
+  /// into JSON structures required by the Gemini API. It facilitates the preparation of training examples and the parsing of JSONL files.
+  /// </remarks>
+  TTuningTaskHelper = record
+    /// <summary>
+    /// Converts the contents of a CSV file into a <c>TJSONArray</c>.
+    /// </summary>
+    /// <param name="FileName">
+    /// The file path of the CSV file containing the data.
+    /// </param>
+    /// <param name="Separator">
+    /// The character used as the delimiter between columns in the CSV file. Default is ';'.
+    /// </param>
+    /// <returns>
+    /// A <c>TJSONArray</c> representing the array of JSON objects parsed from the CSV file.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown if the specified CSV file does not exist or cannot be read.
+    /// </exception>
+    class function LoadFromCSV(const FileName: string; Separator: Char = ';'): TJSONArray; static;
+    /// <summary>
+    /// Converts the contents of a JSONL (JSON Lines) file into a <c>TJSONArray</c>.
+    /// </summary>
+    /// <param name="FileName">
+    /// The file path of the JSONL file containing the data.
+    /// </param>
+    /// <returns>
+    /// A <c>TJSONArray</c> representing the array of JSON objects parsed from the JSONL file.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown if the specified JSONL file does not exist or cannot be read.
+    /// </exception>
+    class function LoadFromJSONL(const FileName: string): TJSONArray; static;
+    /// <summary>
+    /// Converts the contents of a CSV or JSONL file into a <c>TJSONArray</c>, based on the file extension.
+    /// </summary>
+    /// <param name="FileName">
+    /// The file path of the data file. Must be a CSV or JSONL file.
+    /// </param>
+    /// <returns>
+    /// A <c>TJSONArray</c> representing the array of JSON objects parsed from the file.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown if the specified file does not exist, is not readable, or is of an unsupported format.
+    /// </exception>
+    class function FileDataToJSONArray(const FileName: string): TJSONArray; static;
+    /// <summary>
+    /// Builds a <c>TJSONObject</c> containing training examples from an array of <c>TTuningExample</c> instances.
+    /// </summary>
+    /// <param name="Value">
+    /// An array of <c>TTuningExample</c> instances representing individual training examples.
+    /// </param>
+    /// <returns>
+    /// A <c>TJSONObject</c> with a single pair where the key is "examples" and the value is a <c>TJSONArray</c> of the provided examples.
+    /// </returns>
+    class function ExamplesBuilder(const Value: TArray<TTuningExample>): TJSONObject; overload; static;
+    /// <summary>
+    /// Builds a <c>TJSONObject</c> containing training examples by reading from a JSONL file.
+    /// </summary>
+    /// <param name="JSONLFileName">
+    /// The file path of the JSONL file containing training data.
+    /// </param>
+    /// <returns>
+    /// A <c>TJSONObject</c> with a single pair where the key is "examples" and the value is a <c>TJSONArray</c> of the parsed examples.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Thrown if the specified JSONL file does not exist or cannot be parsed.
+    /// </exception>
+    class function ExamplesBuilder(const FileName: string): TJSONObject; overload; static;
+  end;
+
+  /// <summary>
   /// <c>TTuningTaskParams</c> controls the taining data for a tuned models.
   /// </summary>
   TTuningTaskParams = class(TJSONParam)
@@ -171,6 +246,10 @@ type
     /// Required. Input only. Immutable. The model training data.
     /// </summary>
     function TrainingData(const Value: TArray<TTuningExample>): TTuningTaskParams; overload;
+    /// <summary>
+    /// Required. Input only. Immutable. The model training data.
+    /// </summary>
+    function TrainingData(const Value: TJSONObject): TTuningTaskParams; overload;
     /// <summary>
     /// Immutable. Hyperparameters controlling the tuning process.
     /// </summary>
@@ -1068,53 +1147,6 @@ implementation
 uses
   System.StrUtils, System.IOUtils, System.Rtti, Rest.Json;
 
-type
-  /// <summary>
-  /// Provides utility methods for handling tuning tasks, including converting training data to JSON formats.
-  /// </summary>
-  /// <remarks>
-  /// The <c>TTuningTaskHelper</c> record contains static methods that assist in transforming training data from various sources
-  /// into JSON structures required by the Gemini API. It facilitates the preparation of training examples and the parsing of JSONL files.
-  /// </remarks>
-  TTuningTaskHelper = record
-    /// <summary>
-    /// Converts the contents of a JSONL (JSON Lines) file into a <c>TJSONArray</c>.
-    /// </summary>
-    /// <param name="JSONLFileName">
-    /// The file path of the JSONL file containing training data.
-    /// </param>
-    /// <returns>
-    /// A <c>TJSONArray</c> representing the array of JSON objects parsed from the JSONL file.
-    /// </returns>
-    /// <exception cref="Exception">
-    /// Thrown if the specified JSONL file does not exist or cannot be read.
-    /// </exception>
-    class function FileDataToJSONArray(const JSONLFileName: string): TJSONArray; static;
-    /// <summary>
-    /// Builds a <c>TJSONObject</c> containing training examples from an array of <c>TTuningExample</c> instances.
-    /// </summary>
-    /// <param name="Value">
-    /// An array of <c>TTuningExample</c> instances representing individual training examples.
-    /// </param>
-    /// <returns>
-    /// A <c>TJSONObject</c> with a single pair where the key is "examples" and the value is a <c>TJSONArray</c> of the provided examples.
-    /// </returns>
-    class function ExamplesBuilder(const Value: TArray<TTuningExample>): TJSONObject; overload; static;
-    /// <summary>
-    /// Builds a <c>TJSONObject</c> containing training examples by reading from a JSONL file.
-    /// </summary>
-    /// <param name="JSONLFileName">
-    /// The file path of the JSONL file containing training data.
-    /// </param>
-    /// <returns>
-    /// A <c>TJSONObject</c> with a single pair where the key is "examples" and the value is a <c>TJSONArray</c> of the parsed examples.
-    /// </returns>
-    /// <exception cref="Exception">
-    /// Thrown if the specified JSONL file does not exist or cannot be parsed.
-    /// </exception>
-    class function ExamplesBuilder(const JSONLFileName: string): TJSONObject; overload; static;
-  end;
-
 { TModelStateHelper }
 
 class function TModelStateHelper.Create(const Value: string): TModelState;
@@ -1258,15 +1290,21 @@ begin
 end;
 
 function TTuningTaskParams.TrainingData(
+  const JSONLFileName: string): TTuningTaskParams;
+begin
+  Result := TTuningTaskParams(Add('training_data', TTuningTaskHelper.ExamplesBuilder(JSONLFileName)));
+end;
+
+function TTuningTaskParams.TrainingData(
   const Value: TArray<TTuningExample>): TTuningTaskParams;
 begin
   Result := TTuningTaskParams(Add('training_data', TTuningTaskHelper.ExamplesBuilder(Value)));
 end;
 
 function TTuningTaskParams.TrainingData(
-  const JSONLFileName: string): TTuningTaskParams;
+  const Value: TJSONObject): TTuningTaskParams;
 begin
-  Result := TTuningTaskParams(Add('training_data', TTuningTaskHelper.ExamplesBuilder(JSONLFileName)));
+  Result := TTuningTaskParams(Add('training_data', Value));
 end;
 
 { TTuningTaskHelper }
@@ -1274,36 +1312,88 @@ end;
 class function TTuningTaskHelper.ExamplesBuilder(
   const Value: TArray<TTuningExample>): TJSONObject;
 begin
+  {--- Add examples to a JSON array }
   var JSONArray := TJSONArray.Create;
   for var Item in Value do
     JSONArray.Add(Item.Detach);
-  var JSONExamples := TJSONObject.Create.AddPair('examples', JSONArray);
-  Result := TJSONObject.Create.AddPair('examples', JSONExamples);
+
+  {--- Building the JSON string for the API request }
+  Result := TJSONObject.Create.AddPair('examples', TJSONObject.Create.AddPair('examples', JSONArray));
 end;
 
 class function TTuningTaskHelper.ExamplesBuilder(
-  const JSONLFileName: string): TJSONObject;
+  const FileName: string): TJSONObject;
 begin
-  if not FileExists(JSONLFileName) then
-    raise Exception.CreateFmt('Training file not found : %s', [JSONLFileName]);
-  var JSONExamples := TJSONObject.Create.AddPair('examples', FileDataToJSONArray(JSONLFileName));
-  Result := TJSONObject.Create.AddPair('examples', JSONExamples);
+  {--- Check the existence of the file.}
+  if not FileExists(FileName) then
+    raise Exception.CreateFmt('Training file not found : %s', [FileName]);
+
+  {--- Try to load the data from the file to a JSON array }
+  var JSONArray := FileDataToJSONArray(FileName);
+  if not Assigned(JSONArray) then
+    raise Exception.CreateFmt('Error importing training file : %s', [FileName]);
+
+  {--- Building the JSON string for the API request }
+  Result := TJSONObject.Create.AddPair('examples', TJSONObject.Create.AddPair('examples', JSONArray));
 end;
 
 class function TTuningTaskHelper.FileDataToJSONArray(
-  const JSONLFileName: string): TJSONArray;
-var
-  Ligne: string;
+  const FileName: string): TJSONArray;
+begin
+  case IndexStr(ExtractFileExt(FileName).ToLower, ['.csv', '.jsonl']) of
+    0 : Result := LoadFromCSV(FileName);
+    1 : Result := LoadFromJSONL(FileName);
+    else
+      raise Exception.Create('Trainig examples: Only CSV (using `;` as a separator) or JSONL files are supported');
+  end;
+end;
+
+class function TTuningTaskHelper.LoadFromCSV(
+  const FileName: string; Separator: Char): TJSONArray;
 begin
   Result := TJSONArray.Create;
-  var JSONLFile := TFileStream.Create(JSONLFileName, fmOpenRead or fmShareDenyWrite);
+  var CSVFile := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+  var Reader := TStreamReader.Create(CSVFile, TEncoding.UTF8);
+  try
+    try
+      var Index := 0;
+      while not Reader.EndOfStream do
+        begin
+          Inc(Index);
+          if Index = 1 then
+            Continue;
+          var Fields := Reader.ReadLine.Split([Separator]);
+          if Length(Fields) = 2 then
+            begin
+              Result.Add( TJSONOBject.Create
+                .AddPair('text_input', Fields[0].Trim)
+                .AddPair('output', Fields[1].Trim));
+            end;
+        end;
+    except
+      FreeAndNil(Result);
+    end;
+  finally
+    Reader.Free;
+    CSVFile.Free;
+  end;
+end;
+
+class function TTuningTaskHelper.LoadFromJSONL(
+  const FileName: string): TJSONArray;
+begin
+  Result := TJSONArray.Create;
+  var JSONLFile := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
   var StreamReader := TStreamReader.Create(JSONLFile, TEncoding.UTF8);
   try
-    while not StreamReader.EndOfStream do
-      begin
-        Ligne := StreamReader.ReadLine;
-        Result.Add(TJSONObject.ParseJSONValue(Ligne) as TJSONObject)
-      end;
+    try
+      while not StreamReader.EndOfStream do
+        begin
+          Result.Add(TJSONObject.ParseJSONValue(StreamReader.ReadLine) as TJSONObject)
+        end;
+    except
+      FreeAndNil(Result);
+    end;
   finally
     StreamReader.Free;
     JSONLFile.Free;
