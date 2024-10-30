@@ -485,7 +485,7 @@ Declare this method for displaying.
 
 ### Configure text generation
 
-Each prompt sent to the model includes settings that control how responses are generated. You can adjust these settings using the `GenerationConfig`, which allows you to customize various [parameters](https://ai.google.dev/gemini-api/docs/models/generative-models#model-parameters/). If no configurations are applied, the model will rely on default settings, which may differ depending on the model.
+Each prompt sent to the model includes settings that control how responses are generated. You can adjust these settings using the `GenerationConfig`, which allows you to customize various [parameters](https://ai.google.dev/gemini-api/docs/models/generative-models#model-parameters). If no configurations are applied, the model will rely on default settings, which may differ depending on the model.
  
 Here's an example demonstrating how to adjust several of these options.
 
