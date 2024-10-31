@@ -57,7 +57,7 @@ Once you have a token, you can initialize `IGemini` interface, which is an entry
 
 Due to the fact that there can be many parameters and not all of them are required, they are configured using an anonymous function.
 
-> [!TIP]
+> [!NOTE]
 >```Pascal
 >uses Gemini;
 >
