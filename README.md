@@ -1044,14 +1044,11 @@ Please refer to the [official documentation](https://ai.google.dev/gemini-api/do
   try
     for var Item in Chat.Candidates do
       begin
-        for var Item in Chat.Candidates do
+        for var SubItem in Item.Content.Parts do
           begin
-            for var SubItem in Item.Content.Parts do
-              begin
-                if Assigned(SubItem.FunctionCall) then
-                  CallFunction(SubItem.FunctionCall, Weather) else
-                  DisplayStream(Memo1, SubItem.Text);
-              end;
+            if Assigned(SubItem.FunctionCall) then
+              CallFunction(SubItem.FunctionCall, Weather) else
+              DisplayStream(Memo1, SubItem.Text);
           end;
       end;
   finally
