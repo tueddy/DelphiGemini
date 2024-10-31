@@ -401,7 +401,7 @@ Declare this method for displaying.
 >```
 >
 >```Pascal
->  procedure DisplayCR(Sender: TObject);
+>  procedure Display(Sender: TObject);
 >  begin
 >    var M := Sender as TMemo;
 >    M.Lines.Text := M.Text + sLineBreak;
@@ -422,7 +422,7 @@ Declare this method for displaying.
     begin
       if IsDone then
         begin
-          DisplayCR(Memo1);
+          Display(Memo1);
         end;
       if Assigned(Chat) then
         begin
@@ -462,7 +462,7 @@ Here’s an example of a basic chat implementation:
     begin
       if IsDone then
         begin
-          DisplayCR(Memo1);
+          Display(Memo1);
         end;
       if Assigned(Chat) then
         begin
@@ -506,7 +506,7 @@ Declare this method for displaying.
     begin
       Result.Sender := Memo1;
       Result.OnProgress := DisplayStream;
-      Result.OnSuccess := DisplayCR;
+      Result.OnSuccess := Display;
       Result.OnError := DisplayError;
     end);
 ```
