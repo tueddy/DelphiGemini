@@ -27,6 +27,9 @@ ___
         - [List files](#List-files)
         - [Delete files](#Delete-files)
     - [System instructions](#System-instructions)
+    - [Vision](#Vision)
+        - [Prompting with images](#Prompting-with-images)
+        - [Prompting with video](#Prompting-with-video)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -602,7 +605,7 @@ Use the asynchronous methods `Gemini.Files.Upload` or `Gemini.Files.AsyncUpload`
 
   var FileUri := '';
   {--- Load file and get its uri }
-  var MyFile := Gemini.Files.UpLoad('D:\2025-developpement\Images\Invoice.png', 'MyFile');
+  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\documents\help.PDF', 'MyFile');
   try
     FileUri := MyFile.&File.URI;
     Display(Memo1, FileUri);
@@ -610,11 +613,11 @@ Use the asynchronous methods `Gemini.Files.Upload` or `Gemini.Files.AsyncUpload`
     MyFile.Free;
   end;
  
-  {--- Generate text from an image using its URI. }
+  {--- Generate text from a document using its URI. }
   Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
     procedure (Params: TChatParams)
     begin
-      Params.Contents([TPayload.Add('Describe this image.', [FileUri])]);
+      Params.Contents([TPayload.Add('Summarize the document.', [FileUri])]);
     end,
     function : TAsynChat
     begin
@@ -752,6 +755,66 @@ You can configure these instructions when initializing the model, and they will 
 >
 
 See [More examples](https://ai.google.dev/gemini-api/docs/system-instructions?lang=rest#more-examples) on official site.
+
+<br/>
+
+## Vision
+
+The Gemini API can perform inference on both images and videos provided to it. When given a single image, a sequence of images, or a video, Gemini can:
+
+- Describe or respond to questions about the content,
+- Provide a summary of the content,
+- Make inferences based on the content.
+
+All outputs are text-based only.
+
+<br/>
+
+### Prompting with images
+
+The Gemini 1.5 Pro and 1.5 Flash models can support up to **3,600 image files**.
+
+Supported image **MIME types** include the following formats:
+
+- **PNG** - `image/png`
+- **JPEG** - `image/jpeg`
+- **WEBP** - `image/webp`
+- **HEIC** - `image/heic`
+- **HEIF** - `image/heif`
+
+Each image counts as **258 tokens**.
+
+// uses Gemini, Gemini.Chat, Gemini.Files;
+
+  var FileUri := '';
+  {--- Load file and get its uri }
+  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\images\image.png', 'MyFile');
+  try
+    FileUri := MyFile.&File.URI;
+    Display(Memo1, FileUri);
+  finally
+    MyFile.Free;
+  end;
+ 
+  {--- Generate text from an image using its Uri. }
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Describe this image.', [FileUri])]);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);
+```
+
+<br/>
+
+### Prompting with video
+
+
 
 <br/>
 
