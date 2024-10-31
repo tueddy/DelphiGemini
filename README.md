@@ -189,7 +189,7 @@ In the following examples, we will use the procedures 'Display' to simplify the 
 
 > [!TIP]
 >```Pascal
->  procedure Display(Sender: TObject; Embed: TEmbeddingValues);
+>  procedure Display(Sender: TObject; Embed: TEmbeddingValues); overload;
 >  begin
 >    var M := Sender as TMemo;
 >    for var Item in Embed.Values do
@@ -401,7 +401,7 @@ Declare this method for displaying.
 >```
 >
 >```Pascal
->  procedure Display(Sender: TObject);
+>  procedure Display(Sender: TObject); overload;
 >  begin
 >    var M := Sender as TMemo;
 >    M.Lines.Text := M.Text + sLineBreak;
