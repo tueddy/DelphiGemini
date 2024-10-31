@@ -24,6 +24,8 @@ ___
     - [Document processing](#Document-processing)
         - [Upload a document and generate content](#Upload-a-document-and-generate-content)
         - [Get metadata for a file](#Get-metadata-for-a-file)
+        - [List files](#List files)
+        - [Delete files](#Delete files)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -639,6 +641,44 @@ You can confirm that the API successfully saved the uploaded file and retrieve i
     GetFile.Free;
   end;
 ```
+
+<br/>
+
+### List files
+
+You can list all files uploaded using the File API and their URIs using `Gemini.Files.List` or `Gemini.Files.AsynList`.
+
+Declare this method for displaying.
+> [!TIP]
+> ```Pascal
+>   procedure Display(Sender: TObject; Files: TFiles); overload;
+>   begin
+>     var M := Sender as TMemo;
+>     for var Item in Files.Files do
+>       begin
+>         M.Text := M.Text + sLineBreak + Item.Name + '   ' + Item.MimeType + '   ' + Item.Uri + sLineBreak;
+>         M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>       end;
+>     M.Text := M.Text + sLineBreak;
+>     M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>   end;
+> ```
+
+```Pascal
+// uses Gemini, Gemini.Files;
+
+  Gemini.Files.AsynList(
+     function : TAsynFiles
+     begin
+       Result.Sender := Memo1;
+       Result.OnSuccess := Display;
+       Result.OnError := Display;
+     end);  
+```
+
+<br/>
+
+### Delete files
 
 <br/>
 
