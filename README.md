@@ -591,6 +591,12 @@ You can upload documents of any size by using the File API. Always rely on the F
 > You can use the File API to store files for up to 48 hours, with a storage limit of 20 GB per project and a maximum of 2 GB per file. During this time, files are accessible with your API key but are not downloadable through the API. The File API is free to use and available in all regions where the Gemini API operates.
 >
 
+Use the asynchronous methods `Gemini.Files.Upload` or `Gemini.Files.AsyncUpload` to upload a file with the File API. The following code uploads a document file and then uses it in a call to `models.generateContent`.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Files;
+
+```
 
 <br/>
 
