@@ -1025,6 +1025,57 @@ Typically, use function calling if you need to run custom functions locally. For
 
 ## Function calling
 
+The Gemini API’s function calling feature allows you to define custom functions that the model can suggest, providing structured output that includes the function name and recommended arguments. While the model doesn’t execute these functions directly, it outputs suggestions, allowing you to trigger an external API call with those parameters. This approach enables you to bring real-time data from external sources, such as databases, CRM systems, or document repositories, into the conversation, allowing the model to deliver more contextually relevant and actionable responses.
+
+Please refer to the [official documentation](https://ai.google.dev/gemini-api/docs/function-calling#how_it_works) for more information.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.tools, Gemini.Functions.Core, Gemini.Functions.Example;
+
+  var Weather := TWeatherReportFunction.CreateInstance;
+
+  var Chat := Gemini.Chat.Create('models/gemini-1.5-flash',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.User('What is the weather like in Paris?')]);
+      Params.Tools([Weather]);
+      Params.ToolConfig(AUTO);
+    end);
+  try
+    for var Item in Chat.Candidates do
+      begin
+        for var Item in Chat.Candidates do
+        begin
+          for var SubItem in Item.Content.Parts do
+            begin
+              if Assigned(SubItem.FunctionCall) then
+                CallFunction(SubItem.FunctionCall, Weather) else
+                DisplayStream(Memo1, SubItem.Text);
+            end;
+        end;
+      end;
+  finally
+    Chat.Free;
+  end;
+
+...
+
+  procedure TForm.CallFunction(const Value: TFunctionCall; Func: IFunctionCore);
+  begin
+    var ArgResult := Func.Execute(Value.Args);
+    Gemini.Chat.ASynCreateStream('models/gemini-1.5-flash',
+      procedure (Params: TChatParams)
+      begin
+        Params.Contents([TPayload.Add(ArgResult)]);
+      end,
+      function : TAsynChatStream
+      begin
+        Result.Sender := Memo1;
+        Result.OnProgress := DisplayStream;
+        Result.OnError := Display;
+      end);
+  end;
+```
 
 <br/>
 
