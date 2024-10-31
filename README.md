@@ -784,6 +784,7 @@ Supported image **MIME types** include the following formats:
 
 Each image counts as **258 tokens**.
 
+```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Files;
 
   var FileUri := '';
