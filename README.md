@@ -33,6 +33,8 @@ ___
     - [Audio](#Audio)
         - [Speech-to-text](#Speech-to-text)
         - [Text-to-speech](#Text-to-speech)
+    - [Long context](#Long-context)
+    - [Code execution](#Code-execution)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -392,21 +394,29 @@ Declare this method for displaying.
 
 > [!TIP]
 >```Pascal
+>  procedure DisplayStream(Sender: TObject; const Buffer: string); overload;
+>  begin
+>  var M := Sender as TMemo;
+>  for var i := 1 to Length(Buffer) do
+>    begin
+>      M.Lines.Text := M.Text + Buffer[i];
+>      M.Lines.BeginUpdate;
+>      try
+>        Application.ProcessMessages;
+>        M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>      finally
+>        M.Lines.EndUpdate;
+>      end;
+>    end;
+>  end;
+>```
+>
+>```Pascal
 >  procedure Display(Sender: TObject; Candidate: TChatCandidate); overload;
 >  begin
->    var M := Sender as TMemo;
->    var Buffer := Candidate.Content.Parts[0].Text;
->    for var i := 1 to Length(Buffer) do
->      begin
->        M.Lines.Text := M.Text + Buffer[i];
->        M.Lines.BeginUpdate;
->        try
->          Application.ProcessMessages;
->          M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
->        finally
->          M.Lines.EndUpdate;
->        end;
->      end;
+>    for var Item in Candidate.Content.Parts do
+>      if Assigned(Item) then
+>        DisplayStream(Sender, Item.Text);
 >  end;
 >```
 >
@@ -493,7 +503,7 @@ Here’s an example of a asynchronous chat implementation
 Declare this method for displaying.
 > [!TIP]
 >```Pascal
->  procedure DisplayStream(Sender: TObject; Chat: TChat);
+>  procedure DisplayStream(Sender: TObject; Chat: TChat); overload;
 >  begin
 >    Display(Sender, Chat.Candidates[0]);
 >  end;
@@ -946,6 +956,69 @@ To perform the transcription, simply follow the example below, assuming the audi
 ### Text-to-speech
 
 As stated above, the Gemini API doesn't support audio output generation, and the Gemini APIs do not provide any method to transcribe text into an audio file. On the other hand, Google Cloud offers an alternative, which you can find [here](https://cloud.google.com/text-to-speech/?utm_source=google&utm_medium=cpc&utm_campaign=emea-gb-all-en-dr-bkws-all-all-trial-%7Bmatchtype%7D-gcp-1707574&utm_content=text-ad-none-any-DEV_%7Bdevice%7D-CRE_%7Bcreative%7D-ADGP_%7B_dsadgroup%7D-KWID_%7B_dstrackerid%7D-%7Btargetid%7D-userloc_%7Bloc_physical_ms%7D&utm_term=KW_%7Bkeyword%7D-NET_%7Bnetwork%7D-PLAC_%7Bplacement%7D&%7B_dsmrktparam%7D%7Bignore%7D&%7B_dsmrktparam%7D&gclsrc=aw.ds&gad_source=1&gclid=Cj0KCQjw1Yy5BhD-ARIsAI0RbXZf2NNU_LQ_rYqNEeTpm3Q0QPI83Jap8PAIl6ZFzulFAD3cY-z487oaAvk0EALw_wcB&gclsrc=aw.ds&hl=en).
+
+<br/>
+
+## Long context
+
+See the [official documentation](https://ai.google.dev/gemini-api/docs/long-context).
+
+<br/>
+
+## Code execution
+
+The Gemini API’s code execution feature allows the model to generate and execute Python code, enabling it to learn iteratively from the results until it reaches a final output. This capability can be applied to build applications that benefit from code-based reasoning and produce text-based results. For instance, code execution could be utilized in applications designed for solving equations or text processing.
+
+Code execution is available in both AI Studio and the Gemini API. In AI Studio, it can be enabled within Advanced settings. With the Gemini API, code execution functions as a tool similar to function calling, allowing the model to decide when to use it.
+
+> [!NOTE]
+> The code execution environment has the NumPy and SymPy libraries available. You aren’t able to install additional libraries.
+>
+<br/>
+
+Declare this method for displaying.
+> [!TIP]
+> ```Pascal
+>  procedure DisplayCode(Sender: TObject; Chat: TChat); 
+>  begin
+>  var M := Sender as TMemo;
+>  for var Candidate in Chat.Candidates do
+>    begin
+>      for var Part in Candidate.Content.Parts do
+>        begin
+>          if Assigned(Part.ExecutableCode) then
+>            DisplayStream(Sender, Part.ExecutableCode.Code)
+>          else
+>            DisplayStream(Sender, Part.Text);
+>        end;
+>    end;
+>  end;
+> ```
+
+```Pascal
+// uses Gemini, Gemini.Chat;
+
+  Gemini.Chat.ASynCreateStream('models/gemini-1.5-flash',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('What is the sum of the first 50 prime numbers? Generate and run code for the calculation, and make sure you get all 50.')]);
+      Params.Tools(True);  // Enable code execution
+    end,
+    function : TAsynChatStream
+    begin
+      Result.Sender := Memo1;
+      Result.OnProgress := DisplayCode;
+      Result.OnError := Display;
+    end);
+```
+
+Code execution and function calling are similar features with distinct use cases:
+
+Code execution allows the model to run code directly in the API backend within a controlled, isolated environment. Function calling enables running functions that the model requests in a separate, customizable environment of your choice.
+
+Generally, code execution is preferable if it meets your requirements, as it’s simpler to enable and completes within a single GenerateContent request, resulting in a single charge. In contrast, function calling requires an additional GenerateContent request to return each function’s output, leading to multiple charges.
+
+Typically, use function calling if you need to run custom functions locally. For cases where the API should generate and execute Python code and deliver results, code execution is often the best fit.
 
 <br/>
 
