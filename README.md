@@ -604,8 +604,8 @@ Use the asynchronous methods `Gemini.Files.Upload` or `Gemini.Files.AsyncUpload`
 // uses Gemini, Gemini.Chat, Gemini.Files;
 
   var FileUri := '';
-  {--- Load file and get its uri }
-  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\documents\help.PDF', 'MyFile');
+  {--- Upload file and get its uri }
+  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\document\My_document.PDF', 'MyFile');
   try
     FileUri := MyFile.&File.URI;
     Display(Memo1, FileUri);
@@ -788,8 +788,8 @@ Each image counts as **258 tokens**.
 // uses Gemini, Gemini.Chat, Gemini.Files;
 
   var FileUri := '';
-  {--- Load file and get its uri }
-  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\images\image.png', 'MyFile');
+  {--- Upload file and get its uri }
+  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\image\my_image.png', 'MyFile');
   try
     FileUri := MyFile.&File.URI;
     Display(Memo1, FileUri);
@@ -815,7 +815,48 @@ Each image counts as **258 tokens**.
 
 ### Prompting with video
 
+Gemini 1.5 Pro and Flash can process up to about one hour of video content.
 
+Supported video formats include the following MIME types:
+
+- `video/mp4`
+- `video/mpeg`
+- `video/mov`
+- `video/avi`
+- `video/x-flv`
+- `video/mpg`
+- `video/webm`
+- `video/wmv`
+- `video/3gpp`
+
+Through the File API service, frames are extracted from videos at a rate of 1 frame per second (FPS), and audio is extracted at 1Kbps in single-channel mode, with timestamps marked every second. These rates may be adjusted in the future to enhance processing capabilities.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Files;
+
+  var FileUri := '';
+  {--- Upload file and get its uri }
+  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\video\my_video.mp4', 'MyFile');
+  try
+    FileUri := MyFile.&File.URI;
+    Display(Memo1, FileUri);
+  finally
+    MyFile.Free;
+  end;
+ 
+  {--- Generate text from a video using its Uri. }
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Describe this video clip.', [FileUri])]);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);
+```
 
 <br/>
 
