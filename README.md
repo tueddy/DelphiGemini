@@ -570,16 +570,16 @@ This guide illustrates various methods for prompting the Gemini API using upload
 
 The `Gemini 1.5 Pro` and `1.5 Flash` models can handle up to **3,600 pages** per document. Supported file types for text data include:
 
-- PDF: `application/pdf`
-- JavaScript: `application/x-javascript, text/javascript`
-- Python: `application/x-python, text/x-python`
-- TXT: `text/plain`
-- HTML: `text/html`
-- CSS: `text/css`
-- Markdown: `text/md`
-- CSV: `text/csv`
-- XML: `text/xml`
-- RTF: `text/rtf`
+- **PDF**: `application/pdf`
+- **JavaScript**: `application/x-javascript, text/javascript`
+- **Python**: `application/x-python, text/x-python`
+- **TXT**: `text/plain`
+- **HTML**: `text/html`
+- **CSS**: `text/css`
+- **Markdown**: `text/md`
+- **CSV**: `text/csv`
+- **XML**: `text/xml`
+- **RTF**: `text/rtf`
 Each page consists of **258 tokens**.
 
 To achieve optimal results:
