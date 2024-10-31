@@ -30,6 +30,7 @@ ___
     - [Vision](#Vision)
         - [Prompting with images](#Prompting-with-images)
         - [Prompting with video](#Prompting-with-video)
+    - [Audio](#Audio)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -849,6 +850,60 @@ Through the File API service, frames are extracted from videos at a rate of 1 fr
     procedure (Params: TChatParams)
     begin
       Params.Contents([TPayload.Add('Describe this video clip.', [FileUri])]);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);
+```
+
+<br/>
+
+## Audio
+
+Gemini can handle audio prompts by:
+
+- Describing, summarizing, or answering questions about audio content
+- Providing a transcription of the audio
+- Offering answers or a transcription for a specific part of the audio
+
+> [!IMPORTANT]
+> The Gemini API doesn't support audio output generation.
+>
+
+Gemini is compatible with the following audio format MIME types:
+
+- **WAV**: `audio/wav`
+- **MP3**: `audio/mp3`
+- **AIFF**: `audio/aiff`
+- **AAC**: `audio/aac`
+- **OGG** `Vorbis: audio/ogg`
+- **FLAC**: `audio/flac`
+
+Here’s a rephrased version of the technical details:
+
+Gemini processes audio by breaking it down into **25 tokens per second**, so one minute of audio translates to **1,500 tokens**. The system currently only interprets spoken English but can recognize non-verbal sounds like birdsong or sirens. For a single input, Gemini supports a maximum audio length of **9.5 hours**. While there’s no restriction on the number of files per prompt, their total length combined cannot exceed 9.5 hours. All audio is downsampled to a **16 Kbps data rate**, and if the audio has multiple channels, they’re merged into a single channel.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Files;
+
+  var FileUri := '';
+  {--- Upload file and get its uri }
+  var MyFile := Gemini.Files.UpLoad('Z:\my_folder\sound\my_sound.wav', 'MyFile');
+  try
+    FileUri := MyFile.&File.URI;
+    Display(Memo1, FileUri);
+  finally
+    MyFile.Free;
+  end;
+ 
+  {--- Generate text from an image using its Uri. }
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Describe this audio clip.', [FileUri])]);
     end,
     function : TAsynChat
     begin
