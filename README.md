@@ -36,7 +36,7 @@ ___
     - [Long context](#Long-context)
     - [Code execution](#Code-execution)
     - [Function calling](#Function-calling)
-    ... TODO
+    - ... TODO
 - [Contributing](#contributing)
 - [License](#license)
 
