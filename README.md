@@ -31,6 +31,8 @@ ___
         - [Prompting with images](#Prompting-with-images)
         - [Prompting with video](#Prompting-with-video)
     - [Audio](#Audio)
+        - [Speech-to-text](#Speech-to-text)
+        - [Text-to-speech](#Text-to-speech)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -899,7 +901,7 @@ Gemini processes audio by breaking it down into **25 tokens per second**, so one
     MyFile.Free;
   end;
  
-  {--- Generate text from an image using its Uri. }
+  {--- Generate text from an audio record using its Uri. }
   Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
     procedure (Params: TChatParams)
     begin
@@ -912,6 +914,38 @@ Gemini processes audio by breaking it down into **25 tokens per second**, so one
       Result.OnError := Display;
     end);
 ```
+
+<br/>
+
+### Speech-to-text
+
+The primary purpose of speech-to-text technology is to provide a text transcription of a voice recording, which is inherently temporary in nature. Therefore, uploading this audio file is unnecessary, as it will be used only once for transcription.
+
+To perform the transcription, simply follow the example below, assuming the audio file has already been provided through a prior recording process.
+
+```Pascal
+// uses Gemini, Gemini.Chat;
+
+  var SpeechSource := 'Z:\my_folder\sound\my_speech.wav';
+  {--- Transcribe the audio recording into a text. }
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Transcribe the audio recording into English.', [SpeechSource])]);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);
+```
+
+<br/>
+
+### Text-to-speech
+
+As stated above, the Gemini API doesn't support audio output generation, and the Gemini APIs do not provide any method to transcribe text into an audio file. On the other hand, Google Cloud offers an alternative, which you can find [here](https://cloud.google.com/text-to-speech/?utm_source=google&utm_medium=cpc&utm_campaign=emea-gb-all-en-dr-bkws-all-all-trial-%7Bmatchtype%7D-gcp-1707574&utm_content=text-ad-none-any-DEV_%7Bdevice%7D-CRE_%7Bcreative%7D-ADGP_%7B_dsadgroup%7D-KWID_%7B_dstrackerid%7D-%7Btargetid%7D-userloc_%7Bloc_physical_ms%7D&utm_term=KW_%7Bkeyword%7D-NET_%7Bnetwork%7D-PLAC_%7Bplacement%7D&%7B_dsmrktparam%7D%7Bignore%7D&%7B_dsmrktparam%7D&gclsrc=aw.ds&gad_source=1&gclid=Cj0KCQjw1Yy5BhD-ARIsAI0RbXZf2NNU_LQ_rYqNEeTpm3Q0QPI83Jap8PAIl6ZFzulFAD3cY-z487oaAvk0EALw_wcB&gclsrc=aw.ds&hl=en).
 
 <br/>
 
