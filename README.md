@@ -730,6 +730,23 @@ System instructions can be used for various purposes, such as:
 
 You can configure these instructions when initializing the model, and they will persist throughout the session, guiding the model’s responses. They form part of the model’s prompts and are governed by standard data use policies.
 
+```Pascal
+// uses Gemini, Gemini.Chat;
+
+  Gemini.Chat.AsynCreateStream('models/gemini-1.5-flash-001',
+    procedure (Params: TChatParams)
+    begin
+      Params.SystemInstruction('you are a rocket scientist');
+      Params.Contents([ TPayload.Add('What are the differences between the Saturn 5 rocket and the Saturn 1 rocket?') ]);
+    end,
+    function : TAsynChatStream
+    begin
+      Result.Sender := Memo1;
+      Result.OnProgress := DisplayStream;
+      Result.OnError := Display;
+    end);
+```
+
 <br/>
 
 # Contributing
