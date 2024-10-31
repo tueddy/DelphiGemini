@@ -588,7 +588,8 @@ There aren’t any strict pixel limits for documents beyond the model’s contex
 You can upload documents of any size by using the File API. Always rely on the File API whenever the combined size of the request—including files, text prompt, system instructions, and any other data—exceeds 20 MB.
 
 > [!WARNING]
-
+> You can use the File API to store files for up to 48 hours, with a storage limit of 20 GB per project and a maximum of 2 GB per file. During this time, files are accessible with your API key but are not downloadable through the API. The File API is free to use and available in all regions where the Gemini API operates.
+>
 
 
 <br/>
