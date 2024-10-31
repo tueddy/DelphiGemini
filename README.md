@@ -35,6 +35,7 @@ ___
         - [Text-to-speech](#Text-to-speech)
     - [Long context](#Long-context)
     - [Code execution](#Code-execution)
+    - [Function calling](#Function-calling)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1019,6 +1020,11 @@ Code execution allows the model to run code directly in the API backend within a
 Generally, code execution is preferable if it meets your requirements, as it’s simpler to enable and completes within a single GenerateContent request, resulting in a single charge. In contrast, function calling requires an additional GenerateContent request to return each function’s output, leading to multiple charges.
 
 Typically, use function calling if you need to run custom functions locally. For cases where the API should generate and execute Python code and deliver results, code execution is often the best fit.
+
+<br/>
+
+## Function calling
+
 
 <br/>
 
