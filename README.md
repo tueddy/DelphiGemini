@@ -687,6 +687,30 @@ These methods allow for more precise control over pagination and callback handli
 
 ### Delete files
 
+Files uploaded with the File API are automatically removed **after 48 hours**. You can also delete them manually using either `Gemini.Files.Delete` or `Gemini.Files.Delete`.
+
+Declare this method for displaying.
+> [!TIP]
+>```Pascal
+>  procedure Display(Sender: TObject; Delete: TFileDelete); overload;
+>  begin
+>    Display(Sender, 'deleted');
+>  end;
+>```
+
+```Pascal
+// uses Gemini, Gemini.Files;
+
+  var FileCode := 'files/{code}';  // e.g. files/yrsihy2hdyz7
+  Gemini.Files.AsynDelete(FileCode,
+    function : TAsynFileDelete
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);
+```
+
 <br/>
 
 # Contributing
