@@ -36,7 +36,7 @@ ___
     - [Long context](#Long-context)
     - [Code execution](#Code-execution)
     - [Function calling](#Function-calling)
-    - ... TODO (Caching, Fine-tuning, Safety, Grounding with Google Search)
+    - ... TODO (Caching, Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
 
