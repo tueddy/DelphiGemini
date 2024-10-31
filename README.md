@@ -676,6 +676,13 @@ Declare this method for displaying.
      end);  
 ```
 
+By default, a list of 10 elements will be retrieved. We can refine the process of obtaining the list of files using the following methods:
+
+- `List(const PageSize: Integer; const PageToken: string);`
+- `AsyncList(const PageSize: Integer; const PageToken: string; Callbacks: TFunc<TAsyncFiles>);`
+
+These methods allow for more precise control over pagination and callback handling.
+
 <br/>
 
 ### Delete files
