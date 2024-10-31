@@ -189,29 +189,28 @@ In the following examples, we will use the procedures 'Display' to simplify the 
 
 > [!TIP]
 >```Pascal
->  procedure Display(Sender: TObject; Embed: TEmbedding); overload;
+>  procedure Display(Sender: TObject; Embed: TEmbeddingValues);
 >  begin
 >    var M := Sender as TMemo;
->    for var Item in Embed.Embedding.Values do
+>    for var Item in Embed.Values do
 >      begin
 >        M.Lines.Text := M.Text + sLineBreak + Item.ToString;
 >      end;
 >    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
 >  end;
+>```
 >
+>```Pascal
 >  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
 >  begin
 >    var M := Sender as TMemo;
 >    for var Item in Embed.Embeddings do
 >      begin
->        for var Value in Item.Values do
->          begin
->            M.Lines.Text := M.Text + sLineBreak + Value.ToString;
->          end;
+>        Display(Sender, Item);
 >        M.Lines.Text := M.Text + sLineBreak;
 >      end;
 >    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
->end;
+>  end;
 >```
 
 1. **Synchronously** : Get the vector representation of the text *'This is an example'*.
@@ -226,7 +225,7 @@ In the following examples, we will use the procedures 'Display' to simplify the 
             end);
   // For displaying, add a TMemo on the form
   try
-    Display(Memo1, Integration)
+    Display(Memo1, Integration.Embedding)
   finally
     Integration.Free;
   end;
