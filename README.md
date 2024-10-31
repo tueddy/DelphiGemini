@@ -24,8 +24,8 @@ ___
     - [Document processing](#Document-processing)
         - [Upload a document and generate content](#Upload-a-document-and-generate-content)
         - [Get metadata for a file](#Get-metadata-for-a-file)
-        - [List files](#List files)
-        - [Delete files](#Delete files)
+        - [List files](#List-files)
+        - [Delete files](#Delete-files)
 - [Contributing](#contributing)
 - [License](#license)
 
