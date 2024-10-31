@@ -1735,8 +1735,8 @@ begin
   var OnDoCancel := CallBackParams.Param.OnDoCancel;
 
   var Task: ITask := TTask.Create(
-          procedure()
-          begin
+        procedure()
+        begin
             {--- Pass the instance of the current class in case no value was specified. }
             if not Assigned(Sender) then
               Sender := Self;
@@ -1825,7 +1825,7 @@ begin
                   end;
                 end;
             end;
-          end);
+        end);
   Task.Start;
 end;
 
@@ -1894,7 +1894,6 @@ begin
         finally
           Chat.Free;
         end;
-
       end);
   finally
     ResetStream;
