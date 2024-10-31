@@ -625,7 +625,20 @@ Use the asynchronous methods `Gemini.Files.Upload` or `Gemini.Files.AsyncUpload`
 
 ### Get metadata for a file
 
+You can confirm that the API successfully saved the uploaded file and retrieve its metadata by using Gemini.Files.Retrieve or Gemini.Files.AsynRetrieve. Only the name (and therefore, the URI) is unique.
 
+```Pascal
+// uses Gemini, Gemini.Files;
+
+  var FileName := 'files/{code}'  //e.g. 'files/yrsihy2hdyz7'
+  var GetFile := Gemini.Files.Retrieve(FileName);
+
+  try
+    Display(Memo1, GetFile.Name + ' : ' + GetFile.MimeType + ' : ' + GetFile.DisplayName);
+  finally
+    GetFile.Free;
+  end;
+```
 
 <br/>
 
