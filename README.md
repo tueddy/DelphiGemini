@@ -747,6 +747,12 @@ You can configure these instructions when initializing the model, and they will 
     end);
 ```
 
+> [!CAUTION]
+> System instructions can guide the model to follow directions but don’t fully safeguard against jailbreaks or leaks. We recommend being cautious about including any sensitive information in these instructions.
+>
+
+See [More examples](https://ai.google.dev/gemini-api/docs/system-instructions?lang=rest#more-examples) on official site.
+
 <br/>
 
 # Contributing
