@@ -57,7 +57,7 @@ Once you have a token, you can initialize `IGemini` interface, which is an entry
 
 Due to the fact that there can be many parameters and not all of them are required, they are configured using an anonymous function.
 
-> [!NOTE]
+> [!TIP]
 >```Pascal
 >uses Gemini;
 >
@@ -187,7 +187,7 @@ See also the [embeddings models](https://ai.google.dev/gemini-api/docs/models/ge
 
 In the following examples, we will use the procedures 'Display' to simplify the examples.
 
-> [!NOTE]
+> [!TIP]
 >```Pascal
 >  procedure Display(Sender: TObject; Embed: TEmbedding); overload;
 >  begin
@@ -280,7 +280,7 @@ The Gemini API enables [`text generation`](https://ai.google.dev/api/generate-co
 - Your own unique use cases
 
 In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
-> [!NOTE] 
+> [!TIP] 
 >```Pascal
 >  procedure Display(Sender: TObject; Chat: TChat); overload;
 >  begin
@@ -381,7 +381,7 @@ The example below demonstrates how to implement streaming using the [`streamGene
 
 Declare this method for displaying.
 
-> [!NOTE]
+> [!TIP]
 >```Pascal
 >  procedure Display(Sender: TObject; Candidate: TChatCandidate); overload;
 >  begin
@@ -482,7 +482,7 @@ Here’s an example of a basic chat implementation:
 Here’s an example of a asynchronous chat implementation
 
 Declare this method for displaying.
-> [!NOTE]
+> [!TIP]
 >```Pascal
 >  procedure DisplayStream(Sender: TObject; Chat: TChat);
 >  begin
@@ -585,6 +585,10 @@ There aren’t any strict pixel limits for documents beyond the model’s contex
 <br/>
 
 ### Upload a document and generate content
+
+You can upload documents of any size by using the File API. Always rely on the File API whenever the combined size of the request—including files, text prompt, system instructions, and any other data—exceeds 20 MB.
+
+> [!WARNING]
 
 
 
