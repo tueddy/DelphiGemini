@@ -716,7 +716,7 @@ Declare this method for displaying.
 
 ## System instructions
 
-When setting up an AI model, you can define guidelines for how it should respond, like assigning it a specific role (`you are a rocket scientist`) or instructing it on a particular tone (`speak like a pirate`). These parameters are established by configuring the system instructions during the model's initialization.
+When setting up an AI model, you can define guidelines for how it should respond, like assigning it a specific role `you are a rocket scientist` or instructing it on a particular tone `speak like a pirate`. These parameters are established by configuring the system instructions during the model's initialization.
 
 System instructions let you shape the model’s behavior to fit specific needs and use cases. When set, they provide added context that guides the model to perform tasks in a more tailored way, adjusting its responses to meet particular guidelines across the entire interaction. These instructions apply across multiple exchanges with the model.
 
