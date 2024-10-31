@@ -23,6 +23,7 @@ ___
         - [Configure text generation](#Configure-text-generation)
     - [Document processing](#Document-processing)
         - [Upload a document and generate content](#Upload-a-document-and-generate-content)
+        - [Get metadata for a file](#Get-metadata-for-a-file)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -278,7 +279,7 @@ The Gemini API enables [`text generation`](https://ai.google.dev/api/generate-co
 - Chatbots
 - Your own unique use cases
 
-In the following examples, we will use two procedures ('Display' and 'DisplayError') to simplify the examples.
+In the following examples, we will use the procedures 'Display' to simplify the examples.
 > [!TIP] 
 >```Pascal
 >  procedure Display(Sender: TObject; Chat: TChat); overload;
@@ -297,7 +298,7 @@ In the following examples, we will use two procedures ('Display' and 'DisplayErr
 >```
 >
 >```Pascal
->  procedure DisplayError(Sender: TObject; Error: string);
+>  procedure Display(Sender: TObject; Error: string); overload;
 >  begin
 >    var M := Sender as TMemo;
 >    M.Lines.Text := M.Text + sLineBreak + Error;
@@ -340,7 +341,7 @@ Asynchronous mode
     begin
       Result.Sender := Memo1;
       Result.OnSuccess := Display;
-      Result.OnError := DisplayError;
+      Result.OnError := Display;
     end);
 ```
 
@@ -364,7 +365,7 @@ The Gemini API supports multimodal inputs that combine text with media files. Th
     begin
       Result.Sender := Memo1;
       Result.OnSuccess := Display;
-      Result.OnError := DisplayError;
+      Result.OnError := Display;
     end);
 ```
 
@@ -507,7 +508,7 @@ Declare this method for displaying.
       Result.Sender := Memo1;
       Result.OnProgress := DisplayStream;
       Result.OnSuccess := Display;
-      Result.OnError := DisplayError;
+      Result.OnError := Display;
     end);
 ```
 
@@ -596,7 +597,35 @@ Use the asynchronous methods `Gemini.Files.Upload` or `Gemini.Files.AsyncUpload`
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Files;
 
+  var FileUri := '';
+  {--- Load file and get its uri }
+  var MyFile := Gemini.Files.UpLoad('D:\2025-developpement\Images\Invoice.png', 'MyFile');
+  try
+    FileUri := MyFile.&File.URI;
+    Display(Memo1, FileUri);
+  finally
+    MyFile.Free;
+  end;
+ 
+  {--- Generate text from an image using its URI. }
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('Describe this image.', [FileUri])]);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);
 ```
+
+<br/>
+
+### Get metadata for a file
+
+
 
 <br/>
 
