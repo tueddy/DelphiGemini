@@ -630,8 +630,8 @@ You can confirm that the API successfully saved the uploaded file and retrieve i
 ```Pascal
 // uses Gemini, Gemini.Files;
 
-  var FileName := 'files/{code}'  //e.g. 'files/yrsihy2hdyz7'
-  var GetFile := Gemini.Files.Retrieve(FileName);
+  var FileCode := 'files/{code}'  //e.g. 'files/yrsihy2hdyz7'
+  var GetFile := Gemini.Files.Retrieve(FileCode);
 
   try
     Display(Memo1, GetFile.Name + ' : ' + GetFile.MimeType + ' : ' + GetFile.DisplayName);
