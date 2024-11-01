@@ -1396,10 +1396,21 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
 - Example 2 : You have chosen to implement a ***TrainingData.jsonl*** file in `JSONL` format, structured as follows.
 
 ```Jsonl
-{"text_input": "1", "output": "2"}
-{"text_input": "3", "output": "4"}
-{"text_input": "-3", "output": "-2"}
-...
+{"text_input": "1","output": "2"}
+{"text_input": "3","output": "4"}
+{"text_input": "-3","output": "-2"}
+{"text_input": "twenty two","output": "twenty three"}
+{"text_input": "two hundred","output": "two hundred one"}
+{"text_input": "ninety nine","output": "one hundred"}
+{"text_input": "8","output": "9"}
+{"text_input": "-98","output": "-97"}
+{"text_input": "1,000","output": "1,001"}
+{"text_input": "10,100,000","output": "10,100,001"}
+{"text_input": "thirteen","output": "fourteen"}
+{"text_input": "eighty","output": "eighty one"}
+{"text_input": "one","output": "two"}
+{"text_input": "three","output": "four"}
+{"text_input": "seven","output": "eight"}
 ```
 
 ```Pascal
@@ -1421,10 +1432,22 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
 
 ```Csv
 text_input;output
+text_input;output
 1;2
 3;4
 -3;-2
-...
+twenty two;twenty three
+two hundred;two hundred one
+ninety nine;one hundred
+8;9
+-98;-97
+"1,000";"1,001"
+"1,01,000";"1,01,00,001"
+thirteen;fourteen
+eighty;eighty one
+one;two hundred one
+three;fourteen
+seven;eight
 ```
 
 ```Pascal
