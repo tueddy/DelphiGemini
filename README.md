@@ -49,6 +49,8 @@ ___
         - [Upload tuning dataset](#Upload-tuning-dataset)
         - [Try the model](#Try-the-model)
         - [List tuned models](#List-tuned-models)
+        - [Retrieve tuned model](#Retrieve-tuned-model)
+        - [Delete tuned model](#Delete-tuned-model)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1460,6 +1462,40 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
       end;
   finally
     List.Free;
+  end;
+```
+
+<br/>
+
+### Retrieve tuned model
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TunedModelName := 'tunedModels/{code}';  //e.g. tunedModels/number-generator-model-fc2ml58m7qc8
+
+  var Retrieved := Gemini.FineTune.Retrieve(TunedModelName);
+  try
+    Display(Memo1, Retrieved.Name + ' - ' + Retrieved.BaseModel);
+  finally
+    Retrieved.Free;
+  end;
+```
+
+<br/>
+
+### Delete tuned model
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TunedModelName := 'tunedModels/{code}';  //e.g. tunedModels/number-generator-model-fc2ml58m7qc8
+
+  var Deleted := Gemini.FineTune.Delete(TunedModelName);
+  try
+    Display(Memo1, TunedModelName + ' - Deleted');
+  finally
+    Deleted.Free;
   end;
 ```
 
