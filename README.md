@@ -1311,6 +1311,8 @@ In summary, `TSafety` provides a flexible interface for setting up and adjusting
 
 ## Fine-tuning
 
+When **few-shot prompting** does not yield the desired results, **fine-tuning** can enhance model performance on specific tasks. This process allows the model to better adhere to particular output requirements by using a curated set of examples that demonstrate the desired outcomes when instructions alone are insufficient. **Fine-tuning** thus helps to align the model's responses more closely with specific expectations.
+
 <br/>
 
 # Contributing
