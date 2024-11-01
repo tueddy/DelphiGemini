@@ -1264,14 +1264,14 @@ The `TSafety` record is defined in the `Gemini.Safety.pas` unit is designed to c
 
 <br/>
 
-1. Safety Categories Configuration:
+- 1. Safety Categories Configuration:
 
 The record allows setting specific blocking rules for categories of content, including:
-    - `HARM_CATEGORY_HARASSMENT` (Harassment)
-    - `HARM_CATEGORY_HATE_SPEECH` (Hate Speech)
-    - `HARM_CATEGORY_SEXUALLY_EXPLICIT` (Sexually Explicit Content)
-    - `HARM_CATEGORY_DANGEROUS_CONTENT` (Dangerous Content)
-    - `HARM_CATEGORY_CIVIC_INTEGRITY` (Civic Integrity)
+  - `HARM_CATEGORY_HARASSMENT` (Harassment)
+  - `HARM_CATEGORY_HATE_SPEECH` (Hate Speech)
+  - `HARM_CATEGORY_SEXUALLY_EXPLICIT` (Sexually Explicit Content)
+  - `HARM_CATEGORY_DANGEROUS_CONTENT` (Dangerous Content)
+  - `HARM_CATEGORY_CIVIC_INTEGRITY` (Civic Integrity)
 
 <br/>
 
