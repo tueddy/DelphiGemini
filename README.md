@@ -1489,7 +1489,7 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
   try
     for var Item in List.TunedModels do
       begin
-        Display(Memo1, Item.Name);
+        Display(Memo1, Item.Name + ' - ' + Item.State.ToString);
       end;
   finally
     List.Free;
