@@ -36,7 +36,8 @@ ___
     - [Long context](#Long-context)
     - [Code execution](#Code-execution)
     - [Function calling](#Function-calling)
-    - ... TODO (Caching, Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
+    - [Context caching](#Context-caching)
+    - ... TODO (Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1074,6 +1075,18 @@ Please refer to the [official documentation](https://ai.google.dev/gemini-api/do
       end);
   end;
 ```
+
+<br/>
+
+## Context caching
+
+In many AI workflows, you may need to send the same input tokens repeatedly to a model. With the Gemini API’s context caching feature, you can submit content once, store the input tokens in a cache, and reference these cached tokens for future requests. At certain usage volumes, this method is more cost-effective than repeatedly submitting the same tokens.
+
+When you cache tokens, you can specify a duration for how long they remain stored before automatic deletion. This duration is known as the time to live `TTL`, and if not specified, it defaults to 1 hour. The cost of caching varies based on the input token size and the desired `TTL`.
+
+> [!NOTE]
+> Context caching is available only for stable models with fixed versions (such as `gemini-1.5-pro-001`). Be sure to include the version suffix (like the -001 in `gemini-1.5-pro-001`).
+>
 
 <br/>
 
