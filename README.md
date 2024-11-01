@@ -1472,6 +1472,8 @@ seven;eight
 
 ### Upload tuning dataset
 
+Creates a tuned model. Check intermediate tuning progress (if any) through the google.longrunning.Operations service.
+
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
 
