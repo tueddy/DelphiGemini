@@ -45,6 +45,7 @@ ___
     - [Safety](#Safety)
         - [TSafety record](#TSafety-record)
     - [Fine-tuning](#Fine-tuning)
+        - [Create training data](#Create-training-data)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1314,6 +1315,15 @@ In summary, `TSafety` provides a flexible interface for setting up and adjusting
 When **few-shot prompting** does not yield the desired results, **fine-tuning** can enhance model performance on specific tasks. This process allows the model to better adhere to particular output requirements by using a curated set of examples that demonstrate the desired outcomes when instructions alone are insufficient. **Fine-tuning** thus helps to align the model's responses more closely with specific expectations.
 
 Refer to [official documentation](https://ai.google.dev/gemini-api/docs/model-tuning#how-model).
+
+<br/>
+
+### Create training data
+
+A training dataset comprises ***hyperparameter***  values and ***training data*** represented as a list of input texts and corresponding response texts. 
+
+The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Training values can be directly specified within the dataset or imported from a `JSONL` or `CSV` file (using a semicolon as a separator).
+
 
 <br/>
 
