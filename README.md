@@ -1472,7 +1472,7 @@ seven;eight
 
 ### Upload tuning dataset
 
-Creates a tuned model. Check intermediate tuning progress (if any) through the google.longrunning.Operations service.
+This example shows how to create a tuned model. Check intermediate tuning progress (if any) through the google.longrunning.Operations service.
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
@@ -1510,7 +1510,7 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
 
 ### List tuned models
 
-Lists created tuned models.
+This example shows how to create a list of tuned models.
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
@@ -1530,7 +1530,7 @@ Lists created tuned models.
 
 ### Retrieve tuned model
 
-Gets information about a specific TunedModel.
+This example shows how to get information about a specific TunedModel.
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
@@ -1549,7 +1549,7 @@ Gets information about a specific TunedModel.
 
 ### Update tuned model
 
-Updates a tuned model.
+This example shows how to update a tuned model.
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
@@ -1584,7 +1584,7 @@ Updates a tuned model.
 
 ### Delete tuned model
 
-Deletes a tuned model.
+This example shows how to delete a tuned model.
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
