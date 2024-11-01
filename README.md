@@ -1324,6 +1324,38 @@ A training dataset comprises ***hyperparameter***  values and ***training data**
 
 The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Training values can be directly specified within the dataset or imported from a `JSONL` or `CSV` file (using a semicolon as a separator).
 
+- Example 1 :
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TuningTask := TTuningTaskParams.Create
+    .Hyperparameters(
+       procedure (var Params : THyperparametersParams)
+       begin
+         Params.LearningRate(0.001);
+         Params.EpochCount(4);
+         Params.BatchSize(2);
+       end)
+    .TrainingData([
+       Example.AddItem('1', '2'),
+       Example.AddItem('2', '3'),
+       Example.AddItem('-3', '-2'),
+       Example.AddItem('twenty two', 'twenty three'),
+       Example.AddItem('two hundred', 'two hundred one'),
+       Example.AddItem('ninety nine', 'one hundred'),
+       Example.AddItem('8', '9'),
+       Example.AddItem('-98', '-97'),
+       Example.AddItem('1,000', '1,001'),
+       Example.AddItem('10,100,000', '10,100,001'),
+       Example.AddItem('thirteen', 'fourteen'),
+       Example.AddItem('eighty', 'eighty one'),
+       Example.AddItem('one', 'two'),
+       Example.AddItem('three', 'four'),
+       Example.AddItem('seven', 'eight')
+     ]);
+  Display(Memo1, TuningTask.ToFormat(True));
+```
 
 <br/>
 
