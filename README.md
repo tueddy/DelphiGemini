@@ -1357,9 +1357,9 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
   Display(Memo1, TuningTask.ToFormat(True));
 ```
 
-- Example 2 : You have chosen to implement a TrainingData.JSONL file in JSONL format, structured as follows.
+- Example 2 : You have chosen to implement a ***TrainingData.jsonl*** file in `JSONL` format, structured as follows.
 
-```JSONL
+```Jsonl
 {"text_input": "1", "output": "2"}
 {"text_input": "3", "output": "4"}
 {"text_input": "-3", "output": "-2"}
@@ -1377,7 +1377,32 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
          Params.EpochCount(4);
          Params.BatchSize(2);
        end)
-    .TrainingData('TrainBatch_1.jsonl');
+    .TrainingData('TrainingData.jsonl');
+  Display(Memo1, TuningTask.ToFormat(True));
+```
+
+- Example 3 : You have chosen to implement a ***TrainingData.csv*** file in `csv` format, structured as follows.
+
+```Csv
+text_input;output
+1;2
+3;4
+-3;-2
+...
+```
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TuningTask := TTuningTaskParams.Create
+    .Hyperparameters(
+       procedure (var Params : THyperparametersParams)
+       begin
+         Params.LearningRate(0.001);
+         Params.EpochCount(4);
+         Params.BatchSize(2);
+       end)
+    .TrainingData('TrainingData.csv');
   Display(Memo1, TuningTask.ToFormat(True));
 ```
 
