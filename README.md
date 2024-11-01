@@ -45,7 +45,8 @@ ___
     - [Safety](#Safety)
         - [TSafety record](#TSafety-record)
     - [Fine-tuning](#Fine-tuning)
-        - [Create training data](#Create-training-data)
+        - [Create tuning task](#Create-tuning-task)
+        - [Upload tuning dataset](#Upload-tuning-dataset)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1318,9 +1319,9 @@ Refer to [official documentation](https://ai.google.dev/gemini-api/docs/model-tu
 
 <br/>
 
-### Create training data
+### Create tuning task
 
-A training dataset comprises ***hyperparameter***  values and ***training data*** represented as a list of input texts and corresponding response texts. 
+A training task comprises ***hyperparameter***  values and ***training data*** represented as a list of input texts and corresponding response texts. 
 
 The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Training values can be directly specified within the dataset or imported from a `JSONL` or `CSV` file (using a semicolon as a separator).
 
@@ -1405,6 +1406,10 @@ text_input;output
     .TrainingData('TrainingData.csv');
   Display(Memo1, TuningTask.ToFormat(True));
 ```
+
+<br/>
+
+### Upload tuning dataset
 
 <br/>
 
