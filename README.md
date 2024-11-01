@@ -1357,6 +1357,14 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
   Display(Memo1, TuningTask.ToFormat(True));
 ```
 
+- Example 2 : You have chosen to implement a TrainingData.JSONL file in JSONL format, structured as follows.
+
+```JSONL
+{"text_input": "1", "output": "2"}
+{"text_input": "3", "output": "4"}
+{"text_input": "-3", "output": "-2"}
+```
+
 <br/>
 
 # Contributing
