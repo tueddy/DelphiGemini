@@ -52,6 +52,7 @@ ___
         - [List tuned models](#List-tuned-models)
         - [Retrieve tuned model](#Retrieve-tuned-model)
         - [Delete tuned model](#Delete-tuned-model)
+- [Methods for the Tutorial Display](#Methods-for-the-Tutorial-Display)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1521,6 +1522,31 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
   finally
     Deleted.Free;
   end;
+```
+
+<br/>
+
+# Methods for the Tutorial Display
+
+```Pascal
+  interface 
+
+    procedure Display(Sender: TObject); overload;
+
+    procedure Display(Sender: TObject; Chat: TChat); overload;
+    procedure Display(Sender: TObject; S: string); overload;
+    procedure Display(Sender: TObject; Candidate: TChatCandidate); overload;
+    procedure Display(Sender: TObject; Embed: TEmbeddingValues); overload;
+    procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
+    procedure Display(Sender: TObject; Files: TFiles); overload;
+    procedure Display(Sender: TObject; Delete: TFileDelete); overload;
+    procedure Display(Sender: TObject; Cache: TCacheContents); overload;
+
+    procedure DisplayStream(Sender: TObject; Buffer: string); overload;
+    procedure DisplayStream(Sender: TObject; Chat: TChat); overload;
+
+    procedure DisplayCode(Sender: TObject; Chat: TChat);
+...
 ```
 
 <br/>
