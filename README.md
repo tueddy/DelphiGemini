@@ -42,7 +42,8 @@ ___
         - [List caches](#List-caches)
         - [Update a cache](#Update-a-cache)
         - [Delete a cache](#Delete-a-cache)
-    - ... TODO (Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
+    - [Safety](#Safety)
+    - ... TODO (Fine-tuning, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1239,6 +1240,14 @@ The caching service includes a delete function that allows users to manually rem
       Result.OnError := Display;
     end);
 ```
+
+<br/>
+
+## Safety
+
+The Gemini API offers adjustable safety settings, allowing you to tailor the level of restriction during the prototyping phase. You can modify these settings across four filtering categories to control the types of content allowed or restricted, depending on your application's needs.
+
+Refer [Safety filters](https://ai.google.dev/gemini-api/docs/safety-settings#safety-filters) to the officiel documentation.
 
 <br/>
 
