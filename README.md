@@ -1363,6 +1363,22 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
 {"text_input": "1", "output": "2"}
 {"text_input": "3", "output": "4"}
 {"text_input": "-3", "output": "-2"}
+...
+```
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TuningTask := TTuningTaskParams.Create
+    .Hyperparameters(
+       procedure (var Params : THyperparametersParams)
+       begin
+         Params.LearningRate(0.001);
+         Params.EpochCount(4);
+         Params.BatchSize(2);
+       end)
+    .TrainingData('TrainBatch_1.jsonl');
+  Display(Memo1, TuningTask.ToFormat(True));
 ```
 
 <br/>
