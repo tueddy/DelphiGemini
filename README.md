@@ -44,7 +44,7 @@ ___
         - [Delete a cache](#Delete-a-cache)
     - [Safety](#Safety)
         - [TSafety record](#TSafety-record)
-    - ... TODO (Fine-tuning, Grounding with Google Search, Display methods resume)
+    - [Fine-tuning](#Fine-tuning)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1306,6 +1306,10 @@ The `TSafety` record is defined in the `Gemini.Safety.pas` unit is designed to c
 <br/>
 
 In summary, `TSafety` provides a flexible interface for setting up and adjusting safety filters in a Delphi application, based on different harm categories and probability thresholds, with convenient methods for category-specific configuration and easy JSON conversion.
+
+<br/>
+
+## Fine-tuning
 
 <br/>
 
