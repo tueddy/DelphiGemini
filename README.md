@@ -1262,6 +1262,8 @@ Refer to [Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance
 
 The `TSafety` record is defined in the `Gemini.Safety.pas` unit is designed to configure safety rules by setting blocking thresholds for various categories of potentially harmful content. Here’s a summary of its capabilities:
 
+<br/>
+
 1. Safety Categories Configuration:
 
 The record allows setting specific blocking rules for categories of content, including:
@@ -1270,6 +1272,8 @@ The record allows setting specific blocking rules for categories of content, inc
 - `HARM_CATEGORY_SEXUALLY_EXPLICIT` (Sexually Explicit Content)
 - `HARM_CATEGORY_DANGEROUS_CONTENT` (Dangerous Content)
 - `HARM_CATEGORY_CIVIC_INTEGRITY` (Civic Integrity)
+
+<br/>
 
 2. Blocking Thresholds (THarmBlockThreshold):
 
@@ -1280,14 +1284,20 @@ You can specify different blocking levels based on the probability of content be
 - `BLOCK_NONE`: Does not block any content.
 - `OFF`: Completely disables the safety filter.
 
+<br/>
+
 3. Methods for Setting Specific Rules:
 
 - `SexuallyExplicit`, `HateSpeech`, `Harassment`, `DangerousContent`, `CivicIntegrity`: These methods create a TSafety object for each content category with a specified blocking threshold.
 - `DontBlock`: Returns an array of `TSafety` configurations where each category is set to not block any content (`BLOCK_NONE`).
 
+<br/>
+
 4. JSON Conversion:
 
 The `ToJson` method converts the defined safety settings in a `TSafety` object to JSON format, with fields `category` (content category) and `threshold` (blocking threshold), facilitating export and storage.
+
+<br/>
 
 5. Fluent Creation Methods:
 
