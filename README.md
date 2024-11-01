@@ -39,6 +39,7 @@ ___
     - [Context caching](#Context-caching)
         - [Set the context to cache](#Set-the-context-to-cache)
         - [Use cached context](#Use-cached-context)
+        - [List caches](#List-caches)
     - ... TODO (Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1142,6 +1143,46 @@ To utilize the code examples, please download the file titled Apollo 11 Conversa
     begin
       Result.Sender := Memo1;
       Result.OnProgress := DisplayStream;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);  
+```
+
+<br/>
+
+### List caches
+
+**It's not possible to access or view cached content directly**, but you can retrieve cache metadata, including the name, model, display name, usage metadata, creation time, update time, and expiration time.
+
+Declare this method for displaying.
+> [!TIP]
+> ```Pascal
+>  procedure Display(Sender: TObject; Cache: TCacheContents); overload;
+>  begin
+>    var M := Sender as TMemo;
+>    if Length(Cache.CachedContents) > 0 then
+>      begin
+>        for var Item in Cache.CachedContents do
+>          begin
+>            M.Text := M.Text + Item.Name + '  Expire at : ' +  Item.expireTime + sLineBreak;
+>            M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>          end;
+>      end
+>    else
+>      M.Text := M.Text + 'No items cached' + sLineBreak;
+>    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>  end;
+>``` 
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Caching;
+
+  // Declare Next as string
+
+  Gemini.Caching.ASynList(20, Next,
+    function : TAsynCacheContents
+    begin
+      Result.Sender := Memo1;
       Result.OnSuccess := Display;
       Result.OnError := Display;
     end);  
