@@ -43,7 +43,7 @@ ___
         - [Update a cache](#Update-a-cache)
         - [Delete a cache](#Delete-a-cache)
     - [Safety](#Safety)
-        - [TSafety in Gemini.Safety.pas unit](#TSafety-in-Gemini.Safety.pas-unit)
+        - [TSafety in Gemini.Safety.pas unit](#TSafety-in-Gemini-Safety-pas-unit)
     - ... TODO (Fine-tuning, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
