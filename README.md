@@ -1302,7 +1302,10 @@ The `ToJson` method converts the defined safety settings in a `TSafety` object t
 5. Fluent Creation Methods:
 
 Category and `Threshold`: These methods allow updating the category and blocking threshold for the current instance, enabling a fluent API style for chainable configuration.
-In summary, TSafety provides a flexible interface for setting up and adjusting safety filters in a Delphi application, based on different harm categories and probability thresholds, with convenient methods for category-specific configuration and easy JSON conversion.
+
+<br/>
+
+In summary, `TSafety` provides a flexible interface for setting up and adjusting safety filters in a Delphi application, based on different harm categories and probability thresholds, with convenient methods for category-specific configuration and easy JSON conversion.
 
 <br/>
 
