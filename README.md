@@ -1422,7 +1422,7 @@ text_input;output
          Params.EpochCount(4);
          Params.BatchSize(2);
        end)
-    .TrainingData('TrainData01.csv');
+    .TrainingData('TrainData01.jsonl');
 
   var TuningDataSet := TTunedModelParams.Create
     .DisplayName('number generator model')
