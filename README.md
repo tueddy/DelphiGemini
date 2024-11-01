@@ -1354,6 +1354,12 @@ A training task comprises [***hyperparameter***](https://ai.google.dev/gemini-ap
 
 The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Training values can be directly specified within the dataset or imported from a `JSONL` or `CSV` file (using a semicolon as a separator).
 
+> [!NOTE]
+> For a comprehensive introduction to these hyperparameters, refer to the section ["Hyperparameters in Linear Regression"](https://developers.google.com/machine-learning/crash-course/linear-regression/hyperparameters?hl=fr) in the [Machine Learning Crash Course](https://developers.google.com/machine-learning/crash-course?hl=fr).
+>
+
+<br/>
+
 - Example 1 :
 
 ```Pascal
@@ -1435,12 +1441,6 @@ text_input;output
     .TrainingData('TrainingData.csv');
   Display(Memo1, TuningTask.ToFormat(True));
 ```
-
-<br/>
-
-> [!NOTE]
-> For a comprehensive introduction to these hyperparameters, refer to the section ["Hyperparameters in Linear Regression"](https://developers.google.com/machine-learning/crash-course/linear-regression/hyperparameters?hl=fr) in the [Machine Learning Crash Course](https://developers.google.com/machine-learning/crash-course?hl=fr).
->
 
 <br/>
 
