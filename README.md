@@ -47,6 +47,8 @@ ___
     - [Fine-tuning](#Fine-tuning)
         - [Create tuning task](#Create-tuning-task)
         - [Upload tuning dataset](#Upload-tuning-dataset)
+        - [Try the model](#Try-the-model)
+        - [List tuned models](#List-tuned-models)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -1321,7 +1323,7 @@ Refer to [official documentation](https://ai.google.dev/gemini-api/docs/model-tu
 
 ### Create tuning task
 
-A training task comprises ***hyperparameter***  values and ***training data*** represented as a list of input texts and corresponding response texts. 
+A training task comprises [***hyperparameter***](https://ai.google.dev/gemini-api/docs/model-tuning#advanced-settings)  values and ***training data*** represented as a list of input texts and corresponding response texts. 
 
 The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Training values can be directly specified within the dataset or imported from a `JSONL` or `CSV` file (using a semicolon as a separator).
 
@@ -1434,6 +1436,30 @@ text_input;output
     Display(Memo1, Tuning.Name + sLineBreak + Tuning.Metadata);
   finally
     Tuning.Free;
+  end;
+```
+
+<br/>
+
+### Try the model
+
+You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the name of the fine-tuned model to evaluate its performance.
+
+<br/>
+
+### List tuned models
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var List := Gemini.FineTune.List(20, Next, '');
+  try
+    for var Item in List.TunedModels do
+      begin
+        Display(Memo1, Item.Name);
+      end;
+  finally
+    List.Free;
   end;
 ```
 
