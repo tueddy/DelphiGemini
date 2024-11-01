@@ -1138,7 +1138,7 @@ To utilize the code examples, please download the file titled Apollo 11 Conversa
     procedure (Params: TChatParams)
     begin
       Params.Contents([ TPayload.User('Please summarize this transcript') ]);
-      Params.CachedContent(CacheName);  // Specify here the CacheName to use
+      Params.CachedContent(CacheName);  // cachedContents/{code} e.g. cachedContents/phd5r5zz767u
     end,
     function : TAsynChatStream
     begin
