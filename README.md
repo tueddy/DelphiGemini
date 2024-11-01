@@ -51,6 +51,7 @@ ___
         - [Try the model](#Try-the-model)
         - [List tuned models](#List-tuned-models)
         - [Retrieve tuned model](#Retrieve-tuned-model)
+        - [Update tuned model](#Update-tuned-model)
         - [Delete tuned model](#Delete-tuned-model)
 - [Methods for the Tutorial Display](#Methods-for-the-Tutorial-Display)
 - [Contributing](#contributing)
@@ -1204,6 +1205,8 @@ Declare this method for displaying.
 
 ### Retrieve a cache
 
+Reads CachedContent resource.
+
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Caching;
 
@@ -1480,7 +1483,7 @@ seven;eight
          Params.EpochCount(4);
          Params.BatchSize(2);
        end)
-    .TrainingData('TrainData01.jsonl');
+    .TrainingData('TrainingData.jsonl');
 
   var TuningDataSet := TTunedModelParams.Create
     .DisplayName('number generator model')
@@ -1537,6 +1540,41 @@ Gets information about a specific TunedModel.
     Display(Memo1, Retrieved.Name + ' - ' + Retrieved.BaseModel);
   finally
     Retrieved.Free;
+  end;
+```
+
+<br/>
+
+### Update tuned model
+
+Updates a tuned model.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TunedModelName := 'tunedModels/{code}'; //e.g. tunedModels/number-generator-model-fc2ml58m7qc8
+
+  var TuningTask := TTuningTaskParams.Create
+    .Hyperparameters(
+       procedure (var Params : THyperparametersParams)
+       begin
+         Params.LearningRate(0.001);
+         Params.EpochCount(4);
+         Params.BatchSize(2);
+       end)
+    .TrainingData('TrainingData.csv');
+
+  var TuningDataSet := TTunedModelParams.Create
+    .DisplayName('new number generator model')
+    .Description('Update test de nouveau')
+    .BaseModel('models/gemini-1.0-pro-001')
+    .TuningTask(TuningTask);
+
+  var Updated := Gemini.FineTune.Update(TunedModelName, 'displayName,description', TuningDataSet.Detach);
+  try
+    Display(Memo1, Updated.DisplayName + ' - ' + Updated.Description);
+  finally
+    Updated.Free;
   end;
 ```
 
