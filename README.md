@@ -1482,6 +1482,8 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
 
 ### List tuned models
 
+Lists created tuned models.
+
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
 
@@ -1500,6 +1502,8 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
 
 ### Retrieve tuned model
 
+Gets information about a specific TunedModel.
+
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
 
@@ -1516,6 +1520,8 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
 <br/>
 
 ### Delete tuned model
+
+Deletes a tuned model.
 
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
