@@ -40,6 +40,7 @@ ___
         - [Set the context to cache](#Set-the-context-to-cache)
         - [Use cached context](#Use-cached-context)
         - [List caches](#List-caches)
+        - [Retrieve a cache](#Retrieve-a-cache)
         - [Update a cache](#Update-a-cache)
         - [Delete a cache](#Delete-a-cache)
     - [Safety](#Safety)
@@ -1197,6 +1198,29 @@ Declare this method for displaying.
       Result.OnError := Display;
     end);  
 ```
+
+<br/>
+
+### Retrieve a cache
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Caching;
+
+  var CacheName := 'cachedContents/{code}';  //e.g. cachedContents/phd5r5zz767u
+
+  Gemini.Caching.ASynRetrieve(CacheName,
+    function : TAsynCache
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess :=
+        procedure (Sender: TObject; Cache: TCache)
+        begin
+          Display(Sender, Cache.Name + '  Expire at : ' + Cache.ExpireTime);
+        end;
+      Result.OnError := Display;
+    end);
+```
+
 
 <br/>
 
