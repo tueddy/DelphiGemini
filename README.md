@@ -1411,6 +1411,32 @@ text_input;output
 
 ### Upload tuning dataset
 
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.FineTunings;
+
+  var TuningTask := TTuningTaskParams.Create
+    .Hyperparameters(
+       procedure (var Params : THyperparametersParams)
+       begin
+         Params.LearningRate(0.001);
+         Params.EpochCount(4);
+         Params.BatchSize(2);
+       end)
+    .TrainingData('TrainData01.csv');
+
+  var TuningDataSet := TTunedModelParams.Create
+    .DisplayName('number generator model')
+    .BaseModel('models/gemini-1.0-pro-001')
+    .TuningTask(TuningTask);
+
+  var Tuning := Gemini.FineTune.Create(TuningDataSet.Detach);
+  try
+    Display(Memo1, Tuning.Name + sLineBreak + Tuning.Metadata);
+  finally
+    Tuning.Free;
+  end;
+```
+
 <br/>
 
 # Contributing
