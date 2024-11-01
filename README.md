@@ -1438,6 +1438,12 @@ text_input;output
 
 <br/>
 
+> [!NOTE]
+> For a comprehensive introduction to these hyperparameters, refer to the section ["Hyperparameters in Linear Regression"](https://developers.google.com/machine-learning/crash-course/linear-regression/hyperparameters?hl=fr) in the [Machine Learning Crash Course](https://developers.google.com/machine-learning/crash-course?hl=fr).
+>
+
+<br/>
+
 ### Upload tuning dataset
 
 ```Pascal
