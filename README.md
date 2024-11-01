@@ -41,6 +41,7 @@ ___
         - [Use cached context](#Use-cached-context)
         - [List caches](#List-caches)
         - [Update a cache](#Update-a-cache)
+        - [Delete a cache](#Delete-a-cache)
     - ... TODO (Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1210,6 +1211,30 @@ Here’s an example of how to update a cache’s `TTL`.
         procedure (Sender: TObject; Cache: TCache)
         begin
           Display(Sender, Cache.Name + '  Expire at : ' + Cache.ExpireTime);
+        end;
+      Result.OnError := Display;
+    end);
+```
+
+<br/>
+
+### Delete a cache
+
+The caching service includes a delete function that allows users to manually remove content from the cache. The example below demonstrates how to delete a cache.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Caching;
+
+  var CacheName := 'cachedContents/{code}';  //e.g. cachedContents/phd5r5zz767u
+
+  Gemini.Caching.ASynDelete(CacheName,
+    function : TAsynCacheDelete
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess :=
+        procedure (Sender: TObject; EmptyCache: TCacheDelete)
+        begin
+          Display(Sender, CacheName + ' deleted');
         end;
       Result.OnError := Display;
     end);
