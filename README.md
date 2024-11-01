@@ -43,6 +43,7 @@ ___
         - [Update a cache](#Update-a-cache)
         - [Delete a cache](#Delete-a-cache)
     - [Safety](#Safety)
+        - [TSafety in Gemini.Safety.pas unit](#TSafety-in-Gemini.Safety.pas-unit)
     - ... TODO (Fine-tuning, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1247,7 +1248,15 @@ The caching service includes a delete function that allows users to manually rem
 
 The Gemini API offers adjustable safety settings, allowing you to tailor the level of restriction during the prototyping phase. You can modify these settings across four filtering categories to control the types of content allowed or restricted, depending on your application's needs.
 
-Refer [Safety filters](https://ai.google.dev/gemini-api/docs/safety-settings#safety-filters) to the officiel documentation.
+Refer to [Safety filters](https://ai.google.dev/gemini-api/docs/safety-settings#safety-filters) in the officiel documentation.
+
+Generative AI models are highly versatile tools, yet they come with certain limitations. While their broad applicability offers great potential, it can also lead to unpredictable outcomes, including outputs that may be inaccurate, biased, or even offensive. To mitigate these risks, careful post-processing and thorough manual evaluation are crucial steps in ensuring the safety and reliability of these models.
+
+Refer to [Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance) in the officiel documentation.
+
+<br/>
+
+### TSafety in Gemini.Safety.pas unit
 
 <br/>
 
