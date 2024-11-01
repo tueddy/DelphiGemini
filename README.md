@@ -412,7 +412,7 @@ Declare this method for displaying.
 
 > [!TIP]
 >```Pascal
->  procedure DisplayStream(Sender: TObject; const Buffer: string); overload;
+>  procedure DisplayStream(Sender: TObject; Buffer: string); overload;
 >  begin
 >  var M := Sender as TMemo;
 >  for var i := 1 to Length(Buffer) do
