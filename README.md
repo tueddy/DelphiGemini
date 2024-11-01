@@ -914,6 +914,8 @@ Gemini is compatible with the following audio format MIME types:
 
 Gemini processes audio by breaking it down into **25 tokens per second**, so one minute of audio translates to **1,500 tokens**. The system currently only interprets spoken English but can recognize non-verbal sounds like birdsong or sirens. For a single input, Gemini supports a maximum audio length of **9.5 hours**. While there’s no restriction on the number of files per prompt, their total length combined cannot exceed 9.5 hours. All audio is downsampled to a **16 Kbps data rate**, and if the audio has multiple channels, they’re merged into a single channel.
 
+<br/>
+
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.Files;
 
