@@ -37,6 +37,8 @@ ___
     - [Code execution](#Code-execution)
     - [Function calling](#Function-calling)
     - [Context caching](#Context-caching)
+        - [Set the context to cache](#Set-the-context-to-cache)
+        - [Use cached context](#Use-cached-context)
     - ... TODO (Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1087,6 +1089,63 @@ When you cache tokens, you can specify a duration for how long they remain store
 > [!NOTE]
 > Context caching is available only for stable models with fixed versions (such as `gemini-1.5-pro-001`). Be sure to include the version suffix (like the -001 in `gemini-1.5-pro-001`).
 >
+
+To utilize the code examples, please download the file titled Apollo 11 Conversation available at the following link: https://storage.googleapis.com/generativeai-downloads/data/a11.txt.
+
+<br/>
+
+### Set the context to cache
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Caching;
+
+  var CacheName := '';  // Variable to store the name of the obtained cache
+
+  var a11 := 'Z:\Download\Text\a11.txt';
+
+  Gemini.Caching.ASynCreate(
+    procedure (Params: TCacheParams)
+    begin
+      Params.Contents([TPayload.User([a11])]);
+      Params.SystemInstruction('You are an expert on the history of space exploration.');
+      Params.ttl('800s');
+      Params.Model('models/gemini-1.5-flash-001');
+    end,
+
+    function : TAsynCache
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess :=
+        procedure (Sender: TObject; Cache: TCache)
+        begin
+          CacheName := Cache.Name;
+          DisplayStream(Sender, Cache.Name)
+        end;
+      Result.OnError := Display;
+    end);
+```
+
+<br/>
+
+### Use cached context
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Caching;
+
+  Gemini.Chat.AsynCreateStream('models/gemini-1.5-flash-001',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([ TPayload.User('Please summarize this transcript') ]);
+      Params.CachedContent(CacheName)
+    end,
+    function : TAsynChatStream
+    begin
+      Result.Sender := Memo1;
+      Result.OnProgress := DisplayStream;
+      Result.OnSuccess := Display;
+      Result.OnError := Display;
+    end);  
+```
 
 <br/>
 
