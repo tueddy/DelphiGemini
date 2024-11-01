@@ -1250,6 +1250,8 @@ The Gemini API offers adjustable safety settings, allowing you to tailor the lev
 
 Refer to [Safety filters](https://ai.google.dev/gemini-api/docs/safety-settings#safety-filters) in the officiel documentation.
 
+<br/>
+
 Generative AI models are highly versatile tools, yet they come with certain limitations. While their broad applicability offers great potential, it can also lead to unpredictable outcomes, including outputs that may be inaccurate, biased, or even offensive. To mitigate these risks, careful post-processing and thorough manual evaluation are crucial steps in ensuring the safety and reliability of these models.
 
 Refer to [Safety guidance](https://ai.google.dev/gemini-api/docs/safety-guidance) in the officiel documentation.
