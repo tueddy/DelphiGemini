@@ -1513,7 +1513,7 @@ You can utilize methods defined in the `Gemini.Chat.pas` unit and specify the na
 ```Pascal
 // uses Gemini, Gemini.Chat, Gemini.FineTunings;
 
-  var TunedModelName := 'tunedModels/{code}';  //e.g. tunedModels/number-generator-model-fc2ml58m7qc8
+  var TunedModelName := 'tunedModels/{code}'; //e.g. tunedModels/number-generator-model-fc2ml58m7qc8
 
   var Deleted := Gemini.FineTune.Delete(TunedModelName);
   try
