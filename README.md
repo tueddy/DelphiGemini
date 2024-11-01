@@ -40,6 +40,7 @@ ___
         - [Set the context to cache](#Set-the-context-to-cache)
         - [Use cached context](#Use-cached-context)
         - [List caches](#List-caches)
+        - [Update a cache](#Update-a-cache)
     - ... TODO (Fine-tuning, Safety, Grounding with Google Search, Display methods resume)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1186,6 +1187,32 @@ Declare this method for displaying.
       Result.OnSuccess := Display;
       Result.OnError := Display;
     end);  
+```
+
+<br/>
+
+### Update a cache
+
+You can update the `TTL` or expiration time for a cache, but modifying any other cache settings isn’t allowed.
+
+Here’s an example of how to update a cache’s `TTL`.
+
+```Pascal
+// uses Gemini, Gemini.Chat, Gemini.Caching;
+
+  var CacheName := 'cachedContents/{code}';  //e.g. cachedContents/phd5r5zz767u
+
+  Gemini.Caching.ASynUpdate(CacheName, '2300s',
+    function : TAsynCache
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess :=
+        procedure (Sender: TObject; Cache: TCache)
+        begin
+          Display(Sender, Cache.Name + '  Expire at : ' + Cache.ExpireTime);
+        end;
+      Result.OnError := Display;
+    end);
 ```
 
 <br/>
