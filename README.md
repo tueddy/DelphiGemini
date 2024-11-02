@@ -53,7 +53,7 @@ ___
         - [Retrieve tuned model](#Retrieve-tuned-model)
         - [Update tuned model](#Update-tuned-model)
         - [Delete tuned model](#Delete-tuned-model)
-    - [Grounding with Google Search](#Grounding-with-Google-Search)1
+    - [Grounding with Google Search](#Grounding-with-Google-Search)
         - [Why is Grounding with Google Search useful](#Why-is-Grounding-with-Google-Search-useful)
 - [Methods for the Tutorial Display](#Methods-for-the-Tutorial-Display)
 - [Contributing](#contributing)
