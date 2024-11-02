@@ -1663,6 +1663,14 @@ Declare this method for displaying.
     end);
 ```
 
+`Params.Tools(GoogleSearch, Threshold)` : **Threshold** is a floating-point number between 0 and 1, with a default value of 0.7. When the threshold is set to zero, the response is always based on Google Search grounding.
+
+For any other threshold value, the following applies:
+- If the prediction score meets or exceeds the threshold, the response is grounded with Google Search.
+- Lower thresholds mean that more prompts will be answered using Google Search grounding.
+-If the prediction score is below the threshold, the model may still generate a response, but it won't be grounded with Google Search.
+
+
 <br/>
 
 ### Why is Grounding with Google Search useful
