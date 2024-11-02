@@ -2041,6 +2041,8 @@ begin
         var JSONValue := TGoogleSearchRetrieval.Create.DynamicRetrievalConfig('MODE_DYNAMIC', Threshold);
         Result := TChatParams(Add('tools', TJSONObject.Create.AddPair('google_search_retrieval', JSONValue.Detach)));
       end;
+    else
+      Result := Self;
   end;
 end;
 
