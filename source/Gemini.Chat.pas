@@ -874,7 +874,7 @@ type
     /// </para>
     /// The <c>Threshold</c> parameter determines the sensitivity or confidence level required for the tool to be activated. Adjusting this value can help control how often the tool is utilized based on the context of the conversation.
     /// </remarks>
-    function Tools(const Value: TToolKind; const Threshold: Double = 0.3): TChatParams; overload;
+    function Tools(const Value: TToolKind; const Threshold: Double = 0.7): TChatParams; overload;
     /// <summary>
     /// Configures the tool settings for any tools specified in the request.
     /// </summary>

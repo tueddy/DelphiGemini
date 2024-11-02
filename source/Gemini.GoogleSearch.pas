@@ -33,7 +33,7 @@ type
     /// Sets the dynamic threshold for retrieval confidence.
     /// </summary>
     /// <param name="Value">
-    /// A double representing the threshold value. Defaults to <c>0.3</c> if not specified.
+    /// A double representing the threshold value. Defaults to <c>0.7</c> if not specified.
     /// </param>
     /// <returns>
     /// Returns the updated <c>TDynamicRetrievalConfig</c> instance for method chaining.
@@ -53,7 +53,7 @@ type
     /// A string specifying the retrieval mode, such as "MODE_DYNAMIC".
     /// </param>
     /// <param name="DynamicThreshold">
-    /// A double indicating the confidence threshold for dynamic retrieval. Defaults to <c>0.3</c>.
+    /// A double indicating the confidence threshold for dynamic retrieval. Defaults to <c>0.7</c>.
     /// </param>
     /// <returns>
     /// Returns the updated <c>TGoogleSearchRetrieval</c> instance for method chaining.
