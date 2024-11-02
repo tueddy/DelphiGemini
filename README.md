@@ -291,7 +291,7 @@ In the following examples, we will use the procedures 'Display' to simplify the 
        // For displaying, add a TMemo on the form
        function : TAsynEmbeddings
        begin
-         Result.Sender := Memo1; // Set a TMemo on the form
+         Result.Sender := Memo1; 
          Result.OnSuccess := Display;
        end);  
 ```
