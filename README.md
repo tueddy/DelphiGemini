@@ -55,6 +55,7 @@ ___
         - [Delete tuned model](#Delete-tuned-model)
     - [Grounding with Google Search](#Grounding-with-Google-Search)
         - [Why is Grounding with Google Search useful](#Why-is-Grounding-with-Google-Search-useful)
+        - [Important note](#Important-note)
 - [Methods for the Tutorial Display](#Methods-for-the-Tutorial-Display)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1667,6 +1668,14 @@ Declare this method for displaying.
 ### Why is Grounding with Google Search useful
 
 Refer to the [official documentation](https://ai.google.dev/gemini-api/docs/grounding?lang=rest#why-grounding).
+
+<br/>
+
+### Important note
+
+> [!CAUTION]
+> The provided URIs must be directly accessible by the end users and must not be queried programmatically through automated means. If automated access is detected, the grounded answer generation service might stop providing the redirection URIs.
+>
 
 <br/>
 
