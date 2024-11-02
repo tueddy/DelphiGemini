@@ -1606,7 +1606,8 @@ This example shows how to delete a tuned model.
 
 > [!IMPORTANT]
 > **Note from Google**<br/>
-> We're launching Grounding with Google Search! This is an initial launch. The EEA, UK, and CH regions will be supported at a later date. Please review the updated [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms), which include new feature terms and updates for clarity. 
+> We're launching Grounding with Google Search! This is an initial launch. The EEA, UK, and CH regions will be supported at a later date. <br/>
+> Please review the updated [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms), which include new feature terms and updates for clarity. 
 >
 
 The Grounding with Google Search feature in the Gemini API and AI Studio can enhance the accuracy and timeliness of model responses. When this feature is enabled, the Gemini API provides more factual responses along with grounding sources (online supporting links) and [Google Search suggestions](https://ai.google.dev/gemini-api/docs/grounding?lang=rest#search-suggestions) alongside the content of the response. These search suggestions guide users to search results related to the grounded response.
