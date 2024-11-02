@@ -237,7 +237,6 @@ In the following examples, we will use the procedures 'Display' to simplify the 
 >```Pascal
 >  procedure Display(Sender: TObject; Embed: TEmbeddings); overload;
 >  begin
->    var M := Sender as TMemo;
 >    for var Item in Embed.Embeddings do
 >      begin
 >        Display(Sender, Item);
