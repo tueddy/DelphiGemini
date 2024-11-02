@@ -241,9 +241,7 @@ In the following examples, we will use the procedures 'Display' to simplify the 
 >    for var Item in Embed.Embeddings do
 >      begin
 >        Display(Sender, Item);
->        M.Lines.Text := M.Text + sLineBreak;
 >      end;
->    M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
 >  end;
 >```
 
