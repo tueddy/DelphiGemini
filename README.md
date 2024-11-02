@@ -1020,7 +1020,7 @@ Declare this method for displaying.
     procedure (Params: TChatParams)
     begin
       Params.Contents([TPayload.Add('What is the sum of the first 50 prime numbers? Generate and run code for the calculation, and make sure you get all 50.')]);
-      Params.Tools(True);  // Enable code execution
+      Params.Tools(CodeExecution);  // Enable code execution
     end,
     function : TAsynChatStream
     begin
