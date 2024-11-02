@@ -1000,7 +1000,6 @@ Declare this method for displaying.
 > ```Pascal
 >  procedure DisplayCode(Sender: TObject; Chat: TChat); 
 >  begin
->  var M := Sender as TMemo;
 >  for var Candidate in Chat.Candidates do
 >    begin
 >      for var Part in Candidate.Content.Parts do
