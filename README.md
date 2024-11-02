@@ -1437,7 +1437,6 @@ The hyperparameters include `LearningRate`, `EpochCount`, and `BatchSize`. Train
 
 ```Csv
 text_input;output
-text_input;output
 1;2
 3;4
 -3;-2
