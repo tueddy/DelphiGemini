@@ -53,6 +53,8 @@ ___
         - [Retrieve tuned model](#Retrieve-tuned-model)
         - [Update tuned model](#Update-tuned-model)
         - [Delete tuned model](#Delete-tuned-model)
+    - [Grounding with Google Search](#Grounding-with-Google-Search)1
+        - [Why is Grounding with Google Search useful](#Why-is-Grounding-with-Google-Search-useful)
 - [Methods for the Tutorial Display](#Methods-for-the-Tutorial-Display)
 - [Contributing](#contributing)
 - [License](#license)
@@ -1597,6 +1599,74 @@ This example shows how to delete a tuned model.
     Deleted.Free;
   end;
 ```
+
+<br/>
+
+## Grounding with Google Search
+
+> [!IMPORTANT]
+> **Note from Google**
+> We're launching Grounding with Google Search! This is an initial launch. The EEA, UK, and CH regions will be supported at a later date. Please review the updated [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms), which include new feature terms and updates for clarity. 
+>
+
+The Grounding with Google Search feature in the Gemini API and AI Studio can enhance the accuracy and timeliness of model responses. When this feature is enabled, the Gemini API provides more factual responses along with grounding sources (online supporting links) and [Google Search suggestions](https://ai.google.dev/gemini-api/docs/grounding?lang=rest#search-suggestions) alongside the content of the response. These search suggestions guide users to search results related to the grounded response.
+
+Grounding with Google Search supports only text-based prompts; it does not accommodate multimodal prompts, such as those combining text with images or audio. Additionally, Grounding with Google Search is available in all [languages supported](https://ai.google.dev/gemini-api/docs/models/gemini#available-languages) by Gemini models.
+
+The following example demonstrates how to set up a model to utilize grounding through Google Search:
+
+Declare this method for displaying.
+> [!TIP]
+>```Pascal
+>  procedure DisplayGoogleSearch(Sender: TObject; Chat: TChat);
+>  begin
+>  var M := Sender as TMemo;
+>  for var Item in Chat.Candidates do
+>    begin
+>      if Item.FinishReason = STOP then
+>        begin
+>          for var SubItem in Item.Content.Parts do
+>            begin
+>              M.Lines.Text := M.Text + sLineBreak + SubItem.Text;
+>            end;
+>          if Assigned(Item.GroundingMetadata) then
+>            begin
+>              for var Chunk in Item.GroundingMetadata.GroundingChunks do
+>                begin
+>                  M.Lines.Text := M.Text + sLineBreak + Chunk.Web.Title + sLineBreak;
+>                  M.Lines.Text := M.Text + sLineBreak + Chunk.Web.Uri + sLineBreak;
+>                end;
+>              M.Lines.Text := M.Text + sLineBreak + Item.GroundingMetadata.WebSearchQueries[0];
+>            end;
+>        end;
+>      M.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+>    end;
+>  end;
+>```
+
+
+```Pascal
+// uses Gemini, Gemini.Chat;
+
+  Gemini.Chat.AsynCreate('models/gemini-1.5-pro',
+    procedure (Params: TChatParams)
+    begin
+      Params.Contents([TPayload.Add('What is the current Google stock price?')]);
+      Params.Tools(GoogleSearch, 0.1);
+    end,
+    function : TAsynChat
+    begin
+      Result.Sender := Memo1;
+      Result.OnSuccess := DisplayGoogleSearch;
+      Result.OnError := Display;
+    end);
+```
+
+<br/>
+
+### Why is Grounding with Google Search useful
+
+Refer to the [official documentation](https://ai.google.dev/gemini-api/docs/grounding?lang=rest#why-grounding).
 
 <br/>
 
