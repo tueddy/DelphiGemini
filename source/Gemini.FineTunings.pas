@@ -234,7 +234,7 @@ type
   end;
 
   /// <summary>
-  /// <c>TTuningTaskParams</c> controls the taining data for a tuned models.
+  /// <c>TTuningTaskParams</c> controls the training data for a tuned models.
   /// </summary>
   TTuningTaskParams = class(TJSONParam)
   public

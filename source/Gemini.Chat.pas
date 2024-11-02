@@ -12,9 +12,23 @@ interface
 uses
   System.SysUtils, System.Classes, REST.JsonReflect, System.JSON, System.Threading,
   REST.Json.Types, Gemini.API.Params, Gemini.API, Gemini.Safety, Gemini.Schema,
-  Gemini.Tools, Gemini.Async.Support, Gemini.Functions.Core;
+  Gemini.Tools, Gemini.Async.Support, Gemini.Functions.Core, Gemini.GoogleSearch;
 
 type
+  /// <summary>
+  /// Kind of tool call
+  /// </summary>
+  TToolKind = (
+    /// <summary>
+    /// Enable code execution
+    /// </summary>
+    CodeExecution,
+    /// <summary>
+    /// Enable google search
+    /// </summary>
+    GoogleSearch
+  );
+
   /// <summary>
   /// Type of message role
   /// </summary>
@@ -839,18 +853,28 @@ type
     /// </remarks>
     function Tools(const Value: TArray<IFunctionCore>): TChatParams; overload;
     /// <summary>
-    /// Specifies whether code execution is available as a tool for the model.
+    /// Enables a specific tool for the chat interaction based on the provided tool kind and threshold.
     /// </summary>
-    /// <param name="CodeExecution">
-    /// A boolean value where <c>True</c> enables code execution as a tool, and <c>False</c> disables it.
+    /// <param name="Value">
+    /// Specifies the type of tool to enable. This can be either <c>TToolKind.CodeExecution</c> to allow code execution capabilities or <c>TToolKind.GoogleSearch</c> to enable Google search functionality.
+    /// </param>
+    /// <param name="Threshold">
+    /// An optional parameter that sets the activation threshold for the specified tool. The default value is <c>0.3</c>.
     /// </param>
     /// <returns>
-    /// Returns the updated <c>TChatParams</c> instance, allowing for method chaining.
+    /// Returns the updated <c>TChatParams</c> instance, facilitating method chaining for configuring multiple parameters.
     /// </returns>
     /// <remarks>
-    /// When enabled, the model can generate code that can be executed to perform tasks.
+    /// This method allows you to specify additional functionalities that the AI model can utilize during the chat session.
+    /// <para>
+    /// - <c>TToolKind.CodeExecution</c>: Enables the model to generate and execute code snippets, which can be useful for tasks requiring computational operations or automation.
+    /// </para>
+    /// <para>
+    /// - <c>TToolKind.GoogleSearch</c>: Allows the model to perform Google searches to fetch real-time information, enhancing its ability to provide up-to-date responses.
+    /// </para>
+    /// The <c>Threshold</c> parameter determines the sensitivity or confidence level required for the tool to be activated. Adjusting this value can help control how often the tool is utilized based on the context of the conversation.
     /// </remarks>
-    function Tools(const CodeExecution: Boolean): TChatParams; overload;
+    function Tools(const Value: TToolKind; const Threshold: Double = 0.3): TChatParams; overload;
     /// <summary>
     /// Configures the tool settings for any tools specified in the request.
     /// </summary>
@@ -1318,6 +1342,7 @@ type
     FTokenCount: Int64;
     FAvgLogprobs: Double;
     FLogprobsResult: TLogprobsResult;
+    FGroundingMetadata: TGroundingMetadata;
     FIndex: Int64;
   public
     /// <summary>
@@ -1357,6 +1382,17 @@ type
     /// Output only. Log-likelihood scores for the response tokens and top tokens
     /// </summary>
     property LogprobsResult: TLogprobsResult read FLogprobsResult write FLogprobsResult;
+    /// <summary>
+    /// Contains metadata related to the grounding of the chat candidate's content.
+    /// </summary>
+    /// <remarks>
+    /// The <c>GroundingMetadata</c> property provides detailed information about the sources and contextual grounding of the generated content.
+    /// <para><c>SearchEntryPoint</c>: The initial point or context from which the search was conducted.</para>
+    /// <para><c>GroundingChunks</c>: A collection of web sources that support the generated content, each containing a URI and title.</para>
+    /// <para><c>WebSearchQueries</c>: The specific search queries used to retrieve information relevant to the content.</para>
+    /// This metadata enhances transparency by linking the generated responses to their original sources, facilitating verification and trust in the content provided by the model.
+    /// </remarks>
+    property GroundingMetadata: TGroundingMetadata read FGroundingMetadata write FGroundingMetadata;
     /// <summary>
     /// Output only. Index of the candidate in the list of response candidates.
     /// </summary>
@@ -1992,12 +2028,20 @@ begin
   Result := TChatParams(Add('tools', TJSONArray.Create.Add(JSONDeclaration)));
 end;
 
-function TChatParams.Tools(const CodeExecution: Boolean): TChatParams;
+function TChatParams.Tools(const Value: TToolKind; const Threshold: Double): TChatParams;
 begin
-  if not CodeExecution then
-    Exit(Self);
-  var JSONCodeExecution := TJSONObject.Create.AddPair('codeExecution', TJSONObject.Create);
-  Result := TChatParams(Add('tools', TJSONArray.Create.Add(JSONCodeExecution)));
+  case Value of
+    CodeExecution:
+      begin
+        var JSONCodeExecution := TJSONObject.Create.AddPair('codeExecution', TJSONObject.Create);
+        Result := TChatParams(Add('tools', TJSONArray.Create.Add(JSONCodeExecution)));
+      end;
+    GoogleSearch:
+      begin
+        var JSONValue := TGoogleSearchRetrieval.Create.DynamicRetrievalConfig('MODE_DYNAMIC', Threshold);
+        Result := TChatParams(Add('tools', TJSONObject.Create.AddPair('google_search_retrieval', JSONValue.Detach)));
+      end;
+  end;
 end;
 
 { TMessageRoleHelper }
@@ -2045,6 +2089,8 @@ begin
     FCitationMetadata.Free;
   if Assigned(FlogprobsResult) then
     FlogprobsResult.Free;
+  if Assigned(FGroundingMetadata) then
+    FGroundingMetadata.Free;
   inherited;
 end;
 
