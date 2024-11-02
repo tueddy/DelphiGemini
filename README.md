@@ -1700,6 +1700,8 @@ Refer to the [official documentation](https://ai.google.dev/gemini-api/docs/grou
 >    procedure DisplayStream(Sender: TObject; Chat: TChat); overload;
 >
 >    procedure DisplayCode(Sender: TObject; Chat: TChat);
+>
+>    procedure DisplayGoogleSearch(Sender: TObject; Chat: TChat);
 >...
 >```
 
