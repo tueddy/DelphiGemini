@@ -1446,7 +1446,7 @@ ninety nine;one hundred
 8;9
 -98;-97
 "1,000";"1,001"
-"1,01,000";"1,01,00,001"
+"10,100,000";"10,100,001"
 thirteen;fourteen
 eighty;eighty one
 one;two hundred one
