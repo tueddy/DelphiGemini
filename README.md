@@ -1605,7 +1605,7 @@ This example shows how to delete a tuned model.
 ## Grounding with Google Search
 
 > [!IMPORTANT]
-> **Note from Google**
+> **Note from Google**<br/>
 > We're launching Grounding with Google Search! This is an initial launch. The EEA, UK, and CH regions will be supported at a later date. Please review the updated [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms), which include new feature terms and updates for clarity. 
 >
 
