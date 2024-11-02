@@ -859,7 +859,7 @@ type
     /// Specifies the type of tool to enable. This can be either <c>TToolKind.CodeExecution</c> to allow code execution capabilities or <c>TToolKind.GoogleSearch</c> to enable Google search functionality.
     /// </param>
     /// <param name="Threshold">
-    /// An optional parameter that sets the activation threshold for the specified tool. The default value is <c>0.3</c>.
+    /// An optional parameter that sets the activation threshold for the specified tool. The default value is <c>0.7</c>.
     /// </param>
     /// <returns>
     /// Returns the updated <c>TChatParams</c> instance, facilitating method chaining for configuring multiple parameters.
