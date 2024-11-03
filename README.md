@@ -280,7 +280,7 @@ In the following examples, we will use the procedures 'Display' to simplify the 
                 Params.OutputDimensionality(20);
               end),
 
-              TEmbeddingRequestParams.Create(
+            TEmbeddingRequestParams.Create(
               procedure (var Params: TEmbeddingRequestParams)
               begin
                 Params.Content(['Second example']);
