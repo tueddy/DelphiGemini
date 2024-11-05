@@ -2326,8 +2326,7 @@ procedure TArgsFixInterceptor.StringReverter(Data: TObject; Field, Arg: string);
 begin
   Arg := Format('{%s}', [Trim(Arg.Replace('`', '"').Replace(#10, ''))]);
   while Arg.Contains(', ') do Arg := Arg.Replace(', ', ',');
-  Arg := Arg.Replace(',', ', ');
-  RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, Arg);
+  RTTI.GetType(Data.ClassType).GetField(Field).SetValue(Data, Arg.Replace(',', ', '));
 end;
 
 { TContentPayload }

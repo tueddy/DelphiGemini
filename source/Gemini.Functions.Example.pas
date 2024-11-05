@@ -111,11 +111,16 @@ begin
 //         '"location": {'+
 //             '"type": "string",'+
 //             '"description": "The city and state, e.g. San Francisco, CA"'+
+//           '},'+
+//         '"unit": {'+
+//             '"type": "string",'+
+//             '"enum": ["celsius", "fahrenheit"]'+
 //           '}'+
 //     '},'+
 //     '"required": ["location"]'+
 //    '}';
 
+  {--- If we use the TSchemaParams class defined in the Gemini.Schema unit }
   var Schema := TSchemaParams.New(
     procedure (var Params: TSchemaParams)
     begin
@@ -133,7 +138,7 @@ begin
             procedure (var Params: TSchemaParams)
             begin
               Params.&Type(stSTRING);
-              Params.Enum(['C','F']);
+              Params.Enum(['celsius', 'fahrenheit']);
             end);
         end);
       Params.Required(['location', 'unit']);
