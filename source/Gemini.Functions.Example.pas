@@ -72,9 +72,9 @@ begin
   JSON := TJSONObject.Create;
   try
     JSON.AddPair('location', Location);
-    if AnsiLowerCase(Location).Contains('san francisco') then
+    if Location.ToLower.Contains('san francisco') then
       index := 0 else
-    if AnsiLowerCase(Location).Contains('paris') then
+    if Location.ToLower.Contains('paris') then
       index := 1;
     case index of
       0 :

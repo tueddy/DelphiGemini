@@ -25,7 +25,6 @@ uses
   /// and for earlier versions, it uses <c>TNetEncoding.Base64.Encode</c>.
   /// </remarks>
   function EncodeBase64(FileLocation : string) : WideString;
-
   /// <summary>
   /// Retrieves the MIME type of the specified file based on its location.
   /// </summary>
