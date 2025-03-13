@@ -1549,8 +1549,6 @@ type
   /// Each method allows configuring model parameters, setting input messages, managing token limits, and including callbacks for processing responses or errors.
   /// </remarks>
   TChatRoute = class(TGeminiAPIRoute)
-  private
-    procedure ResetStream;
   public
     /// <summary>
     /// Create an asynchronous completion for chat message
@@ -1932,21 +1930,8 @@ begin
         end;
       end);
   finally
-    ResetStream;
     Response.Free;
   end;
-end;
-
-procedure TChatRoute.ResetStream;
-begin
-  AsynCreate('gemini-1.5-pro',
-    procedure (Params : TChatParams)
-    begin
-      Params.Contents([TContentPayload.Add(user, 'nill')]);
-    end,
-    function : TAsynChat
-    begin
-    end);
 end;
 
 { TChatParams }

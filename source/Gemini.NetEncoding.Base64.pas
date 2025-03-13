@@ -2,7 +2,7 @@ unit Gemini.NetEncoding.Base64;
 
 {-------------------------------------------------------------------------------
 
-      Github repository :  https://github.com/MaxiDonkey/DelphiAnthropic
+      Github repository :  https://github.com/MaxiDonkey/DelphiGemini
       Visit the Github repository for the documentation and use examples
 
  ------------------------------------------------------------------------------}

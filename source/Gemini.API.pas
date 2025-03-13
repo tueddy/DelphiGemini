@@ -420,7 +420,7 @@ begin
     Stream.Position := 0;
     Result := FHTTPClient.Post(GetRequestURL(Path), Stream, Response, Headers).StatusCode;
   finally
-    FHTTPClient.OnReceiveData := nil;
+    FHTTPClient.ReceiveDataCallBack := nil;
     Stream.Free;
   end;
 end;
@@ -799,7 +799,7 @@ begin
     Stream.Position := 0;
     Result := FHTTPClient.Patch(GetRequestURL(Path), Stream, Response, Headers).StatusCode;
   finally
-    FHTTPClient.OnReceiveData := nil;
+    FHTTPClient.ReceiveDataCallBack := nil;
     Stream.Free;
   end;
 end;
@@ -819,7 +819,7 @@ begin
     Stream.Position := 0;
     Result := FHTTPClient.Patch(GetPatchURL(Path, UriParams), Stream, Response, Headers).StatusCode;
   finally
-    FHTTPClient.OnReceiveData := nil;
+    FHTTPClient.ReceiveDataCallBack := nil;
     Stream.Free;
   end;
 end;
